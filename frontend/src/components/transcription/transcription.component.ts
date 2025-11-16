@@ -225,15 +225,10 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const content =
-        typeof this.transcriptionResult === "string"
-          ? this.transcriptionResult
-          : this.transcriptionResult.text;
-
       if (this.electronService.isElectron()) {
+        // Pass the full result data to Electron - it will format based on selected extension
         const savedPath = await this.electronService.saveTranscript(
-          content,
-          this.outputFormat,
+          this.transcriptionResult,
         );
         if (savedPath) {
           this.snackBar.open(`Saved to: ${savedPath}`, "Close", {
@@ -241,12 +236,16 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
           });
         }
       } else {
-        // Browser mode - download file
+        // Browser mode - default to text download
+        const content =
+          typeof this.transcriptionResult === "string"
+            ? this.transcriptionResult
+            : this.transcriptionResult.text;
         const blob = new Blob([content], { type: "text/plain" });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `transcript.${this.outputFormat}`;
+        a.download = `transcript.txt`;
         a.click();
         window.URL.revokeObjectURL(url);
         this.snackBar.open("Download started", "Close", { duration: 3000 });

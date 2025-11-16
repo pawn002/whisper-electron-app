@@ -41,6 +41,38 @@ const socket_io_client_1 = require("socket.io-client");
 const BACKEND_URL = "http://localhost:3333";
 let mainWindow = null;
 let socket = null;
+// Helper function to convert Whisper timestamp format to SRT
+function convertToSRT(text) {
+    // Whisper format: [00:00:00.000 --> 00:00:05.840]   Text here
+    const lines = text.split("\n").filter((line) => line.trim());
+    let srtContent = "";
+    let index = 1;
+    for (const line of lines) {
+        const match = line.match(/\[(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})\]\s*(.+)/);
+        if (match) {
+            const [, start, end, subtitle] = match;
+            // Convert milliseconds format from . to ,
+            const srtStart = start.replace(".", ",");
+            const srtEnd = end.replace(".", ",");
+            srtContent += `${index}\n${srtStart} --> ${srtEnd}\n${subtitle.trim()}\n\n`;
+            index++;
+        }
+    }
+    return srtContent || text; // Fallback to original if no matches
+}
+// Helper function to convert Whisper timestamp format to VTT
+function convertToVTT(text) {
+    const lines = text.split("\n").filter((line) => line.trim());
+    let vttContent = "WEBVTT\n\n";
+    for (const line of lines) {
+        const match = line.match(/\[(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})\]\s*(.+)/);
+        if (match) {
+            const [, start, end, subtitle] = match;
+            vttContent += `${start} --> ${end}\n${subtitle.trim()}\n\n`;
+        }
+    }
+    return vttContent === "WEBVTT\n\n" ? text : vttContent; // Fallback to original if no matches
+}
 function createWindow() {
     mainWindow = new electron_1.BrowserWindow({
         width: 1200,
@@ -253,22 +285,47 @@ electron_1.ipcMain.handle("transcribe-audio", async (event, audioPath, options) 
         }
     });
 });
-electron_1.ipcMain.handle("save-transcript", async (event, content, format) => {
+electron_1.ipcMain.handle("save-transcript", async (event, resultData) => {
     const { dialog } = require("electron");
-    const result = await dialog.showSaveDialog({
-        defaultPath: `transcript.${format}`,
+    const saveResult = await dialog.showSaveDialog({
+        defaultPath: `transcript.txt`,
         filters: [
             { name: "Text Files", extensions: ["txt"] },
+            { name: "JSON", extensions: ["json"] },
             { name: "SRT Subtitles", extensions: ["srt"] },
             { name: "VTT Subtitles", extensions: ["vtt"] },
-            { name: "JSON", extensions: ["json"] },
             { name: "All Files", extensions: ["*"] },
         ],
     });
-    if (!result.canceled && result.filePath) {
+    if (!saveResult.canceled && saveResult.filePath) {
         const fs = require("fs");
-        fs.writeFileSync(result.filePath, content);
-        return result.filePath;
+        const selectedPath = saveResult.filePath;
+        const ext = path.extname(selectedPath).toLowerCase();
+        let content;
+        // Format content based on selected extension
+        if (ext === ".json") {
+            const jsonData = typeof resultData === "string" ? { text: resultData } : resultData;
+            content = JSON.stringify(jsonData, null, 2);
+        }
+        else if (ext === ".srt") {
+            // For SRT, convert Whisper timestamp format to SRT format
+            const text = typeof resultData === "string" ? resultData : resultData.text || "";
+            content = convertToSRT(text);
+        }
+        else if (ext === ".vtt") {
+            // For VTT (WebVTT), convert Whisper timestamp format
+            const text = typeof resultData === "string" ? resultData : resultData.text || "";
+            content = convertToVTT(text);
+        }
+        else {
+            // For txt - use text content
+            content =
+                typeof resultData === "string"
+                    ? resultData
+                    : resultData.text || JSON.stringify(resultData);
+        }
+        fs.writeFileSync(selectedPath, content, "utf-8");
+        return selectedPath;
     }
     return null;
 });

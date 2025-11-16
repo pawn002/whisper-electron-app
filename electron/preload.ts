@@ -8,8 +8,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   transcribeAudio: (audioPath: string, options: any) =>
     ipcRenderer.invoke("transcribe-audio", audioPath, options),
 
-  saveTranscript: (content: string, format: string) =>
-    ipcRenderer.invoke("save-transcript", content, format),
+  saveTranscript: (resultData: any) =>
+    ipcRenderer.invoke("save-transcript", resultData),
 
   getAvailableModels: () => ipcRenderer.invoke("get-available-models"),
 
@@ -58,10 +58,7 @@ declare global {
     electronAPI: {
       selectAudioFile: () => Promise<string | null>;
       transcribeAudio: (audioPath: string, options: any) => Promise<any>;
-      saveTranscript: (
-        content: string,
-        format: string,
-      ) => Promise<string | null>;
+      saveTranscript: (resultData: any) => Promise<string | null>;
       getAvailableModels: () => Promise<any[]>;
       downloadModel: (modelName: string) => Promise<any>;
       getSystemInfo: () => Promise<any>;

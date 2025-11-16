@@ -31,14 +31,11 @@ export class ElectronService {
     return await this.electron.transcribeAudio(audioPath, options);
   }
 
-  async saveTranscript(
-    content: string,
-    format: string,
-  ): Promise<string | null> {
+  async saveTranscript(resultData: any): Promise<string | null> {
     if (!this.isElectron()) {
       throw new Error("This feature is only available in Electron");
     }
-    return await this.electron.saveTranscript(content, format);
+    return await this.electron.saveTranscript(resultData);
   }
 
   async getAvailableModels(): Promise<any[]> {

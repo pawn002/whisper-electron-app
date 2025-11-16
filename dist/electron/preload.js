@@ -6,7 +6,7 @@ const electron_1 = require("electron");
 electron_1.contextBridge.exposeInMainWorld("electronAPI", {
     selectAudioFile: () => electron_1.ipcRenderer.invoke("select-audio-file"),
     transcribeAudio: (audioPath, options) => electron_1.ipcRenderer.invoke("transcribe-audio", audioPath, options),
-    saveTranscript: (content, format) => electron_1.ipcRenderer.invoke("save-transcript", content, format),
+    saveTranscript: (resultData) => electron_1.ipcRenderer.invoke("save-transcript", resultData),
     getAvailableModels: () => electron_1.ipcRenderer.invoke("get-available-models"),
     downloadModel: (modelName) => electron_1.ipcRenderer.invoke("download-model", modelName),
     getSystemInfo: () => electron_1.ipcRenderer.invoke("get-system-info"),
