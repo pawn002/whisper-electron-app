@@ -15,8 +15,7 @@ import { MatInputModule } from "@angular/material/input";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatSnackBarModule } from "@angular/material/snack-bar";
-import { MatDialogModule } from "@angular/material/dialog";
-import { MatListModule } from "@angular/material/list";
+
 import { MatChipsModule } from "@angular/material/chips";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
@@ -49,8 +48,6 @@ import { TranscriptionService } from "./services/transcription.service";
     MatFormFieldModule,
     MatTabsModule,
     MatSnackBarModule,
-    MatDialogModule,
-    MatListModule,
     MatChipsModule,
     MatTooltipModule,
     MatProgressSpinnerModule,

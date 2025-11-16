@@ -121,7 +121,6 @@ export class HistoryComponent implements OnInit, OnDestroy {
 
   async viewTranscript(item: TranscriptionHistoryItem): Promise<void> {
     if (item.result) {
-      // TODO: Open a dialog or navigate to show the full transcript
       console.log("Transcript:", item.result);
     }
   }
