@@ -33,11 +33,11 @@ export class TranscriptionController {
         },
       }),
       fileFilter: (req, file, callback) => {
-        const allowedExtensions = /\.(mp3|wav|ogg|m4a|flac|aac)$/;
+        const allowedExtensions = /\.(mp3|wav|ogg|m4a|flac|aac|webm)$/;
         if (!allowedExtensions.test(file.originalname.toLowerCase())) {
           return callback(
             new HttpException(
-              "Only audio files are allowed",
+              "Only audio files are allowed (mp3, wav, ogg, m4a, flac, aac, webm)",
               HttpStatus.BAD_REQUEST,
             ),
             false,

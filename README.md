@@ -7,7 +7,7 @@ A robust, production-ready Electron application that provides offline speech-to-
 - **100% Offline Operation**: No internet connection required after initial setup
 - **Multiple Model Support**: Choose from tiny, base, small, medium, and large models
 - **Real-time Progress Updates**: WebSocket-based progress tracking
-- **Multi-format Support**: MP3, WAV, OGG, M4A, FLAC, AAC audio formats
+- **Multi-format Support**: MP3, WAV, OGG, M4A, FLAC, AAC, WEBM audio formats (automatic conversion via bundled ffmpeg)
 - **Export Options**: Save transcripts as TXT, SRT, VTT, or JSON
 - **Cross-Platform**: Works on Windows, macOS, and Linux
 - **Modern UI**: Material Design with Angular
@@ -29,9 +29,6 @@ A robust, production-ready Electron application that provides offline speech-to-
 ```bash
 # Install Xcode Command Line Tools
 xcode-select --install
-
-# Install ffmpeg (for audio conversion)
-brew install ffmpeg
 ```
 
 #### Ubuntu/Debian
@@ -39,9 +36,6 @@ brew install ffmpeg
 # Install build tools
 sudo apt-get update
 sudo apt-get install build-essential cmake git
-
-# Install ffmpeg
-sudo apt-get install ffmpeg
 ```
 
 #### Windows
@@ -66,6 +60,7 @@ The `setup` script will:
 - Install root dependencies
 - Install backend and frontend dependencies
 - Clone and build whisper.cpp
+- Download and bundle ffmpeg for audio conversion
 - Download tiny and base models (~113 MB total)
 
 ### 2. Development Mode
@@ -294,11 +289,13 @@ node scripts/setup-whisper.js
 - Ensure `form-data` package is installed: `npm install`
 
 #### Audio file won't transcribe
-- Check file format (supported: MP3, WAV, OGG, M4A, FLAC, AAC)
+- Check file format (supported: MP3, WAV, OGG, M4A, FLAC, AAC, WEBM)
 - Ensure file is not corrupted
-- Try converting with ffmpeg first:
+- Non-WAV files are automatically converted using bundled ffmpeg
+- If conversion fails, check backend logs for detailed error messages
+- If ffmpeg binary is missing, re-run setup:
   ```bash
-  ffmpeg -i input.mp3 -ar 16000 output.wav
+  npm run setup
   ```
 
 #### Progress stuck at 0%

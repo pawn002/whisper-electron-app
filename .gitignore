@@ -7,4 +7,5 @@ whisper.cpp
 models
 uploads
 backend/uploads
+ffmpeg
 nul
