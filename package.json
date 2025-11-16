@@ -64,8 +64,12 @@
     },
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        {
+          "target": "dir",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
     },
     "linux": {
