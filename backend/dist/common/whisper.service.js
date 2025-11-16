@@ -32,41 +32,41 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WhisperService = void 0;
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs/promises"));
 const child_process_1 = require("child_process");
-const electron_1 = require("electron");
-const https_1 = __importDefault(require("https"));
+const https = __importStar(require("https"));
 const fs_1 = require("fs");
 class WhisperService {
     constructor() {
         this.initialized = false;
         this.availableModels = [
-            { name: 'tiny', size: '39 MB', description: 'Fastest, least accurate' },
-            { name: 'base', size: '74 MB', description: 'Fast, good accuracy' },
-            { name: 'small', size: '244 MB', description: 'Balanced speed/accuracy' },
-            { name: 'medium', size: '769 MB', description: 'Slower, better accuracy' },
-            { name: 'large', size: '1550 MB', description: 'Slowest, best accuracy' }
+            { name: "tiny", size: "39 MB", description: "Fastest, least accurate" },
+            { name: "base", size: "74 MB", description: "Fast, good accuracy" },
+            { name: "small", size: "244 MB", description: "Balanced speed/accuracy" },
+            { name: "medium", size: "769 MB", description: "Slower, better accuracy" },
+            { name: "large", size: "1550 MB", description: "Slowest, best accuracy" },
         ];
-        const isDev = !electron_1.app.isPackaged;
-        const basePath = isDev ? path.join(__dirname, '../../../') : electron_1.app.getPath('userData');
-        this.whisperPath = path.join(basePath, 'native', process.platform, 'whisper');
-        this.modelsPath = path.join(basePath, 'models');
+        const basePath = path.join(__dirname, "../../../");
+        if (process.platform === "win32") {
+            this.whisperPath = path.join(basePath, "whisper.cpp", "build", "bin", "Release", "whisper-cli.exe");
+        }
+        else {
+            this.whisperPath = path.join(basePath, "whisper.cpp", "main");
+        }
+        this.modelsPath = path.join(basePath, "models");
     }
     async initialize() {
         await this.ensureDirectories();
         const binaryExists = await this.checkBinary();
         if (!binaryExists) {
-            throw new Error('Whisper binary not found. Please rebuild the application.');
+            throw new Error("Whisper binary not found. Please rebuild the application.");
         }
         const models = await this.getInstalledModels();
         if (models.length === 0) {
-            await this.downloadModel('tiny');
+            await this.downloadModel("tiny");
         }
         this.initialized = true;
     }
@@ -85,18 +85,18 @@ class WhisperService {
     }
     async getAvailableModels() {
         const installed = await this.getInstalledModels();
-        return this.availableModels.map(model => ({
+        return this.availableModels.map((model) => ({
             ...model,
             installed: installed.includes(model.name),
-            path: path.join(this.modelsPath, `ggml-${model.name}.bin`)
+            path: path.join(this.modelsPath, `ggml-${model.name}.bin`),
         }));
     }
     async getInstalledModels() {
         try {
             const files = await fs.readdir(this.modelsPath);
             return files
-                .filter(file => file.startsWith('ggml-') && file.endsWith('.bin'))
-                .map(file => file.replace('ggml-', '').replace('.bin', ''));
+                .filter((file) => file.startsWith("ggml-") && file.endsWith(".bin"))
+                .map((file) => file.replace("ggml-", "").replace(".bin", ""));
         }
         catch {
             return [];
@@ -107,21 +107,23 @@ class WhisperService {
         const modelPath = path.join(this.modelsPath, `ggml-${modelName}.bin`);
         return new Promise((resolve, reject) => {
             const file = (0, fs_1.createWriteStream)(modelPath);
-            https_1.default.get(modelUrl, (response) => {
-                const totalSize = parseInt(response.headers['content-length'] || '0', 10);
+            https
+                .get(modelUrl, (response) => {
+                const totalSize = parseInt(response.headers["content-length"] || "0", 10);
                 let downloadedSize = 0;
-                response.on('data', (chunk) => {
+                response.on("data", (chunk) => {
                     downloadedSize += chunk.length;
                     if (progressCallback && totalSize > 0) {
                         progressCallback((downloadedSize / totalSize) * 100);
                     }
                 });
                 response.pipe(file);
-                file.on('finish', () => {
+                file.on("finish", () => {
                     file.close();
                     resolve();
                 });
-            }).on('error', (err) => {
+            })
+                .on("error", (err) => {
                 fs.unlink(modelPath).catch(() => { });
                 reject(err);
             });
@@ -139,37 +141,53 @@ class WhisperService {
             throw new Error(`Model ${options.model} not found. Please download it first.`);
         }
         const args = [
-            '-m', modelPath,
-            '-f', audioPath,
-            '-t', (options.threads || 4).toString(),
-            '-p', (options.processors || 1).toString()
+            "-m",
+            modelPath,
+            "-f",
+            audioPath,
+            "-t",
+            (options.threads || 4).toString(),
+            "-p",
+            (options.processors || 1).toString(),
         ];
         if (options.language) {
-            args.push('-l', options.language);
+            args.push("-l", options.language);
         }
         if (options.translate) {
-            args.push('--translate');
+            args.push("--translate");
         }
-        if (options.outputFormat === 'json') {
-            args.push('-oj');
+        if (options.outputFormat === "json") {
+            args.push("-oj");
         }
-        else if (options.outputFormat === 'srt') {
-            args.push('-osrt');
+        else if (options.outputFormat === "srt") {
+            args.push("-osrt");
         }
-        else if (options.outputFormat === 'vtt') {
-            args.push('-ovtt');
+        else if (options.outputFormat === "vtt") {
+            args.push("-ovtt");
         }
         if (!options.timestamps) {
-            args.push('-nt');
+            args.push("-nt");
         }
+        console.log("Executing whisper command:", this.whisperPath);
+        console.log("Arguments:", args);
         return new Promise((resolve, reject) => {
-            const whisperProcess = (0, child_process_1.spawn)(this.whisperPath, args);
-            let output = '';
-            let error = '';
+            let whisperProcess;
+            try {
+                whisperProcess = (0, child_process_1.spawn)(this.whisperPath, args);
+            }
+            catch (spawnError) {
+                console.error("Failed to spawn whisper process:", spawnError);
+                reject(new Error(`Failed to start whisper: ${spawnError.message}`));
+                return;
+            }
+            let output = "";
+            let error = "";
             let lastProgress = 0;
-            whisperProcess.stdout.on('data', (data) => {
-                output += data.toString();
-                const progressMatch = data.toString().match(/(\d+)%/);
+            whisperProcess.stdout.on("data", (data) => {
+                const text = data.toString();
+                output += text;
+                console.log("Whisper stdout:", text);
+                const progressMatch = text.match(/(\d+)%/);
                 if (progressMatch && progressCallback) {
                     const progress = parseInt(progressMatch[1], 10);
                     if (progress > lastProgress) {
@@ -178,9 +196,10 @@ class WhisperService {
                     }
                 }
             });
-            whisperProcess.stderr.on('data', (data) => {
+            whisperProcess.stderr.on("data", (data) => {
                 const message = data.toString();
-                if (message.includes('%') && progressCallback) {
+                console.log("Whisper stderr:", message);
+                if (message.includes("%") && progressCallback) {
                     const progressMatch = message.match(/(\d+)%/);
                     if (progressMatch) {
                         const progress = parseInt(progressMatch[1], 10);
@@ -192,19 +211,23 @@ class WhisperService {
                 }
                 error += message;
             });
-            whisperProcess.on('close', (code) => {
+            whisperProcess.on("close", (code) => {
+                console.log(`Whisper process closed with code: ${code}`);
+                console.log("Output:", output);
+                console.log("Error:", error);
                 if (code === 0) {
-                    if (options.outputFormat === 'json') {
+                    if (options.outputFormat === "json") {
                         try {
                             const jsonResult = JSON.parse(output);
                             resolve({
-                                text: jsonResult.text || '',
+                                text: jsonResult.text || "",
                                 segments: jsonResult.segments || [],
                                 language: jsonResult.language,
-                                duration: jsonResult.duration
+                                duration: jsonResult.duration,
                             });
                         }
                         catch (e) {
+                            console.error("Failed to parse JSON output:", e);
                             resolve({ text: output });
                         }
                     }
@@ -213,35 +236,42 @@ class WhisperService {
                     }
                 }
                 else {
-                    reject(new Error(`Whisper process failed: ${error}`));
+                    const errorMsg = `Whisper process exited with code ${code}. Error: ${error || "No error output"}. Output: ${output || "No output"}`;
+                    console.error(errorMsg);
+                    reject(new Error(errorMsg));
                 }
             });
-            whisperProcess.on('error', (err) => {
-                reject(err);
+            whisperProcess.on("error", (err) => {
+                console.error("Whisper process error event:", err);
+                reject(new Error(`Whisper process error: ${err.message}`));
             });
         });
     }
     async convertAudioToWav(inputPath) {
-        const outputPath = inputPath.replace(path.extname(inputPath), '.wav');
+        const outputPath = inputPath.replace(path.extname(inputPath), ".wav");
         return new Promise((resolve, reject) => {
-            const ffmpegPath = path.join(path.dirname(this.whisperPath), process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg');
+            const ffmpegPath = path.join(path.dirname(this.whisperPath), process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg");
             const ffmpegProcess = (0, child_process_1.spawn)(ffmpegPath, [
-                '-i', inputPath,
-                '-ar', '16000',
-                '-ac', '1',
-                '-c:a', 'pcm_s16le',
+                "-i",
+                inputPath,
+                "-ar",
+                "16000",
+                "-ac",
+                "1",
+                "-c:a",
+                "pcm_s16le",
                 outputPath,
-                '-y'
+                "-y",
             ]);
-            ffmpegProcess.on('close', (code) => {
+            ffmpegProcess.on("close", (code) => {
                 if (code === 0) {
                     resolve(outputPath);
                 }
                 else {
-                    reject(new Error('Failed to convert audio file'));
+                    reject(new Error("Failed to convert audio file"));
                 }
             });
-            ffmpegProcess.on('error', (err) => {
+            ffmpegProcess.on("error", (err) => {
                 reject(err);
             });
         });

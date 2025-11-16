@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CreateTranscriptionDto } from "./create-transcription.dto";
 import { TranscriptionGateway } from "./transcription.gateway";
+import { WhisperService } from "../common/whisper.service";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { v4 as uuidv4 } from "uuid";
@@ -21,8 +22,14 @@ export interface TranscriptionJob {
 export class TranscriptionService {
   private jobs: Map<string, TranscriptionJob> = new Map();
   private transcriptionHistory: TranscriptionJob[] = [];
+  private whisperService: WhisperService;
 
-  constructor(private readonly gateway: TranscriptionGateway) {}
+  constructor(private readonly gateway: TranscriptionGateway) {
+    this.whisperService = new WhisperService();
+    this.whisperService.initialize().catch((error) => {
+      console.error("Failed to initialize WhisperService:", error);
+    });
+  }
 
   async processAudio(
     file: Express.Multer.File,
@@ -50,12 +57,37 @@ export class TranscriptionService {
   private async processTranscriptionJob(job: TranscriptionJob): Promise<void> {
     try {
       job.status = "processing";
-      this.gateway.sendProgressUpdate(job.id, 10);
+      this.gateway.sendProgressUpdate(job.id, 5, "Starting transcription");
 
-      // Simulate processing steps
-      // In a real implementation, this would interface with whisper.cpp
-      await this.simulateProcessing(job);
+      // Prepare whisper options
+      const whisperOptions = {
+        model: job.options.model || "base",
+        language: job.options.language,
+        threads: job.options.threads || 4,
+        processors: 1,
+        outputFormat: job.options.outputFormat || "txt",
+        timestamps: job.options.timestamps !== false,
+      };
 
+      this.gateway.sendProgressUpdate(job.id, 10, "Loading model");
+
+      // Transcribe using WhisperService
+      const result = await this.whisperService.transcribe(
+        job.filePath,
+        whisperOptions,
+        (progress) => {
+          // Map whisper progress (0-100) to our progress (10-90)
+          const mappedProgress = 10 + progress * 0.8;
+          job.progress = Math.round(mappedProgress);
+          this.gateway.sendProgressUpdate(
+            job.id,
+            job.progress,
+            "Transcribing audio",
+          );
+        },
+      );
+
+      job.result = result;
       job.status = "completed";
       job.completedAt = new Date();
       job.progress = 100;
@@ -66,7 +98,7 @@ export class TranscriptionService {
         this.transcriptionHistory = this.transcriptionHistory.slice(0, 50);
       }
 
-      this.gateway.sendProgressUpdate(job.id, 100);
+      this.gateway.sendProgressUpdate(job.id, 100, "Completed");
       this.gateway.sendCompletionUpdate(job.id, job.result);
 
       // Clean up uploaded file after processing
@@ -77,45 +109,10 @@ export class TranscriptionService {
       job.completedAt = new Date();
 
       this.gateway.sendErrorUpdate(job.id, error.message);
+
+      // Clean up file even on error
+      await this.cleanupFile(job.filePath).catch(() => {});
     }
-  }
-
-  private async simulateProcessing(job: TranscriptionJob): Promise<void> {
-    // Simulate different processing stages
-    const stages = [
-      { progress: 20, delay: 500, action: "Loading model" },
-      { progress: 40, delay: 1000, action: "Processing audio" },
-      { progress: 60, delay: 1500, action: "Generating transcript" },
-      { progress: 80, delay: 1000, action: "Formatting output" },
-      { progress: 90, delay: 500, action: "Finalizing" },
-    ];
-
-    for (const stage of stages) {
-      if (job.status === "cancelled") {
-        throw new Error("Job was cancelled");
-      }
-
-      await this.delay(stage.delay);
-      job.progress = stage.progress;
-      this.gateway.sendProgressUpdate(job.id, stage.progress, stage.action);
-    }
-
-    // Generate mock result
-    job.result = {
-      text: `This is a mock transcription of the audio file. In a real implementation,
-             this would contain the actual transcribed text from whisper.cpp.
-             The audio was processed with model: ${job.options.model || "base"}.`,
-      segments: [
-        { start: 0, end: 5, text: "This is a mock transcription" },
-        { start: 5, end: 10, text: "of the audio file." },
-      ],
-      language: job.options.language || "en",
-      duration: 10.5,
-    };
-  }
-
-  private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async cleanupFile(filePath: string): Promise<void> {
@@ -150,13 +147,7 @@ export class TranscriptionService {
     return this.transcriptionHistory;
   }
 
-  getAvailableModels() {
-    return [
-      { id: "tiny", name: "Tiny", size: "39 MB", speed: "Fastest" },
-      { id: "base", name: "Base", size: "74 MB", speed: "Fast" },
-      { id: "small", name: "Small", size: "244 MB", speed: "Balanced" },
-      { id: "medium", name: "Medium", size: "769 MB", speed: "Slow" },
-      { id: "large", name: "Large", size: "1550 MB", speed: "Slowest" },
-    ];
+  async getAvailableModels() {
+    return await this.whisperService.getAvailableModels();
   }
 }

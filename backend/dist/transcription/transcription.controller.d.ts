@@ -9,12 +9,7 @@ export declare class TranscriptionController {
     }>;
     getTranscriptionStatus(jobId: string): Promise<import("./transcription.service").TranscriptionJob>;
     getTranscriptionHistory(): Promise<import("./transcription.service").TranscriptionJob[]>;
-    getAvailableModels(): Promise<{
-        id: string;
-        name: string;
-        size: string;
-        speed: string;
-    }[]>;
+    getAvailableModels(): Promise<any[]>;
     cancelTranscription(jobId: string): Promise<{
         success: boolean;
         message: string;

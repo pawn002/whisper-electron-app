@@ -51,33 +51,42 @@ sudo apt-get install ffmpeg
 
 ## 🚀 Quick Start
 
-### 1. Clone and Setup
+### 1. Initial Setup
 
 ```bash
-# Clone the repository (or create the project structure)
+# Clone the repository
+git clone <repository-url>
 cd whisper-electron-app
 
-# Install dependencies
-npm install
-
-# This will also:
-# - Install backend and frontend dependencies
-# - Build whisper.cpp
-# - Download the tiny model
+# Complete setup (installs dependencies, builds Whisper.cpp, downloads models)
+npm run setup
 ```
+
+The `setup` script will:
+- Install root dependencies
+- Install backend and frontend dependencies
+- Clone and build whisper.cpp
+- Download tiny and base models (~113 MB total)
 
 ### 2. Development Mode
 
-Run all services concurrently:
+Run the application in development mode:
 
 ```bash
 npm run dev
 ```
 
-This starts:
-- NestJS backend on http://localhost:3333
-- Angular frontend on http://localhost:4200
-- Electron app in development mode
+This single command starts:
+- NestJS backend server on http://localhost:3333
+- Angular dev server on http://localhost:4200
+- Electron app in development mode with live reload
+
+**Individual Services** (if needed):
+```bash
+npm run dev:backend    # Run only backend
+npm run dev:frontend   # Run only frontend
+npm run dev:electron   # Run only Electron app
+```
 
 ### 3. Production Build
 
@@ -101,28 +110,42 @@ whisper-electron-app/
 ├── electron/               # Electron main process
 │   ├── main.ts            # Main process entry
 │   ├── preload.ts         # Preload script for IPC
-│   └── services/          # Electron services
-│       ├── whisper.service.ts
-│       └── file.service.ts
+│   └── tsconfig.json      # TypeScript config
 ├── backend/               # NestJS backend
 │   └── src/
 │       ├── main.ts
 │       ├── app.module.ts
-│       └── transcription/ # Transcription module
+│       ├── transcription/ # Transcription module
+│       │   ├── transcription.controller.ts
+│       │   ├── transcription.service.ts
+│       │   └── transcription.gateway.ts
+│       └── common/        # Shared services
+│           ├── whisper.service.ts
+│           └── file.service.ts
 ├── frontend/              # Angular frontend
 │   └── src/
 │       ├── app/
-│       │   ├── components/
-│       │   └── services/
-│       └── index.html
-├── native/                # Native binaries
-│   ├── darwin/           # macOS binaries
-│   ├── linux/            # Linux binaries
-│   └── win32/            # Windows binaries
-├── models/               # Whisper models
-│   └── ggml-*.bin       # Model files
-├── scripts/              # Build scripts
-│   └── build-whisper.js # Whisper.cpp build script
+│       │   ├── app.component.ts
+│       │   └── app.module.ts
+│       ├── components/
+│       │   └── transcription/
+│       └── services/
+│           ├── electron.service.ts
+│           └── transcription.service.ts
+├── whisper.cpp/           # Whisper.cpp repository
+│   ├── main.exe          # Windows binary (or 'main' on Unix)
+│   └── models/           # (symlinked or referenced)
+├── models/               # Whisper model files
+│   ├── ggml-tiny.bin
+│   ├── ggml-base.bin
+│   └── ggml-*.bin       # Other downloaded models
+├── dist/                 # Build output
+│   ├── electron/        # Compiled Electron code
+│   ├── backend/         # Compiled backend code
+│   └── frontend/        # Built Angular app
+├── scripts/              # Build and setup scripts
+│   ├── setup-whisper.js # Whisper.cpp setup script
+│   └── build-whisper.js # Legacy build script
 └── package.json         # Main package configuration
 ```
 
@@ -209,38 +232,81 @@ The app supports all languages that Whisper supports. To add specific language o
 
 ## 🐛 Troubleshooting
 
-### Build Issues
+### Setup Issues
 
-#### macOS: "xcrun: error"
+#### "Git not found"
+- Windows: Install from https://git-scm.com/download/win
+- macOS: `xcode-select --install`
+- Linux: `sudo apt-get install git`
+
+#### Setup fails during Whisper.cpp build
+
+**macOS: "xcrun: error"**
 ```bash
 xcode-select --install
 sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 ```
 
-#### Windows: "CMake not found"
+**Windows: "CMake not found"**
 - Install CMake: https://cmake.org/download/
-- Add to PATH
+- Add CMake to PATH
+- Or install MinGW with make: https://www.mingw-w64.org/
 
-#### Linux: "make: command not found"
+**Linux: "make: command not found"**
 ```bash
-sudo apt-get install build-essential
+sudo apt-get install build-essential cmake
 ```
+
+#### Model download fails
+- Check internet connection
+- Manually download from: https://huggingface.co/ggerganov/whisper.cpp/tree/main
+- Place in `models/` directory as `ggml-{model-name}.bin`
 
 ### Runtime Issues
 
-#### "Whisper binary not found"
+#### "Backend connection failed"
 ```bash
-# Rebuild whisper
-node scripts/build-whisper.js
+# Check if backend is running
+cd backend && npm run start:dev
+
+# Check port 3333 is not in use
+netstat -an | grep 3333  # Unix
+netstat -an | findstr 3333  # Windows
 ```
 
-#### "Model not found"
-- Download models from Models tab
-- Or manually download to `models/` directory
+#### "Whisper binary not found"
+```bash
+# Re-run setup to rebuild Whisper.cpp
+npm run setup
 
-#### Audio format not supported
-- Ensure ffmpeg is installed
-- Check audio file integrity
+# Or manually rebuild
+node scripts/setup-whisper.js
+```
+
+#### "Model not found" error during transcription
+- Ensure models are in `models/` directory
+- Check model file names match `ggml-{name}.bin` format
+- Download additional models from the UI or run setup again
+
+#### "Multipart: Unexpected end of form" error
+- This was a known issue with FormData handling
+- Update to latest version of the app
+- Ensure `form-data` package is installed: `npm install`
+
+#### Audio file won't transcribe
+- Check file format (supported: MP3, WAV, OGG, M4A, FLAC, AAC)
+- Ensure file is not corrupted
+- Try converting with ffmpeg first:
+  ```bash
+  ffmpeg -i input.mp3 -ar 16000 output.wav
+  ```
+
+#### Progress stuck at 0%
+- Check backend logs for errors
+- Ensure Whisper.cpp binary has execute permissions (Unix):
+  ```bash
+  chmod +x whisper.cpp/main
+  ```
 
 ## 📦 Distribution
 

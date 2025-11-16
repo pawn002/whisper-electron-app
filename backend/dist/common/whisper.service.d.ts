@@ -4,7 +4,7 @@ export interface TranscriptionOptions {
     translate?: boolean;
     threads?: number;
     processors?: number;
-    outputFormat?: 'txt' | 'srt' | 'vtt' | 'json';
+    outputFormat?: "txt" | "srt" | "vtt" | "json";
     timestamps?: boolean;
 }
 export interface TranscriptionResult {

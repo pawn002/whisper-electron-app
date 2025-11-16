@@ -53,8 +53,28 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
     this.loadAvailableModels();
 
     if (this.electronService.isElectron()) {
+      // Set up event listeners for Electron mode
       this.electronService.onTranscriptionProgress((progress) => {
         this.transcriptionProgress = progress;
+      });
+
+      // Listen for transcription completion
+      (window as any).electronAPI?.onTranscriptionCompleted?.((result: any) => {
+        this.transcriptionResult = result;
+        this.isTranscribing = false;
+        this.transcriptionProgress = 100;
+        this.snackBar.open("Transcription completed!", "Close", {
+          duration: 3000,
+        });
+      });
+
+      // Listen for transcription errors
+      (window as any).electronAPI?.onTranscriptionError?.((error: string) => {
+        this.isTranscribing = false;
+        this.transcriptionProgress = 0;
+        this.snackBar.open(error || "Transcription failed", "Close", {
+          duration: 5000,
+        });
       });
     }
   }
@@ -134,13 +154,12 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
           this.selectedFilePath,
           options,
         );
-        if (result.success) {
-          this.transcriptionResult = result.data;
-          this.snackBar.open("Transcription completed!", "Close", {
-            duration: 3000,
-          });
+        if (result.success && result.data) {
+          // Job started successfully, now wait for WebSocket events
+          // The progress and completion will be handled by the event listeners
+          // set up in ngOnInit via onTranscriptionProgress
         } else {
-          throw new Error(result.error);
+          throw new Error(result.error || "Failed to start transcription");
         }
       } else if (this.selectedFile) {
         // Browser mode - use file upload

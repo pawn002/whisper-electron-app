@@ -15,19 +15,13 @@ export declare class TranscriptionService {
     private readonly gateway;
     private jobs;
     private transcriptionHistory;
+    private whisperService;
     constructor(gateway: TranscriptionGateway);
     processAudio(file: Express.Multer.File, options: CreateTranscriptionDto): Promise<TranscriptionJob>;
     private processTranscriptionJob;
-    private simulateProcessing;
-    private delay;
     private cleanupFile;
     getJobStatus(jobId: string): Promise<TranscriptionJob | undefined>;
     cancelJob(jobId: string): Promise<boolean>;
     getTranscriptionHistory(): TranscriptionJob[];
-    getAvailableModels(): {
-        id: string;
-        name: string;
-        size: string;
-        speed: string;
-    }[];
+    getAvailableModels(): Promise<any[]>;
 }
