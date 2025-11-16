@@ -1,2 +1,8 @@
 **/node_modules
 **/.angular
+**/dist
+backend/dist
+dist
+whisper.cpp
+models
+nul
