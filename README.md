@@ -516,9 +516,8 @@ MIT License - See LICENSE file for details
 
 ## 📞 Support
 
-- GitHub Issues: Report bugs or request features
-- Documentation: Check the wiki for detailed guides
-- Community: Join discussions in the forum
+- **GitHub Issues**: Report bugs or request features
+- **Documentation**: Wiki with detailed guides (planned)
 
 ## 🚦 Status
 
