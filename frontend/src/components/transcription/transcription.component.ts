@@ -244,6 +244,40 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
   }
 
+  getFileName(): string {
+    if (this.selectedFile) {
+      return this.selectedFile.name;
+    }
+    if (this.selectedFilePath) {
+      return this.selectedFilePath.split(/[\\/]/).pop() || "";
+    }
+    return "";
+  }
+
+  getTranscriptionText(): string {
+    if (!this.transcriptionResult) {
+      return "";
+    }
+    if (typeof this.transcriptionResult === "string") {
+      return this.transcriptionResult;
+    }
+    return (
+      this.transcriptionResult.text ||
+      JSON.stringify(this.transcriptionResult, null, 2)
+    );
+  }
+
+  setTranscriptionText(value: string): void {
+    if (typeof this.transcriptionResult === "string") {
+      this.transcriptionResult = value;
+    } else if (
+      this.transcriptionResult &&
+      typeof this.transcriptionResult === "object"
+    ) {
+      this.transcriptionResult.text = value;
+    }
+  }
+
   copyToClipboard(): void {
     if (!this.transcriptionResult) {
       return;

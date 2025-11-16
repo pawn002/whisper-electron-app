@@ -17,16 +17,16 @@
                 Select Audio File
             </button>
 
-            <div *ngIf="selectedFile" class="file-info">
+            <div *ngIf="selectedFile || selectedFilePath" class="file-info">
                 <mat-icon>audiotrack</mat-icon>
-                <span>{{ selectedFile.name }}</span>
-                <span class="file-size">{{
+                <span>{{ getFileName() }}</span>
+                <span class="file-size" *ngIf="selectedFile">{{
                     formatFileSize(selectedFile.size)
                 }}</span>
             </div>
         </div>
 
-        <div class="options-section" *ngIf="selectedFile">
+        <div class="options-section" *ngIf="selectedFile || selectedFilePath">
             <mat-form-field appearance="outline">
                 <mat-label>Model</mat-label>
                 <mat-select [(value)]="selectedModel">
@@ -74,7 +74,8 @@
                 <textarea
                     matInput
                     rows="10"
-                    [(ngModel)]="transcriptionResult"
+                    [ngModel]="getTranscriptionText()"
+                    (ngModelChange)="setTranscriptionText($event)"
                     placeholder="Transcription will appear here..."
                 ></textarea>
             </mat-form-field>

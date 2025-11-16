@@ -125,25 +125,14 @@ electron_1.app.on("activate", () => {
     }
 });
 // IPC Handlers
-electron_1.ipcMain.handle("transcribe-audio", async (event, filePath, options) => {
-    // This will be handled by the backend service
-    // For now, return a mock response
-    return {
-        success: true,
-        jobId: "mock-job-id",
-    };
-});
-electron_1.ipcMain.handle("get-app-path", async () => {
-    return electron_1.app.getPath("userData");
-});
-electron_1.ipcMain.handle("select-file", async () => {
+electron_1.ipcMain.handle("select-audio-file", async () => {
     const { dialog } = require("electron");
     const result = await dialog.showOpenDialog({
         properties: ["openFile"],
         filters: [
             {
                 name: "Audio Files",
-                extensions: ["mp3", "wav", "ogg", "flac", "m4a", "aac"],
+                extensions: ["mp3", "wav", "ogg", "flac", "m4a", "aac", "webm"],
             },
             { name: "All Files", extensions: ["*"] },
         ],
@@ -152,4 +141,64 @@ electron_1.ipcMain.handle("select-file", async () => {
         return result.filePaths[0];
     }
     return null;
+});
+electron_1.ipcMain.handle("transcribe-audio", async (event, audioPath, options) => {
+    // This will be handled by the backend service
+    // For now, return a mock response
+    return {
+        success: true,
+        data: {
+            text: "This is a mock transcription. Backend integration pending.",
+        },
+    };
+});
+electron_1.ipcMain.handle("save-transcript", async (event, content, format) => {
+    const { dialog } = require("electron");
+    const result = await dialog.showSaveDialog({
+        defaultPath: `transcript.${format}`,
+        filters: [
+            { name: "Text Files", extensions: ["txt"] },
+            { name: "SRT Subtitles", extensions: ["srt"] },
+            { name: "VTT Subtitles", extensions: ["vtt"] },
+            { name: "JSON", extensions: ["json"] },
+            { name: "All Files", extensions: ["*"] },
+        ],
+    });
+    if (!result.canceled && result.filePath) {
+        const fs = require("fs");
+        fs.writeFileSync(result.filePath, content);
+        return result.filePath;
+    }
+    return null;
+});
+electron_1.ipcMain.handle("get-available-models", async () => {
+    // Mock data - will be replaced with actual model detection
+    return [
+        { name: "tiny", size: "39 MB", installed: false },
+        { name: "base", size: "74 MB", installed: true },
+        { name: "small", size: "244 MB", installed: false },
+        { name: "medium", size: "769 MB", installed: false },
+        { name: "large", size: "1.5 GB", installed: false },
+    ];
+});
+electron_1.ipcMain.handle("download-model", async (event, modelName) => {
+    // Mock implementation - will be replaced with actual download logic
+    return {
+        success: true,
+        message: `Model ${modelName} download started`,
+    };
+});
+electron_1.ipcMain.handle("get-system-info", async () => {
+    const os = require("os");
+    return {
+        platform: os.platform(),
+        arch: os.arch(),
+        version: os.release(),
+        totalMemory: os.totalmem(),
+        freeMemory: os.freemem(),
+        cpus: os.cpus().length,
+    };
+});
+electron_1.ipcMain.handle("get-app-path", async () => {
+    return electron_1.app.getPath("userData");
 });
