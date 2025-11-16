@@ -294,11 +294,31 @@ ipcMain.handle("get-available-models", async () => {
 });
 
 ipcMain.handle("download-model", async (event, modelName: string) => {
-  // Mock implementation - will be replaced with actual download logic
-  return {
-    success: true,
-    message: `Model ${modelName} download started`,
-  };
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}/api/transcription/download-model/${modelName}`,
+      {
+        method: "POST",
+      },
+    );
+
+    if (!response.ok) {
+      const error: any = await response.json();
+      throw new Error(error.message || "Failed to download model");
+    }
+
+    const result: any = await response.json();
+    return {
+      success: true,
+      message: result.message || `Model ${modelName} downloaded successfully`,
+    };
+  } catch (error: any) {
+    console.error("Error downloading model:", error);
+    return {
+      success: false,
+      message: error.message || "Failed to download model",
+    };
+  }
 });
 
 ipcMain.handle("get-system-info", async () => {

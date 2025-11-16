@@ -89,6 +89,22 @@ export class TranscriptionController {
     return this.transcriptionService.getAvailableModels();
   }
 
+  @Post("download-model/:modelName")
+  async downloadModel(@Param("modelName") modelName: string) {
+    try {
+      await this.transcriptionService.downloadModel(modelName);
+      return {
+        success: true,
+        message: `Model ${modelName} downloaded successfully`,
+      };
+    } catch (error: any) {
+      throw new HttpException(
+        error.message || "Failed to download model",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   @Post("cancel/:jobId")
   async cancelTranscription(@Param("jobId") jobId: string) {
     const result = await this.transcriptionService.cancelJob(jobId);

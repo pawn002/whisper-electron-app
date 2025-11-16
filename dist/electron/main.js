@@ -293,11 +293,27 @@ electron_1.ipcMain.handle("get-available-models", async () => {
     }
 });
 electron_1.ipcMain.handle("download-model", async (event, modelName) => {
-    // Mock implementation - will be replaced with actual download logic
-    return {
-        success: true,
-        message: `Model ${modelName} download started`,
-    };
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/transcription/download-model/${modelName}`, {
+            method: "POST",
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || "Failed to download model");
+        }
+        const result = await response.json();
+        return {
+            success: true,
+            message: result.message || `Model ${modelName} downloaded successfully`,
+        };
+    }
+    catch (error) {
+        console.error("Error downloading model:", error);
+        return {
+            success: false,
+            message: error.message || "Failed to download model",
+        };
+    }
 });
 electron_1.ipcMain.handle("get-system-info", async () => {
     const os = require("os");

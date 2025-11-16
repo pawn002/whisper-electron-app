@@ -51,6 +51,18 @@ let TranscriptionController = class TranscriptionController {
     async getAvailableModels() {
         return this.transcriptionService.getAvailableModels();
     }
+    async downloadModel(modelName) {
+        try {
+            await this.transcriptionService.downloadModel(modelName);
+            return {
+                success: true,
+                message: `Model ${modelName} downloaded successfully`,
+            };
+        }
+        catch (error) {
+            throw new common_1.HttpException(error.message || "Failed to download model", common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     async cancelTranscription(jobId) {
         const result = await this.transcriptionService.cancelJob(jobId);
         if (!result) {
@@ -106,6 +118,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], TranscriptionController.prototype, "getAvailableModels", null);
+__decorate([
+    (0, common_1.Post)("download-model/:modelName"),
+    __param(0, (0, common_1.Param)("modelName")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], TranscriptionController.prototype, "downloadModel", null);
 __decorate([
     (0, common_1.Post)("cancel/:jobId"),
     __param(0, (0, common_1.Param)("jobId")),

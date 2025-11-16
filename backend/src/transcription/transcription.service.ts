@@ -189,4 +189,8 @@ export class TranscriptionService {
   async getAvailableModels() {
     return await this.whisperService.getAvailableModels();
   }
+
+  async downloadModel(modelName: string): Promise<void> {
+    return await this.whisperService.downloadModel(modelName);
+  }
 }

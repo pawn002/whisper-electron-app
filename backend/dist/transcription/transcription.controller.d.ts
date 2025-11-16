@@ -10,6 +10,10 @@ export declare class TranscriptionController {
     getTranscriptionStatus(jobId: string): Promise<import("./transcription.service").TranscriptionJob>;
     getTranscriptionHistory(): Promise<import("./transcription.service").TranscriptionJob[]>;
     getAvailableModels(): Promise<any[]>;
+    downloadModel(modelName: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
     cancelTranscription(jobId: string): Promise<{
         success: boolean;
         message: string;

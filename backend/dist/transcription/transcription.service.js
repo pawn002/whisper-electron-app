@@ -164,6 +164,9 @@ let TranscriptionService = class TranscriptionService {
     async getAvailableModels() {
         return await this.whisperService.getAvailableModels();
     }
+    async downloadModel(modelName) {
+        return await this.whisperService.downloadModel(modelName);
+    }
 };
 exports.TranscriptionService = TranscriptionService;
 exports.TranscriptionService = TranscriptionService = __decorate([

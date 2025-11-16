@@ -28,4 +28,5 @@ export declare class TranscriptionService {
     cancelJob(jobId: string): Promise<boolean>;
     getTranscriptionHistory(): TranscriptionJob[];
     getAvailableModels(): Promise<any[]>;
+    downloadModel(modelName: string): Promise<void>;
 }
