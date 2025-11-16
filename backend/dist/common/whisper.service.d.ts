@@ -20,12 +20,15 @@ export interface TranscriptionResult {
 export declare class WhisperService {
     private whisperPath;
     private modelsPath;
+    private ffmpegPath;
     private initialized;
+    private ffmpegAvailable;
     private availableModels;
     constructor();
     initialize(): Promise<void>;
     private ensureDirectories;
     private checkBinary;
+    private checkFfmpeg;
     getAvailableModels(): Promise<any[]>;
     private getInstalledModels;
     downloadModel(modelName: string, progressCallback?: (progress: number) => void): Promise<void>;

@@ -51,9 +51,38 @@
       "output": "release"
     },
     "files": [
-      "dist/**/*",
-      "native/**/*",
-      "models/**/*"
+      "dist/electron/**/*",
+      "backend/dist/**/*",
+      "backend/node_modules/**/*",
+      "backend/package.json",
+      "frontend/dist/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "backend/node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "whisper.cpp",
+        "to": "whisper.cpp",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "models",
+        "to": "models",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "ffmpeg",
+        "to": "ffmpeg",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "mac": {
       "category": "public.app-category.productivity",
@@ -63,14 +92,7 @@
       ]
     },
     "win": {
-      "target": [
-        {
-          "target": "dir",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
+      "target": "dir"
     },
     "linux": {
       "target": [

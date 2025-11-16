@@ -99,9 +99,9 @@ __decorate([
             },
         }),
         fileFilter: (req, file, callback) => {
-            const allowedExtensions = /\.(mp3|wav|ogg|m4a|flac|aac)$/;
+            const allowedExtensions = /\.(mp3|wav|ogg|m4a|flac|aac|webm)$/;
             if (!allowedExtensions.test(file.originalname.toLowerCase())) {
-                return callback(new common_1.HttpException("Only audio files are allowed", common_1.HttpStatus.BAD_REQUEST), false);
+                return callback(new common_1.HttpException("Only audio files are allowed (mp3, wav, ogg, m4a, flac, aac, webm)", common_1.HttpStatus.BAD_REQUEST), false);
             }
             callback(null, true);
         },

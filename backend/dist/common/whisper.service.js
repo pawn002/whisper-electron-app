@@ -42,6 +42,7 @@ const fs_1 = require("fs");
 class WhisperService {
     constructor() {
         this.initialized = false;
+        this.ffmpegAvailable = false;
         this.availableModels = [
             { name: "tiny", size: "39 MB", description: "Fastest, least accurate" },
             { name: "base", size: "74 MB", description: "Fast, good accuracy" },
@@ -52,9 +53,11 @@ class WhisperService {
         const basePath = path.join(__dirname, "../../../");
         if (process.platform === "win32") {
             this.whisperPath = path.join(basePath, "whisper.cpp", "build", "bin", "Release", "whisper-cli.exe");
+            this.ffmpegPath = path.join(basePath, "ffmpeg", "bin", "ffmpeg.exe");
         }
         else {
             this.whisperPath = path.join(basePath, "whisper.cpp", "main");
+            this.ffmpegPath = path.join(basePath, "ffmpeg", "bin", "ffmpeg");
         }
         this.modelsPath = path.join(basePath, "models");
     }
@@ -63,6 +66,13 @@ class WhisperService {
         const binaryExists = await this.checkBinary();
         if (!binaryExists) {
             throw new Error("Whisper binary not found. Please rebuild the application.");
+        }
+        this.ffmpegAvailable = await this.checkFfmpeg();
+        if (this.ffmpegAvailable) {
+            console.log("ffmpeg detected - multi-format audio support enabled");
+        }
+        else {
+            console.warn("ffmpeg not found - only WAV files will be supported. Install ffmpeg for multi-format support.");
         }
         const models = await this.getInstalledModels();
         if (models.length === 0) {
@@ -80,6 +90,17 @@ class WhisperService {
             return true;
         }
         catch {
+            return false;
+        }
+    }
+    async checkFfmpeg() {
+        try {
+            await fs.access(this.ffmpegPath);
+            console.log(`Found bundled ffmpeg at: ${this.ffmpegPath}`);
+            return true;
+        }
+        catch {
+            console.warn(`Bundled ffmpeg not found at: ${this.ffmpegPath}`);
             return false;
         }
     }
@@ -155,11 +176,24 @@ class WhisperService {
         catch {
             throw new Error(`Model ${options.model} not found. Please download it first.`);
         }
+        const ext = path.extname(audioPath).toLowerCase();
+        let processedAudioPath = audioPath;
+        let needsCleanup = false;
+        if (ext !== ".wav") {
+            console.log(`Non-WAV file detected (${ext}), converting to WAV...`);
+            try {
+                processedAudioPath = await this.convertAudioToWav(audioPath);
+                needsCleanup = true;
+            }
+            catch (error) {
+                throw new Error(`Audio conversion failed: ${error.message}. Only WAV files are supported without ffmpeg.`);
+            }
+        }
         const args = [
             "-m",
             modelPath,
             "-f",
-            audioPath,
+            processedAudioPath,
             "-t",
             (options.threads || 4).toString(),
             "-p",
@@ -226,10 +260,19 @@ class WhisperService {
                 }
                 error += message;
             });
-            whisperProcess.on("close", (code) => {
+            whisperProcess.on("close", async (code) => {
                 console.log(`Whisper process closed with code: ${code}`);
                 console.log("Output:", output);
                 console.log("Error:", error);
+                if (needsCleanup) {
+                    try {
+                        await fs.unlink(processedAudioPath);
+                        console.log(`Cleaned up converted file: ${processedAudioPath}`);
+                    }
+                    catch (cleanupError) {
+                        console.error("Failed to cleanup converted file:", cleanupError);
+                    }
+                }
                 if (code === 0) {
                     if (options.outputFormat === "json") {
                         try {
@@ -256,17 +299,28 @@ class WhisperService {
                     reject(new Error(errorMsg));
                 }
             });
-            whisperProcess.on("error", (err) => {
+            whisperProcess.on("error", async (err) => {
                 console.error("Whisper process error event:", err);
+                if (needsCleanup) {
+                    try {
+                        await fs.unlink(processedAudioPath);
+                    }
+                    catch (cleanupError) {
+                        console.error("Failed to cleanup converted file:", cleanupError);
+                    }
+                }
                 reject(new Error(`Whisper process error: ${err.message}`));
             });
         });
     }
     async convertAudioToWav(inputPath) {
+        if (!this.ffmpegAvailable) {
+            throw new Error("ffmpeg is not available. Please run setup to install ffmpeg.");
+        }
         const outputPath = inputPath.replace(path.extname(inputPath), ".wav");
+        console.log(`Converting ${inputPath} to WAV format using bundled ffmpeg...`);
         return new Promise((resolve, reject) => {
-            const ffmpegPath = path.join(path.dirname(this.whisperPath), process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg");
-            const ffmpegProcess = (0, child_process_1.spawn)(ffmpegPath, [
+            const ffmpegProcess = (0, child_process_1.spawn)(this.ffmpegPath, [
                 "-i",
                 inputPath,
                 "-ar",
@@ -278,16 +332,23 @@ class WhisperService {
                 outputPath,
                 "-y",
             ]);
+            let errorOutput = "";
+            ffmpegProcess.stderr.on("data", (data) => {
+                errorOutput += data.toString();
+            });
             ffmpegProcess.on("close", (code) => {
                 if (code === 0) {
+                    console.log(`Audio converted successfully to: ${outputPath}`);
                     resolve(outputPath);
                 }
                 else {
-                    reject(new Error("Failed to convert audio file"));
+                    console.error("ffmpeg conversion failed:", errorOutput);
+                    reject(new Error(`Failed to convert audio file. ffmpeg exit code: ${code}`));
                 }
             });
             ffmpegProcess.on("error", (err) => {
-                reject(err);
+                console.error("ffmpeg process error:", err);
+                reject(new Error(`Failed to start ffmpeg: ${err.message}. ffmpeg binary may be missing or corrupted.`));
             });
         });
     }
