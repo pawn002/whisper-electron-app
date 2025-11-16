@@ -24,7 +24,8 @@
     "version:minor": "npm version minor && npm run version:sync",
     "version:major": "npm version major && npm run version:sync",
     "version:sync": "node scripts/sync-version.js",
-    "release": "npm run version:sync && git push --follow-tags"
+    "release": "npm run version:sync && git push --follow-tags",
+    "release:interactive": "node scripts/release.js"
   },
   "keywords": [
     "electron",

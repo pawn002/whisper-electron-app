@@ -330,11 +330,79 @@ This project follows [Semantic Versioning](https://semver.org/). Version numbers
 - **MINOR**: New functionality in a backwards-compatible manner
 - **PATCH**: Backwards-compatible bug fixes
 
-### Creating a New Release
+### Interactive Release Process (Recommended)
+
+The easiest way to create a release is using the interactive release script:
+
+```bash
+npm run release:interactive
+```
+
+This single command will guide you through the entire release process:
+
+**What it does:**
+
+1. **Git Status Check** - Ensures your working directory is clean
+2. **Version Selection** - Choose between patch, minor, major, or custom version
+3. **CHANGELOG Generation** - Automatically generates CHANGELOG entry from git commits
+   - Option to edit the generated entry
+   - Categorizes changes (Added, Changed, Fixed, Removed)
+4. **Version Update** - Updates version in all package.json files
+5. **Git Commit & Tag** - Creates commit and tag for the release
+6. **Build & Distribution** - Optionally builds and packages the app
+7. **Push to Remote** - Pushes commits and tags to GitHub
+8. **GitHub Release** - Creates GitHub release with notes (requires GitHub CLI)
+   - Optionally uploads distribution files
+
+**Example session:**
+
+```bash
+$ npm run release:interactive
+
+🚀 Whisper Electron App - Release Manager
+══════════════════════════════════════════════════════
+
+📋 Step 1: Checking git status...
+✅ Working directory clean
+
+📋 Step 2: Version selection
+
+Current version: 1.0.0
+
+Select release type:
+  1) Patch (1.0.1) - Bug fixes
+  2) Minor (1.1.0) - New features (backwards compatible)
+  3) Major (2.0.0) - Breaking changes
+  4) Custom version
+
+Your choice (1-4): 1
+
+✅ Selected version: 1.0.1
+
+📋 Step 3: Updating CHANGELOG.md
+...
+```
+
+**Requirements:**
+
+- **Optional but recommended**: [GitHub CLI](https://cli.github.com/) for automatic GitHub release creation
+  ```bash
+  # Install GitHub CLI
+  # Windows (via winget)
+  winget install --id GitHub.cli
+  
+  # macOS
+  brew install gh
+  
+  # Login
+  gh auth login
+  ```
+
+### Manual Release Process
+
+If you prefer manual control, follow these steps:
 
 #### 1. Update Version
-
-Use the built-in version scripts to bump the version:
 
 ```bash
 # For bug fixes (1.0.0 → 1.0.1)
@@ -355,7 +423,7 @@ These scripts automatically:
 
 #### 2. Update CHANGELOG.md
 
-Before releasing, update `CHANGELOG.md` with:
+Manually update `CHANGELOG.md` with:
 - New version section
 - Added features
 - Changed functionality
@@ -376,9 +444,22 @@ Example:
 - Updated Whisper.cpp to latest version
 ```
 
-#### 3. Push Release
+#### 3. Build and Package
 
-Push the version bump and tags to GitHub:
+```bash
+# Build the app
+npm run build
+
+# Create distribution packages
+npm run dist
+
+# Or platform-specific
+npm run dist:win
+npm run dist:mac
+npm run dist:linux
+```
+
+#### 4. Push Release
 
 ```bash
 npm run release
@@ -389,16 +470,20 @@ Or manually:
 git push origin main --follow-tags
 ```
 
-#### 4. Create GitHub Release
+#### 5. Create GitHub Release
 
+**With GitHub CLI:**
+```bash
+gh release create v1.0.1 --title "Release v1.0.1" --notes "See CHANGELOG.md"
+gh release upload v1.0.1 release/*.exe release/*.dmg release/*.AppImage
+```
+
+**Manually:**
 1. Go to your repository on GitHub
 2. Click "Releases" → "Draft a new release"
 3. Select the version tag (e.g., `v1.0.1`)
 4. Use the CHANGELOG.md content for release notes
-5. Attach distribution files (optional):
-   - Windows: `release/win-unpacked/` or installer
-   - macOS: `.dmg` or `.zip` from `release/`
-   - Linux: `.AppImage` or `.deb` from `release/`
+5. Attach distribution files from `release/` directory
 6. Publish release
 
 ### Version Sync
