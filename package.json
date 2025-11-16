@@ -13,7 +13,6 @@
     "dev:backend": "cd backend && npm run start:dev",
     "dev:frontend": "cd frontend && npm run start",
     "dev:electron": "wait-on http://localhost:4200 && electron . --dev",
-    "postinstall": "electron-builder install-app-deps && npm run install:all && npm run build:whisper",
     "install:all": "cd backend && npm install && cd ../frontend && npm install",
     "build:whisper": "node scripts/build-whisper.js",
     "dist": "npm run build && electron-builder",
@@ -21,7 +20,13 @@
     "dist:win": "npm run build && electron-builder --win",
     "dist:linux": "npm run build && electron-builder --linux"
   },
-  "keywords": ["electron", "whisper", "speech-to-text", "angular", "nestjs"],
+  "keywords": [
+    "electron",
+    "whisper",
+    "speech-to-text",
+    "angular",
+    "nestjs"
+  ],
   "author": "Your Name",
   "license": "MIT",
   "devDependencies": {
@@ -49,13 +54,22 @@
     ],
     "mac": {
       "category": "public.app-category.productivity",
-      "target": ["dmg", "zip"]
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "win": {
-      "target": ["nsis", "portable"]
+      "target": [
+        "nsis",
+        "portable"
+      ]
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "category": "Utility"
     }
   }

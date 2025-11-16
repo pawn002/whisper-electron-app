@@ -1,0 +1,55 @@
+<mat-toolbar color="primary" class="app-toolbar">
+    <mat-icon>mic</mat-icon>
+    <span class="title">{{ title }}</span>
+    <span class="spacer"></span>
+    <button
+        mat-icon-button
+        [matTooltip]="isElectron ? 'Running in Electron' : 'Running in Browser'"
+    >
+        <mat-icon>{{ isElectron ? "desktop_windows" : "web" }}</mat-icon>
+    </button>
+    <!-- <app-settings></app-settings> -->
+</mat-toolbar>
+
+<div class="app-container">
+    <mat-tab-group animationDuration="0ms">
+        <mat-tab label="Transcription">
+            <div class="tab-content">
+                <app-transcription></app-transcription>
+            </div>
+        </mat-tab>
+
+        <mat-tab label="Models">
+            <div class="tab-content">
+                <!-- <app-model-selector></app-model-selector> -->
+                <mat-card>
+                    <mat-card-header>
+                        <mat-card-title>Model Management</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <p>Model selection will appear here.</p>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </mat-tab>
+
+        <mat-tab label="History" [disabled]="!isElectron">
+            <div class="tab-content">
+                <mat-card>
+                    <mat-card-header>
+                        <mat-card-title>Transcription History</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <p>History of your transcriptions will appear here.</p>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>
+
+<div class="status-bar" *ngIf="systemInfo">
+    <span>Platform: {{ systemInfo.platform }}</span>
+    <span>•</span>
+    <span>Version: {{ systemInfo.version }}</span>
+</div>

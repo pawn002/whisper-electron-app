@@ -1,0 +1,94 @@
+<mat-card class="transcription-card">
+    <mat-card-header>
+        <mat-card-title>Audio Transcription</mat-card-title>
+        <mat-card-subtitle
+            >Upload or select an audio file to transcribe</mat-card-subtitle
+        >
+    </mat-card-header>
+
+    <mat-card-content>
+        <div class="upload-section">
+            <button
+                mat-raised-button
+                color="primary"
+                (click)="selectAudioFile()"
+            >
+                <mat-icon>folder_open</mat-icon>
+                Select Audio File
+            </button>
+
+            <div *ngIf="selectedFile" class="file-info">
+                <mat-icon>audiotrack</mat-icon>
+                <span>{{ selectedFile.name }}</span>
+                <span class="file-size">{{
+                    formatFileSize(selectedFile.size)
+                }}</span>
+            </div>
+        </div>
+
+        <div class="options-section" *ngIf="selectedFile">
+            <mat-form-field appearance="outline">
+                <mat-label>Model</mat-label>
+                <mat-select [(value)]="selectedModel">
+                    <mat-option value="tiny">Tiny (Fast)</mat-option>
+                    <mat-option value="base">Base</mat-option>
+                    <mat-option value="small">Small</mat-option>
+                    <mat-option value="medium">Medium</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Language</mat-label>
+                <mat-select [(value)]="selectedLanguage">
+                    <mat-option value="auto">Auto Detect</mat-option>
+                    <mat-option value="en">English</mat-option>
+                    <mat-option value="es">Spanish</mat-option>
+                    <mat-option value="fr">French</mat-option>
+                    <mat-option value="de">German</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <button
+                mat-raised-button
+                color="accent"
+                (click)="startTranscription()"
+                [disabled]="isTranscribing"
+            >
+                <mat-icon>play_arrow</mat-icon>
+                Start Transcription
+            </button>
+        </div>
+
+        <div class="progress-section" *ngIf="isTranscribing">
+            <mat-progress-bar
+                mode="indeterminate"
+                color="accent"
+            ></mat-progress-bar>
+            <p class="progress-text">Transcribing audio...</p>
+        </div>
+
+        <div class="result-section" *ngIf="transcriptionResult">
+            <h3>Transcription Result</h3>
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Transcript</mat-label>
+                <textarea
+                    matInput
+                    rows="10"
+                    [(ngModel)]="transcriptionResult"
+                    placeholder="Transcription will appear here..."
+                ></textarea>
+            </mat-form-field>
+
+            <div class="result-actions">
+                <button mat-button (click)="copyToClipboard()">
+                    <mat-icon>content_copy</mat-icon>
+                    Copy
+                </button>
+                <button mat-button (click)="exportTranscript()">
+                    <mat-icon>save</mat-icon>
+                    Export
+                </button>
+            </div>
+        </div>
+    </mat-card-content>
+</mat-card>

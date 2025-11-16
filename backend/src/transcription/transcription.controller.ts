@@ -8,24 +8,25 @@ import {
   UploadedFile,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { TranscriptionService } from './transcription.service';
-import { CreateTranscriptionDto } from './dto/create-transcription.dto';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { TranscriptionService } from "./transcription.service";
+import { CreateTranscriptionDto } from "./create-transcription.dto";
+import { diskStorage } from "multer";
+import { extname } from "path";
 
-@Controller('api/transcription')
+@Controller("api/transcription")
 export class TranscriptionController {
   constructor(private readonly transcriptionService: TranscriptionService) {}
 
-  @Post('process')
+  @Post("process")
   @UseInterceptors(
-    FileInterceptor('audio', {
+    FileInterceptor("audio", {
       storage: diskStorage({
-        destination: './uploads',
+        destination: "./uploads",
         filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + "-" + Math.round(Math.random() * 1e9);
           callback(null, `${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
@@ -33,7 +34,10 @@ export class TranscriptionController {
         const allowedExtensions = /\.(mp3|wav|ogg|m4a|flac|aac)$/;
         if (!allowedExtensions.test(file.originalname.toLowerCase())) {
           return callback(
-            new HttpException('Only audio files are allowed', HttpStatus.BAD_REQUEST),
+            new HttpException(
+              "Only audio files are allowed",
+              HttpStatus.BAD_REQUEST,
+            ),
             false,
           );
         }
@@ -49,7 +53,7 @@ export class TranscriptionController {
     @Body() dto: CreateTranscriptionDto,
   ) {
     if (!file) {
-      throw new HttpException('No audio file provided', HttpStatus.BAD_REQUEST);
+      throw new HttpException("No audio file provided", HttpStatus.BAD_REQUEST);
     }
 
     try {
@@ -60,37 +64,40 @@ export class TranscriptionController {
       };
     } catch (error: any) {
       throw new HttpException(
-        error.message || 'Failed to process audio',
+        error.message || "Failed to process audio",
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  @Get('status/:jobId')
-  async getTranscriptionStatus(@Param('jobId') jobId: string) {
+  @Get("status/:jobId")
+  async getTranscriptionStatus(@Param("jobId") jobId: string) {
     const status = await this.transcriptionService.getJobStatus(jobId);
     if (!status) {
-      throw new HttpException('Job not found', HttpStatus.NOT_FOUND);
+      throw new HttpException("Job not found", HttpStatus.NOT_FOUND);
     }
     return status;
   }
 
-  @Get('history')
+  @Get("history")
   async getTranscriptionHistory() {
     return this.transcriptionService.getTranscriptionHistory();
   }
 
-  @Get('models')
+  @Get("models")
   async getAvailableModels() {
     return this.transcriptionService.getAvailableModels();
   }
 
-  @Post('cancel/:jobId')
-  async cancelTranscription(@Param('jobId') jobId: string) {
+  @Post("cancel/:jobId")
+  async cancelTranscription(@Param("jobId") jobId: string) {
     const result = await this.transcriptionService.cancelJob(jobId);
     if (!result) {
-      throw new HttpException('Job not found or already completed', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        "Job not found or already completed",
+        HttpStatus.NOT_FOUND,
+      );
     }
-    return { success: true, message: 'Job cancelled successfully' };
+    return { success: true, message: "Job cancelled successfully" };
   }
 }
