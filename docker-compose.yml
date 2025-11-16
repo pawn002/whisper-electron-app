@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  whisper-app:
+    build: .
+    container_name: whisper-electron-app
+    ports:
+      - "3333:3333"  # Backend API
+      - "4200:4200"  # Frontend (if serving separately)
+    volumes:
+      - ./models:/app/models
+      - ./uploads:/app/uploads
+      - whisper-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3333
+      - MAX_FILE_SIZE=500MB
+    restart: unless-stopped
+    networks:
+      - whisper-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Nginx for serving frontend in production
+  nginx:
+    image: nginx:alpine
+    container_name: whisper-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - whisper-app
+    networks:
+      - whisper-network
+    restart: unless-stopped
+
+volumes:
+  whisper-data:
+    driver: local
+
+networks:
+  whisper-network:
+    driver: bridge

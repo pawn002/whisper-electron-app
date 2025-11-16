@@ -1,0 +1,62 @@
+{
+  "name": "whisper-electron-app",
+  "version": "1.0.0",
+  "description": "Offline Speech-to-Text Electron App with Whisper.cpp",
+  "main": "dist/electron/main.js",
+  "scripts": {
+    "start": "npm run build && electron .",
+    "build": "npm run build:backend && npm run build:frontend && npm run build:electron",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "build:electron": "tsc -p electron",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:electron\"",
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:frontend": "cd frontend && npm run start",
+    "dev:electron": "wait-on http://localhost:4200 && electron . --dev",
+    "postinstall": "electron-builder install-app-deps && npm run install:all && npm run build:whisper",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "build:whisper": "node scripts/build-whisper.js",
+    "dist": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:linux": "npm run build && electron-builder --linux"
+  },
+  "keywords": ["electron", "whisper", "speech-to-text", "angular", "nestjs"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "concurrently": "^8.2.2",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "typescript": "^5.3.3",
+    "wait-on": "^7.2.0"
+  },
+  "dependencies": {
+    "electron-is-dev": "^2.0.0",
+    "electron-store": "^8.1.0"
+  },
+  "build": {
+    "appId": "com.yourcompany.whisper-electron",
+    "productName": "Whisper Transcription",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "native/**/*",
+      "models/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "target": ["nsis", "portable"]
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility"
+    }
+  }
+}
