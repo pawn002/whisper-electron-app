@@ -82,6 +82,18 @@ export class ElectronService {
     }
   }
 
+  onTranscriptionCompleted(callback: (result: any) => void): void {
+    if (this.isElectron()) {
+      this.electron.onTranscriptionCompleted(callback);
+    }
+  }
+
+  onTranscriptionError(callback: (error: string) => void): void {
+    if (this.isElectron()) {
+      this.electron.onTranscriptionError(callback);
+    }
+  }
+
   onModelDownloadProgress(callback: (data: any) => void): void {
     if (this.isElectron()) {
       this.electron.onModelDownloadProgress(callback);

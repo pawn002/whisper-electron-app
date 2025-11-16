@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { MatCardModule } from "@angular/material/card";
 import { MatIconModule } from "@angular/material/icon";
@@ -36,7 +36,7 @@ interface TranscriptionHistoryItem {
   templateUrl: "./history.component.html",
   styleUrls: ["./history.component.scss"],
 })
-export class HistoryComponent implements OnInit {
+export class HistoryComponent implements OnInit, OnDestroy {
   history: TranscriptionHistoryItem[] = [];
   displayedColumns: string[] = [
     "fileName",
@@ -52,6 +52,23 @@ export class HistoryComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadHistory();
+
+    // Listen for transcription completion events to auto-refresh
+    this.electronService.onTranscriptionCompleted(() => {
+      console.log("Transcription completed, refreshing history...");
+      this.loadHistory();
+    });
+
+    this.electronService.onTranscriptionError(() => {
+      console.log("Transcription failed, refreshing history...");
+      this.loadHistory();
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Clean up event listeners
+    this.electronService.removeAllListeners("transcription-completed");
+    this.electronService.removeAllListeners("transcription-error");
   }
 
   async loadHistory(): Promise<void> {
