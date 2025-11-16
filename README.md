@@ -328,6 +328,95 @@ The app uses NSIS for Windows installer creation. Customize in `package.json`:
 }
 ```
 
+## 🔖 Release Management
+
+This project follows [Semantic Versioning](https://semver.org/). Version numbers follow the format `MAJOR.MINOR.PATCH`:
+
+- **MAJOR**: Incompatible API changes
+- **MINOR**: New functionality in a backwards-compatible manner
+- **PATCH**: Backwards-compatible bug fixes
+
+### Creating a New Release
+
+#### 1. Update Version
+
+Use the built-in version scripts to bump the version:
+
+```bash
+# For bug fixes (1.0.0 → 1.0.1)
+npm run version:patch
+
+# For new features (1.0.0 → 1.1.0)
+npm run version:minor
+
+# For breaking changes (1.0.0 → 2.0.0)
+npm run version:major
+```
+
+These scripts automatically:
+- Update version in root `package.json`
+- Sync version to `backend/package.json` and `frontend/package.json`
+- Create a git commit with the version bump
+- Create a git tag (e.g., `v1.0.1`)
+
+#### 2. Update CHANGELOG.md
+
+Before releasing, update `CHANGELOG.md` with:
+- New version section
+- Added features
+- Changed functionality
+- Deprecated features
+- Removed features
+- Fixed bugs
+- Security updates
+
+Example:
+```markdown
+## [1.0.1] - 2025-11-20
+
+### Fixed
+- Fixed audio conversion issue with large files
+- Improved error handling in transcription service
+
+### Changed
+- Updated Whisper.cpp to latest version
+```
+
+#### 3. Push Release
+
+Push the version bump and tags to GitHub:
+
+```bash
+npm run release
+```
+
+Or manually:
+```bash
+git push origin main --follow-tags
+```
+
+#### 4. Create GitHub Release
+
+1. Go to your repository on GitHub
+2. Click "Releases" → "Draft a new release"
+3. Select the version tag (e.g., `v1.0.1`)
+4. Use the CHANGELOG.md content for release notes
+5. Attach distribution files (optional):
+   - Windows: `release/win-unpacked/` or installer
+   - macOS: `.dmg` or `.zip` from `release/`
+   - Linux: `.AppImage` or `.deb` from `release/`
+6. Publish release
+
+### Version Sync
+
+If you need to manually sync versions across all packages:
+
+```bash
+npm run version:sync
+```
+
+This ensures `package.json` in root, backend, and frontend all have the same version number.
+
 ## 🤝 Contributing
 
 1. Fork the repository
