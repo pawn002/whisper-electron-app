@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class ElectronService {
   private electron: any;
@@ -19,21 +19,24 @@ export class ElectronService {
 
   async selectAudioFile(): Promise<string | null> {
     if (!this.isElectron()) {
-      throw new Error('This feature is only available in Electron');
+      throw new Error("This feature is only available in Electron");
     }
     return await this.electron.selectAudioFile();
   }
 
   async transcribeAudio(audioPath: string, options: any): Promise<any> {
     if (!this.isElectron()) {
-      throw new Error('This feature is only available in Electron');
+      throw new Error("This feature is only available in Electron");
     }
     return await this.electron.transcribeAudio(audioPath, options);
   }
 
-  async saveTranscript(content: string, format: string): Promise<string | null> {
+  async saveTranscript(
+    content: string,
+    format: string,
+  ): Promise<string | null> {
     if (!this.isElectron()) {
-      throw new Error('This feature is only available in Electron');
+      throw new Error("This feature is only available in Electron");
     }
     return await this.electron.saveTranscript(content, format);
   }
@@ -42,9 +45,9 @@ export class ElectronService {
     if (!this.isElectron()) {
       // Return mock data for browser mode
       return [
-        { name: 'tiny', size: '39 MB', installed: false },
-        { name: 'base', size: '74 MB', installed: true },
-        { name: 'small', size: '244 MB', installed: false }
+        { name: "tiny", size: "39 MB", installed: false },
+        { name: "base", size: "74 MB", installed: true },
+        { name: "small", size: "244 MB", installed: false },
       ];
     }
     return await this.electron.getAvailableModels();
@@ -52,7 +55,7 @@ export class ElectronService {
 
   async downloadModel(modelName: string): Promise<any> {
     if (!this.isElectron()) {
-      throw new Error('This feature is only available in Electron');
+      throw new Error("This feature is only available in Electron");
     }
     return await this.electron.downloadModel(modelName);
   }
@@ -64,7 +67,9 @@ export class ElectronService {
     return await this.electron.getSystemInfo();
   }
 
-  onTranscriptionProgress(callback: (progress: number) => void): void {
+  onTranscriptionProgress(
+    callback: (data: { progress: number; message?: string }) => void,
+  ): void {
     if (this.isElectron()) {
       this.electron.onTranscriptionProgress(callback);
     }

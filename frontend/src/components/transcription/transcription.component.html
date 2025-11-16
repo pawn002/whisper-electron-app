@@ -60,11 +60,21 @@
         </div>
 
         <div class="progress-section" *ngIf="isTranscribing">
+            <div class="progress-header">
+                <span class="progress-label">Transcribing audio...</span>
+                <span class="progress-percentage"
+                    >{{ transcriptionProgress }}%</span
+                >
+            </div>
             <mat-progress-bar
-                mode="indeterminate"
+                mode="determinate"
+                [value]="transcriptionProgress"
                 color="accent"
             ></mat-progress-bar>
-            <p class="progress-text">Transcribing audio...</p>
+            <div class="progress-info" *ngIf="progressMessage">
+                <mat-icon class="progress-icon">info</mat-icon>
+                <span>{{ progressMessage }}</span>
+            </div>
         </div>
 
         <div class="result-section" *ngIf="transcriptionResult">

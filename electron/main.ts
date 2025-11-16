@@ -98,7 +98,10 @@ function initializeSocket() {
 
   socket.on("progress", (data: any) => {
     if (mainWindow) {
-      mainWindow.webContents.send("transcription-progress", data.progress);
+      mainWindow.webContents.send("transcription-progress", {
+        progress: data.progress,
+        message: data.message,
+      });
     }
   });
 

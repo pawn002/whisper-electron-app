@@ -14,6 +14,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
   selectedFilePath: string | null = null;
   isTranscribing = false;
   transcriptionProgress = 0;
+  progressMessage = "";
   transcriptionResult: any = null;
   selectedModel = "base";
   selectedLanguage = "auto";
@@ -54,8 +55,9 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
 
     if (this.electronService.isElectron()) {
       // Set up event listeners for Electron mode
-      this.electronService.onTranscriptionProgress((progress) => {
-        this.transcriptionProgress = progress;
+      this.electronService.onTranscriptionProgress((data) => {
+        this.transcriptionProgress = data.progress || 0;
+        this.progressMessage = data.message || "";
       });
 
       // Listen for transcription completion
@@ -158,7 +160,9 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
           // Job started successfully, now wait for WebSocket events
           // The progress and completion will be handled by the event listeners
           // set up in ngOnInit via onTranscriptionProgress
+          // Don't set isTranscribing to false - let the completion event handle it
         } else {
+          this.isTranscribing = false;
           throw new Error(result.error || "Failed to start transcription");
         }
       } else if (this.selectedFile) {
@@ -176,6 +180,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
             next: (update) => {
               if (update.type === "progress") {
                 this.transcriptionProgress = update.progress ?? 0;
+                this.progressMessage = update.message || "";
               } else if (update.type === "completed") {
                 this.transcriptionResult = update.result;
                 this.isTranscribing = false;
@@ -193,10 +198,6 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
       }
     } catch (error: any) {
       this.handleError(error);
-    } finally {
-      if (this.electronService.isElectron()) {
-        this.isTranscribing = false;
-      }
     }
   }
 

@@ -12,7 +12,7 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
     getSystemInfo: () => electron_1.ipcRenderer.invoke("get-system-info"),
     // Event listeners
     onTranscriptionProgress: (callback) => {
-        electron_1.ipcRenderer.on("transcription-progress", (event, progress) => callback(progress));
+        electron_1.ipcRenderer.on("transcription-progress", (event, data) => callback(data));
     },
     onTranscriptionCompleted: (callback) => {
         electron_1.ipcRenderer.on("transcription-completed", (event, result) => callback(result));

@@ -124,7 +124,10 @@ function initializeSocket() {
     });
     socket.on("progress", (data) => {
         if (mainWindow) {
-            mainWindow.webContents.send("transcription-progress", data.progress);
+            mainWindow.webContents.send("transcription-progress", {
+                progress: data.progress,
+                message: data.message,
+            });
         }
     });
     socket.on("completed", (data) => {
