@@ -6,9 +6,10 @@ A robust, production-ready Electron application that provides offline speech-to-
 
 - **100% Offline Operation**: No internet connection required after initial setup
 - **Multiple Model Support**: Choose from tiny, base, small, medium, and large models
-- **Real-time Progress Updates**: WebSocket-based progress tracking
 - **Multi-format Support**: MP3, WAV, OGG, M4A, FLAC, AAC, WEBM audio formats (automatic conversion via bundled ffmpeg)
 - **Export Options**: Save transcripts as TXT, SRT, VTT, or JSON
+- **Transcription History**: View past transcriptions with metadata (model used, duration, processing time)
+- **Model Management**: Download and manage Whisper models directly from the app
 - **Cross-Platform**: Works on Windows, macOS, and Linux
 - **Modern UI**: Material Design with Angular
 - **Secure IPC**: Context-isolated Electron with secure IPC communication
@@ -164,7 +165,7 @@ whisper-electron-app/
 
 4. **Start Transcription**:
    - Click "Transcribe"
-   - Monitor real-time progress
+   - Wait for processing to complete
    - View results in the editor
 
 5. **Export Results**:
@@ -284,9 +285,9 @@ node scripts/setup-whisper.js
 - Download additional models from the UI or run setup again
 
 #### "Multipart: Unexpected end of form" error
-- This was a known issue with FormData handling
-- Update to latest version of the app
-- Ensure `form-data` package is installed: `npm install`
+- This issue has been resolved in the current version
+- If you encounter this error, ensure you're running the latest version
+- Re-run setup if needed: `npm run setup`
 
 #### Audio file won't transcribe
 - Check file format (supported: MP3, WAV, OGG, M4A, FLAC, AAC, WEBM)
@@ -296,13 +297,6 @@ node scripts/setup-whisper.js
 - If ffmpeg binary is missing, re-run setup:
   ```bash
   npm run setup
-  ```
-
-#### Progress stuck at 0%
-- Check backend logs for errors
-- Ensure Whisper.cpp binary has execute permissions (Unix):
-  ```bash
-  chmod +x whisper.cpp/main
   ```
 
 ## 📦 Distribution
@@ -445,8 +439,8 @@ MIT License - See LICENSE file for details
 
 - ✅ Core transcription functionality
 - ✅ Multi-platform support
-- ✅ Real-time progress updates
 - ✅ Model management
+- ✅ Transcription history
 - 🚧 GPU acceleration (in progress)
 - 🚧 Batch processing (planned)
 - 🚧 Speaker diarization (planned)
