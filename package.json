@@ -19,7 +19,12 @@
     "dist": "npm run build && electron-builder",
     "dist:mac": "npm run build && electron-builder --mac",
     "dist:win": "npm run build && electron-builder --win",
-    "dist:linux": "npm run build && electron-builder --linux"
+    "dist:linux": "npm run build && electron-builder --linux",
+    "version:patch": "npm version patch && npm run version:sync",
+    "version:minor": "npm version minor && npm run version:sync",
+    "version:major": "npm version major && npm run version:sync",
+    "version:sync": "node scripts/sync-version.js",
+    "release": "npm run version:sync && git push --follow-tags"
   },
   "keywords": [
     "electron",
