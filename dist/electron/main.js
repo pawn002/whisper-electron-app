@@ -313,3 +313,16 @@ electron_1.ipcMain.handle("get-system-info", async () => {
 electron_1.ipcMain.handle("get-app-path", async () => {
     return electron_1.app.getPath("userData");
 });
+electron_1.ipcMain.handle("get-transcription-history", async () => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/transcription/history`);
+        if (!response.ok) {
+            throw new Error("Failed to fetch history from backend");
+        }
+        return await response.json();
+    }
+    catch (error) {
+        console.error("Error fetching history:", error);
+        throw error;
+    }
+});

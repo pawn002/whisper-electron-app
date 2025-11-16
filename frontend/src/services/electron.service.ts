@@ -67,6 +67,13 @@ export class ElectronService {
     return await this.electron.getSystemInfo();
   }
 
+  async getTranscriptionHistory(): Promise<any[]> {
+    if (!this.isElectron()) {
+      throw new Error("This feature is only available in Electron");
+    }
+    return await this.electron.getTranscriptionHistory();
+  }
+
   onTranscriptionProgress(
     callback: (data: { progress: number; message?: string }) => void,
   ): void {

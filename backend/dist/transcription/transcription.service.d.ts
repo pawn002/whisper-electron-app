@@ -9,6 +9,9 @@ export interface TranscriptionJob {
     startedAt: Date;
     completedAt?: Date;
     filePath: string;
+    fileName?: string;
+    audioDuration?: number;
+    transcriptionTime?: number;
     options: CreateTranscriptionDto;
 }
 export declare class TranscriptionService {
@@ -19,6 +22,7 @@ export declare class TranscriptionService {
     constructor(gateway: TranscriptionGateway);
     processAudio(file: Express.Multer.File, options: CreateTranscriptionDto): Promise<TranscriptionJob>;
     private processTranscriptionJob;
+    private extractDurationFromTranscript;
     private cleanupFile;
     getJobStatus(jobId: string): Promise<TranscriptionJob | undefined>;
     cancelJob(jobId: string): Promise<boolean>;

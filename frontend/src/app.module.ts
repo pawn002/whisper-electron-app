@@ -23,6 +23,7 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 import { AppComponent } from "./app.component";
 import { TranscriptionComponent } from "./components/transcription/transcription.component";
+import { HistoryComponent } from "./components/history/history.component";
 
 // Services
 import { ElectronService } from "./services/electron.service";
@@ -52,6 +53,8 @@ import { TranscriptionService } from "./services/transcription.service";
     MatChipsModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
+    // Standalone Components
+    HistoryComponent,
   ],
   providers: [ElectronService, TranscriptionService],
   bootstrap: [AppComponent],

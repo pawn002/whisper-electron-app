@@ -316,3 +316,16 @@ ipcMain.handle("get-system-info", async () => {
 ipcMain.handle("get-app-path", async () => {
   return app.getPath("userData");
 });
+
+ipcMain.handle("get-transcription-history", async () => {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/transcription/history`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch history from backend");
+    }
+    return await response.json();
+  } catch (error: any) {
+    console.error("Error fetching history:", error);
+    throw error;
+  }
+});

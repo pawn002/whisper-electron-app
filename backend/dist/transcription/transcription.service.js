@@ -66,6 +66,7 @@ let TranscriptionService = class TranscriptionService {
             progress: 0,
             startedAt: new Date(),
             filePath: file.path,
+            fileName: file.originalname,
             options,
         };
         this.jobs.set(jobId, job);
@@ -75,6 +76,7 @@ let TranscriptionService = class TranscriptionService {
     async processTranscriptionJob(job) {
         try {
             job.status = "processing";
+            const processingStartTime = Date.now();
             await new Promise((resolve) => setTimeout(resolve, 100));
             this.gateway.sendProgressUpdate(job.id, 5, "Starting transcription");
             const whisperOptions = {
@@ -95,6 +97,11 @@ let TranscriptionService = class TranscriptionService {
             job.status = "completed";
             job.completedAt = new Date();
             job.progress = 100;
+            job.transcriptionTime = Date.now() - processingStartTime;
+            const resultText = typeof result === "string" ? result : result?.text;
+            if (resultText) {
+                job.audioDuration = this.extractDurationFromTranscript(resultText);
+            }
             this.transcriptionHistory.unshift(job);
             if (this.transcriptionHistory.length > 50) {
                 this.transcriptionHistory = this.transcriptionHistory.slice(0, 50);
@@ -109,6 +116,24 @@ let TranscriptionService = class TranscriptionService {
             job.completedAt = new Date();
             this.gateway.sendErrorUpdate(job.id, error.message);
             await this.cleanupFile(job.filePath).catch(() => { });
+        }
+    }
+    extractDurationFromTranscript(text) {
+        try {
+            const timestampRegex = /\[(\d{2}):(\d{2}):(\d{2}\.\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2}\.\d{3})\]/g;
+            const matches = Array.from(text.matchAll(timestampRegex));
+            if (matches.length === 0)
+                return undefined;
+            const lastMatch = matches[matches.length - 1];
+            const hours = parseInt(lastMatch[4], 10);
+            const minutes = parseInt(lastMatch[5], 10);
+            const seconds = parseFloat(lastMatch[6]);
+            const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+            return totalSeconds;
+        }
+        catch (error) {
+            console.error("Failed to extract duration from transcript:", error);
+            return undefined;
         }
     }
     async cleanupFile(filePath) {

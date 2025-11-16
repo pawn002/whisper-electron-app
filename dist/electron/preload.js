@@ -10,6 +10,7 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
     getAvailableModels: () => electron_1.ipcRenderer.invoke("get-available-models"),
     downloadModel: (modelName) => electron_1.ipcRenderer.invoke("download-model", modelName),
     getSystemInfo: () => electron_1.ipcRenderer.invoke("get-system-info"),
+    getTranscriptionHistory: () => electron_1.ipcRenderer.invoke("get-transcription-history"),
     // Event listeners
     onTranscriptionProgress: (callback) => {
         electron_1.ipcRenderer.on("transcription-progress", (event, data) => callback(data));

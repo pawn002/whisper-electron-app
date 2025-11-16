@@ -18,6 +18,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   getSystemInfo: () => ipcRenderer.invoke("get-system-info"),
 
+  getTranscriptionHistory: () =>
+    ipcRenderer.invoke("get-transcription-history"),
+
   // Event listeners
   onTranscriptionProgress: (
     callback: (data: { progress: number; message?: string }) => void,
@@ -62,6 +65,7 @@ declare global {
       getAvailableModels: () => Promise<any[]>;
       downloadModel: (modelName: string) => Promise<any>;
       getSystemInfo: () => Promise<any>;
+      getTranscriptionHistory: () => Promise<any[]>;
       onTranscriptionProgress: (
         callback: (data: { progress: number; message?: string }) => void,
       ) => void;
