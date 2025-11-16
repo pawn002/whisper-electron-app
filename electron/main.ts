@@ -97,6 +97,7 @@ function initializeSocket() {
   });
 
   socket.on("progress", (data: any) => {
+    console.log("Received progress event:", data);
     if (mainWindow) {
       mainWindow.webContents.send("transcription-progress", {
         progress: data.progress,
@@ -213,7 +214,10 @@ ipcMain.handle(
 
                 // Subscribe to job progress updates via WebSocket
                 if (result.success && result.data && result.data.id && socket) {
+                  console.log("Subscribing to job:", result.data.id);
                   socket.emit("subscribeToJob", result.data.id);
+                } else {
+                  console.log("Cannot subscribe to job. Result:", result);
                 }
 
                 resolve(result);

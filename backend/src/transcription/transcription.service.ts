@@ -57,6 +57,10 @@ export class TranscriptionService {
   private async processTranscriptionJob(job: TranscriptionJob): Promise<void> {
     try {
       job.status = "processing";
+
+      // Small delay to ensure WebSocket subscription completes
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       this.gateway.sendProgressUpdate(job.id, 5, "Starting transcription");
 
       // Prepare whisper options

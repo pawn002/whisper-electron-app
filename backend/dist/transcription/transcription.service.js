@@ -75,6 +75,7 @@ let TranscriptionService = class TranscriptionService {
     async processTranscriptionJob(job) {
         try {
             job.status = "processing";
+            await new Promise((resolve) => setTimeout(resolve, 100));
             this.gateway.sendProgressUpdate(job.id, 5, "Starting transcription");
             const whisperOptions = {
                 model: job.options.model || "base",
