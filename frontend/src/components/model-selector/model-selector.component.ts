@@ -80,7 +80,14 @@ export class ModelSelectorComponent implements OnInit {
     },
   ];
 
-  displayedColumns: string[] = ["name", "size", "speed", "accuracy", "status", "actions"];
+  displayedColumns: string[] = [
+    "name",
+    "size",
+    "speed",
+    "accuracy",
+    "status",
+    "actions",
+  ];
   isLoading = true;
 
   constructor(
@@ -99,9 +106,7 @@ export class ModelSelectorComponent implements OnInit {
 
       // Update installed status
       this.models.forEach((model) => {
-        const found = installedModels.find(
-          (m: any) => m.name === model.name,
-        );
+        const found = installedModels.find((m: any) => m.name === model.name);
         if (found) {
           model.installed = found.installed || false;
         }
@@ -132,9 +137,9 @@ export class ModelSelectorComponent implements OnInit {
         model.downloading = false;
         model.downloadProgress = 100;
         this.snackBar.open(
-          `${model.name} model downloaded successfully!`,
+          `${model.name} model downloaded successfully! You can now use it for transcription.`,
           "Close",
-          { duration: 3000 },
+          { duration: 5000 },
         );
         await this.loadModels();
       } else {

@@ -23,12 +23,28 @@ let TranscriptionController = class TranscriptionController {
     constructor(transcriptionService) {
         this.transcriptionService = transcriptionService;
     }
-    async processAudio(file, dto) {
+    async processAudio(file, dto, req) {
         if (!file) {
             throw new common_1.HttpException("No audio file provided", common_1.HttpStatus.BAD_REQUEST);
         }
+        const options = {
+            model: req.body.model || dto.model,
+            language: req.body.language || dto.language,
+            outputFormat: req.body.outputFormat || dto.outputFormat,
+            timestamps: req.body.timestamps === "true" ||
+                req.body.timestamps === true ||
+                dto.timestamps,
+            threads: req.body.threads ? parseInt(req.body.threads) : dto.threads,
+            translate: req.body.translate === "true" ||
+                req.body.translate === true ||
+                dto.translate,
+            processors: req.body.processors
+                ? parseInt(req.body.processors)
+                : dto.processors,
+        };
+        console.log("Received transcription request with options:", options);
         try {
-            const result = await this.transcriptionService.processAudio(file, dto);
+            const result = await this.transcriptionService.processAudio(file, options);
             return {
                 success: true,
                 data: result,
@@ -95,8 +111,9 @@ __decorate([
     })),
     __param(0, (0, common_1.UploadedFile)()),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, create_transcription_dto_1.CreateTranscriptionDto]),
+    __metadata("design:paramtypes", [Object, create_transcription_dto_1.CreateTranscriptionDto, Object]),
     __metadata("design:returntype", Promise)
 ], TranscriptionController.prototype, "processAudio", null);
 __decorate([

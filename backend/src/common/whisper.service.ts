@@ -127,32 +127,53 @@ export class WhisperService {
     return new Promise((resolve, reject) => {
       const file = createWriteStream(modelPath);
 
-      https
-        .get(modelUrl, (response) => {
-          const totalSize = parseInt(
-            response.headers["content-length"] || "0",
-            10,
-          );
-          let downloadedSize = 0;
-
-          response.on("data", (chunk) => {
-            downloadedSize += chunk.length;
-            if (progressCallback && totalSize > 0) {
-              progressCallback((downloadedSize / totalSize) * 100);
+      const downloadFile = (url: string) => {
+        https
+          .get(url, (response) => {
+            // Follow redirects
+            if (response.statusCode === 301 || response.statusCode === 302) {
+              const redirectUrl = response.headers.location;
+              if (redirectUrl) {
+                console.log(`Following redirect to: ${redirectUrl}`);
+                downloadFile(redirectUrl);
+                return;
+              }
             }
-          });
 
-          response.pipe(file);
+            const totalSize = parseInt(
+              response.headers["content-length"] || "0",
+              10,
+            );
+            let downloadedSize = 0;
 
-          file.on("finish", () => {
+            console.log(
+              `Downloading ${modelName} model (${(totalSize / 1024 / 1024).toFixed(2)} MB)...`,
+            );
+
+            response.on("data", (chunk) => {
+              downloadedSize += chunk.length;
+              if (progressCallback && totalSize > 0) {
+                const progress = (downloadedSize / totalSize) * 100;
+                progressCallback(progress);
+              }
+            });
+
+            response.pipe(file);
+
+            file.on("finish", () => {
+              file.close();
+              console.log(`Model ${modelName} downloaded successfully`);
+              resolve();
+            });
+          })
+          .on("error", (err) => {
             file.close();
-            resolve();
+            fs.unlink(modelPath).catch(() => {});
+            reject(err);
           });
-        })
-        .on("error", (err) => {
-          fs.unlink(modelPath).catch(() => {});
-          reject(err);
-        });
+      };
+
+      downloadFile(modelUrl);
     });
   }
 

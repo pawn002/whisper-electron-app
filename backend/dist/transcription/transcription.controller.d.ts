@@ -1,9 +1,10 @@
+import { Request } from "express";
 import { TranscriptionService } from "./transcription.service";
 import { CreateTranscriptionDto } from "./create-transcription.dto";
 export declare class TranscriptionController {
     private readonly transcriptionService;
     constructor(transcriptionService: TranscriptionService);
-    processAudio(file: Express.Multer.File, dto: CreateTranscriptionDto): Promise<{
+    processAudio(file: Express.Multer.File, dto: CreateTranscriptionDto, req: Request): Promise<{
         success: boolean;
         data: import("./transcription.service").TranscriptionJob;
     }>;

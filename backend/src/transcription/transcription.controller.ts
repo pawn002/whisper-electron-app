@@ -8,8 +8,10 @@ import {
   UploadedFile,
   HttpException,
   HttpStatus,
+  Req,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { Request } from "express";
 import { TranscriptionService } from "./transcription.service";
 import { CreateTranscriptionDto } from "./create-transcription.dto";
 import { diskStorage } from "multer";
@@ -51,13 +53,38 @@ export class TranscriptionController {
   async processAudio(
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: CreateTranscriptionDto,
+    @Req() req: Request,
   ) {
     if (!file) {
       throw new HttpException("No audio file provided", HttpStatus.BAD_REQUEST);
     }
 
+    // Extract options from request body (form fields)
+    const options: CreateTranscriptionDto = {
+      model: req.body.model || dto.model,
+      language: req.body.language || dto.language,
+      outputFormat: req.body.outputFormat || dto.outputFormat,
+      timestamps:
+        req.body.timestamps === "true" ||
+        req.body.timestamps === true ||
+        dto.timestamps,
+      threads: req.body.threads ? parseInt(req.body.threads) : dto.threads,
+      translate:
+        req.body.translate === "true" ||
+        req.body.translate === true ||
+        dto.translate,
+      processors: req.body.processors
+        ? parseInt(req.body.processors)
+        : dto.processors,
+    };
+
+    console.log("Received transcription request with options:", options);
+
     try {
-      const result = await this.transcriptionService.processAudio(file, dto);
+      const result = await this.transcriptionService.processAudio(
+        file,
+        options,
+      );
       return {
         success: true,
         data: result,

@@ -78,6 +78,11 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
           duration: 5000,
         });
       });
+
+      // Refresh models periodically to catch newly downloaded models
+      setInterval(() => {
+        this.loadAvailableModels();
+      }, 5000); // Check every 5 seconds
     }
   }
 
@@ -90,11 +95,23 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
     try {
       if (this.electronService.isElectron()) {
         const models = await this.electronService.getAvailableModels();
-        this.availableModels = models.map((m: any) => ({
-          id: m.name,
-          name: `${m.name.charAt(0).toUpperCase() + m.name.slice(1)} (${m.size})`,
-          installed: m.installed,
-        }));
+        this.availableModels = models
+          .filter((m: any) => m.installed) // Only show installed models
+          .map((m: any) => ({
+            id: m.name,
+            name: `${m.name.charAt(0).toUpperCase() + m.name.slice(1)} (${m.size})`,
+            installed: m.installed,
+          }));
+
+        // Set default to first installed model if current selection not installed
+        if (this.availableModels.length > 0) {
+          const currentModelInstalled = this.availableModels.some(
+            (m) => m.id === this.selectedModel,
+          );
+          if (!currentModelInstalled) {
+            this.selectedModel = this.availableModels[0].id;
+          }
+        }
       }
     } catch (error) {
       console.error("Failed to load models:", error);
