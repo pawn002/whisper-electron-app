@@ -35,6 +35,15 @@
                     </td>
                 </ng-container>
 
+                <ng-container matColumnDef="model">
+                    <th mat-header-cell *matHeaderCellDef>Model</th>
+                    <td mat-cell *matCellDef="let item">
+                        <span class="model-badge">{{
+                            item.options?.model || "base"
+                        }}</span>
+                    </td>
+                </ng-container>
+
                 <ng-container matColumnDef="status">
                     <th mat-header-cell *matHeaderCellDef>Status</th>
                     <td mat-cell *matCellDef="let item">

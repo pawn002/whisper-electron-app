@@ -72,6 +72,17 @@
     }
   }
 
+  .model-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+
   mat-chip {
     font-size: 12px;
     min-height: 24px;

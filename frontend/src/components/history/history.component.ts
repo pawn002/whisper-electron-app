@@ -40,6 +40,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
   history: TranscriptionHistoryItem[] = [];
   displayedColumns: string[] = [
     "fileName",
+    "model",
     "status",
     "duration",
     "transcriptionTime",
