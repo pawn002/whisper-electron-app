@@ -1,13 +1,6 @@
 <mat-toolbar color="primary" class="app-toolbar">
     <mat-icon>mic</mat-icon>
     <span class="title">{{ title }}</span>
-    <span class="spacer"></span>
-    <button
-        mat-icon-button
-        [matTooltip]="isElectron ? 'Running in Electron' : 'Running in Browser'"
-    >
-        <mat-icon>{{ isElectron ? "desktop_windows" : "web" }}</mat-icon>
-    </button>
 </mat-toolbar>
 
 <div class="app-container">
