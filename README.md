@@ -2,6 +2,14 @@
 
 A robust, production-ready Electron application that provides offline speech-to-text transcription using OpenAI's Whisper model via whisper.cpp. Built with Angular for the frontend and NestJS for the backend architecture.
 
+## 📚 Documentation
+
+**New users**: See the [docs/](docs/) folder for comprehensive guides:
+- **[Installation Guide](docs/installation.md)** - Complete setup instructions for all platforms
+- **[Usage Guide](docs/usage.md)** - Detailed walkthrough of all features
+- **[Model Guide](docs/models.md)** - Whisper model comparison and recommendations
+- **[Troubleshooting](docs/troubleshooting.md)** - Solutions to common issues
+
 ## 🌟 Features
 
 - **100% Offline Operation**: No internet connection required after initial setup

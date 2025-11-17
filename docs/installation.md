@@ -1,0 +1,243 @@
+# Installation Guide
+
+This guide covers the complete installation process for the Whisper Electron App on all supported platforms.
+
+## Table of Contents
+
+- [System Requirements](#system-requirements)
+- [Prerequisites](#prerequisites)
+- [Installation Steps](#installation-steps)
+- [Platform-Specific Setup](#platform-specific-setup)
+- [Verification](#verification)
+- [Next Steps](#next-steps)
+
+## System Requirements
+
+### Minimum Requirements
+- **RAM**: 4 GB (8 GB recommended for larger models)
+- **Storage**: 2 GB free space (more for additional models)
+- **OS**: 
+  - Windows 10/11 (64-bit)
+  - macOS 10.15+ (Catalina or later)
+  - Ubuntu 20.04+ / Debian 11+
+
+### Recommended Requirements
+- **RAM**: 8 GB or more
+- **Storage**: 5 GB free space
+- **CPU**: Multi-core processor (4+ cores recommended)
+
+## Prerequisites
+
+### All Platforms
+
+**Node.js and npm**
+- Node.js v18.0.0 or higher
+- npm v8.0.0 or higher
+
+Download from: https://nodejs.org/
+
+Verify installation:
+```bash
+node --version  # Should show v18.0.0 or higher
+npm --version   # Should show v8.0.0 or higher
+```
+
+**Git**
+- Required for cloning whisper.cpp during setup
+
+### Platform-Specific Prerequisites
+
+#### Windows
+
+1. **Visual Studio Build Tools**
+   - Download Visual Studio 2019 or later
+   - Install "Desktop development with C++" workload
+   - Or install just the build tools: https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
+
+2. **CMake**
+   - Download from: https://cmake.org/download/
+   - During installation, select "Add CMake to system PATH"
+
+3. **Git for Windows**
+   - Download from: https://git-scm.com/download/win
+   - Use default installation options
+
+#### macOS
+
+1. **Xcode Command Line Tools**
+   ```bash
+   xcode-select --install
+   ```
+
+2. **Verify Installation**
+   ```bash
+   xcode-select -p
+   # Should output: /Library/Developer/CommandLineTools
+   ```
+
+#### Linux (Ubuntu/Debian)
+
+1. **Build Tools**
+   ```bash
+   sudo apt-get update
+   sudo apt-get install build-essential cmake git
+   ```
+
+2. **Verify Installation**
+   ```bash
+   gcc --version
+   cmake --version
+   git --version
+   ```
+
+## Installation Steps
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/pawn002/whisper-electron-app.git
+cd whisper-electron-app
+```
+
+### 2. Run Setup Script
+
+The setup script automates the entire installation process:
+
+```bash
+npm run setup
+```
+
+This command will:
+1. Install root dependencies
+2. Install backend dependencies
+3. Install frontend dependencies
+4. Clone whisper.cpp repository
+5. Build whisper.cpp for your platform
+6. Download and bundle FFmpeg
+7. Download tiny and base Whisper models (~113 MB)
+
+**Expected Duration**: 5-15 minutes depending on your internet speed and CPU.
+
+### 3. Verify Setup
+
+After setup completes, verify the installation:
+
+```bash
+# Check if whisper.cpp was built
+ls whisper.cpp/whisper-cli*
+
+# Check if models were downloaded
+ls models/
+
+# Should see:
+# ggml-tiny.bin
+# ggml-base.bin
+```
+
+## Platform-Specific Setup
+
+### Windows-Specific Steps
+
+If you encounter permission errors during setup:
+
+1. **Run as Administrator**
+   - Right-click Command Prompt or PowerShell
+   - Select "Run as administrator"
+   - Navigate to project directory
+   - Run `npm run setup`
+
+2. **Antivirus/Windows Defender**
+   - Some antivirus software may block the build process
+   - Temporarily disable or add exception for the project folder
+
+### macOS-Specific Steps
+
+If you get "xcrun: error" during setup:
+
+```bash
+# Ensure Xcode Command Line Tools are properly installed
+sudo xcode-select --reset
+xcode-select --install
+
+# Accept Xcode license
+sudo xcodebuild -license accept
+```
+
+### Linux-Specific Steps
+
+If setup fails with "Permission denied":
+
+```bash
+# Ensure you have proper permissions
+sudo chown -R $USER:$USER .
+
+# Re-run setup
+npm run setup
+```
+
+## Verification
+
+### Test the Application
+
+After installation, test that everything works:
+
+1. **Start Development Mode**
+   ```bash
+   npm run dev
+   ```
+
+2. **Verify Services**
+   - Backend should start on http://localhost:3333
+   - Frontend should start on http://localhost:4200
+   - Electron app should launch
+
+3. **Test Transcription**
+   - Select an audio file
+   - Start transcription with the base model
+   - Verify results appear
+
+### Common Installation Issues
+
+See the [Troubleshooting Guide](troubleshooting.md) for solutions to common installation problems.
+
+## Next Steps
+
+Once installation is complete:
+
+1. **Read the Usage Guide** - Learn how to use all features: [usage.md](usage.md)
+2. **Download Additional Models** - Get larger models for better accuracy: [models.md](models.md)
+3. **Build Production App** - Create distributable package:
+   ```bash
+   npm run build
+   npm run dist
+   ```
+
+## Updating
+
+To update to the latest version:
+
+```bash
+# Pull latest changes
+git pull origin main
+
+# Re-run setup to update dependencies and rebuild
+npm run setup
+```
+
+## Uninstallation
+
+To completely remove the application:
+
+```bash
+# From the project directory
+cd ..
+rm -rf whisper-electron-app
+
+# Or on Windows (PowerShell)
+Remove-Item -Recurse -Force whisper-electron-app
+```
+
+Models and app data are stored in:
+- **Windows**: `C:\Users\<username>\AppData\Roaming\whisper-transcription`
+- **macOS**: `~/Library/Application Support/whisper-transcription`
+- **Linux**: `~/.config/whisper-transcription`
