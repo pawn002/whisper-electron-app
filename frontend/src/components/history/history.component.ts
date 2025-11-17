@@ -6,6 +6,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatTableModule } from "@angular/material/table";
 import { MatChipsModule } from "@angular/material/chips";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
 import { ElectronService } from "../../services/electron.service";
 
 interface TranscriptionHistoryItem {
@@ -32,6 +33,7 @@ interface TranscriptionHistoryItem {
     MatTableModule,
     MatChipsModule,
     MatTooltipModule,
+    MatSnackBarModule,
   ],
   templateUrl: "./history.component.html",
   styleUrls: ["./history.component.scss"],
@@ -49,7 +51,10 @@ export class HistoryComponent implements OnInit, OnDestroy {
   ];
   isLoading = true;
 
-  constructor(private electronService: ElectronService) {}
+  constructor(
+    private electronService: ElectronService,
+    private snackBar: MatSnackBar,
+  ) {}
 
   ngOnInit(): void {
     this.loadHistory();
@@ -119,17 +124,24 @@ export class HistoryComponent implements OnInit, OnDestroy {
     }
   }
 
-  async viewTranscript(item: TranscriptionHistoryItem): Promise<void> {
-    if (item.result) {
-      console.log("Transcript:", item.result);
-    }
-  }
-
   async copyTranscript(item: TranscriptionHistoryItem): Promise<void> {
     if (item.result) {
-      const text =
-        typeof item.result === "string" ? item.result : item.result.text;
-      await navigator.clipboard.writeText(text);
+      try {
+        const text =
+          typeof item.result === "string" ? item.result : item.result.text;
+        await navigator.clipboard.writeText(text);
+        this.snackBar.open("Transcript copied to clipboard", "Close", {
+          duration: 3000,
+          horizontalPosition: "center",
+          verticalPosition: "bottom",
+        });
+      } catch (error) {
+        this.snackBar.open("Failed to copy transcript", "Close", {
+          duration: 3000,
+          horizontalPosition: "center",
+          verticalPosition: "bottom",
+        });
+      }
     }
   }
 }

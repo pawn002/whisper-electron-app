@@ -82,16 +82,9 @@
                             [matTooltip]="'Copy transcript'"
                             (click)="copyTranscript(item)"
                             [disabled]="item.status !== 'completed'"
+                            [tabindex]="item.status !== 'completed' ? -1 : 0"
                         >
                             <mat-icon>content_copy</mat-icon>
-                        </button>
-                        <button
-                            mat-icon-button
-                            [matTooltip]="'View details'"
-                            (click)="viewTranscript(item)"
-                            [disabled]="item.status !== 'completed'"
-                        >
-                            <mat-icon>visibility</mat-icon>
                         </button>
                     </td>
                 </ng-container>

@@ -10,6 +10,13 @@
       right: 0;
       top: 50%;
       transform: translateY(-50%);
+
+      // Enhanced focus state
+      &:focus,
+      &:focus-visible {
+        outline: 3px solid #1976d2;
+        outline-offset: 2px;
+      }
     }
   }
 }
@@ -88,6 +95,15 @@
     min-height: 24px;
     padding: 0 8px;
     text-transform: capitalize;
+  }
+
+  button {
+    // Enhanced focus state for buttons
+    &:focus,
+    &:focus-visible {
+      outline: 3px solid #1976d2;
+      outline-offset: 2px;
+    }
   }
 
   th {
