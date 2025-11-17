@@ -18,6 +18,49 @@
   height: calc(100vh - 64px - 32px);
   padding: 16px;
   overflow: auto;
+
+  // Enhanced tab contrast for better visibility
+  ::ng-deep .mat-mdc-tab-group {
+    .mat-mdc-tab-header {
+      background-color: #303030;
+    }
+
+    // Inactive tab labels - lighter gray for better contrast
+    .mat-mdc-tab:not(.mat-mdc-tab-disabled) {
+      .mdc-tab__text-label {
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      &:hover .mdc-tab__text-label {
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+
+    // Active tab - bright white for maximum contrast
+    .mat-mdc-tab.mdc-tab--active {
+      .mdc-tab__text-label {
+        color: #ffffff;
+        font-weight: 500;
+      }
+    }
+
+    // Active tab indicator - brighter color
+    .mat-mdc-tab-header-pagination-chevron,
+    .mdc-tab-indicator__content--underline {
+      border-color: #ff4081;
+    }
+
+    .mdc-tab-indicator .mdc-tab-indicator__content {
+      border-color: #ff4081;
+    }
+
+    // Disabled tab
+    .mat-mdc-tab-disabled {
+      .mdc-tab__text-label {
+        color: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
 }
 
 .tab-content {
