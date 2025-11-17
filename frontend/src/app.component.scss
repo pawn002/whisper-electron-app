@@ -30,6 +30,18 @@
       &:hover .mdc-tab__text-label {
         color: rgba(255, 255, 255, 0.9);
       }
+
+      // Focus state - high contrast outline
+      &:focus {
+        outline: 2px solid #ff4081;
+        outline-offset: 2px;
+      }
+
+      &:focus-visible {
+        outline: 2px solid #ff4081;
+        outline-offset: 2px;
+        background-color: rgba(255, 64, 129, 0.1);
+      }
     }
 
     // Active tab - bright white for maximum contrast
@@ -37,6 +49,14 @@
       .mdc-tab__text-label {
         color: #ffffff;
         font-weight: 500;
+      }
+
+      // Focus state for active tab
+      &:focus,
+      &:focus-visible {
+        outline: 2px solid #ffffff;
+        outline-offset: 2px;
+        background-color: rgba(255, 255, 255, 0.1);
       }
     }
 

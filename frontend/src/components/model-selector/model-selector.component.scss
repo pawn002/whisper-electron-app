@@ -48,9 +48,19 @@
     a {
       color: #1976d2;
       text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
 
       &:hover {
         text-decoration: underline;
+      }
+
+      .external-link-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
       }
     }
   }
@@ -122,6 +132,13 @@
   button {
     mat-icon {
       margin-right: 4px;
+    }
+
+    // Enhanced focus state for buttons
+    &:focus,
+    &:focus-visible {
+      outline: 3px solid #1976d2;
+      outline-offset: 2px;
     }
   }
 

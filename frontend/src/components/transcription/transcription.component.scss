@@ -6,6 +6,15 @@
 .upload-section {
   margin-bottom: 24px;
 
+  // Enhanced focus state for buttons
+  button {
+    &:focus,
+    &:focus-visible {
+      outline: 3px solid #ff4081;
+      outline-offset: 2px;
+    }
+  }
+
   .file-info {
     display: flex;
     align-items: center;
@@ -33,6 +42,15 @@
   mat-form-field {
     flex: 1;
     min-width: 200px;
+  }
+
+  // Enhanced focus state for buttons
+  button {
+    &:focus,
+    &:focus-visible {
+      outline: 3px solid #ff4081;
+      outline-offset: 2px;
+    }
   }
 }
 
@@ -73,5 +91,14 @@
     display: flex;
     gap: 8px;
     margin-top: 16px;
+
+    // Enhanced focus state for buttons
+    button {
+      &:focus,
+      &:focus-visible {
+        outline: 3px solid #1976d2;
+        outline-offset: 2px;
+      }
+    }
   }
 }
