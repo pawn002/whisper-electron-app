@@ -30,11 +30,9 @@ This guide covers the complete installation process for the Whisper Electron App
 
 ### All Platforms
 
-**Node.js and npm**
+**[Node.js](https://nodejs.org/) and npm**
 - Node.js v18.0.0 or higher
 - npm v8.0.0 or higher
-
-Download from: https://nodejs.org/
 
 Verify installation:
 ```bash
@@ -49,17 +47,13 @@ npm --version   # Should show v8.0.0 or higher
 
 #### Windows
 
-1. **Visual Studio Build Tools**
-   - Download Visual Studio 2019 or later
+1. **[Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022)**
    - Install "Desktop development with C++" workload
-   - Or install just the build tools: https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
 
-2. **CMake**
-   - Download from: https://cmake.org/download/
-   - During installation, select "Add CMake to system PATH"
+2. **[CMake](https://cmake.org/download/)**
+   - Select "Add CMake to system PATH" during installation
 
-3. **Git for Windows**
-   - Download from: https://git-scm.com/download/win
+3. **[Git for Windows](https://git-scm.com/download/win)**
    - Use default installation options
 
 #### macOS

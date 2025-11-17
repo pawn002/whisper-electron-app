@@ -373,6 +373,7 @@ No! For most purposes, `base` or `small` provide excellent results with much fas
 
 ## Further Reading
 
-- [OpenAI Whisper Paper](https://arxiv.org/abs/2212.04356)
-- [Whisper.cpp Repository](https://github.com/ggerganov/whisper.cpp)
-- [Hugging Face Model Hub](https://huggingface.co/ggerganov/whisper.cpp)
+- [OpenAI Whisper](https://github.com/openai/whisper) - Original project
+- [OpenAI Whisper Paper](https://arxiv.org/abs/2212.04356) - Research paper
+- [whisper.cpp](https://github.com/ggerganov/whisper.cpp) - C++ implementation
+- [Model Downloads](https://huggingface.co/ggerganov/whisper.cpp) - Hugging Face

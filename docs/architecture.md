@@ -76,55 +76,23 @@ Technical architecture documentation for the Whisper Electron App.
 ## Technology Stack
 
 ### Frontend
-
-**Framework & UI:**
-- **Angular 17** - Web application framework
-- **Angular Material** - Material Design components
-- **TypeScript** - Type-safe JavaScript
-
-**Communication:**
-- **Socket.IO Client** - WebSocket for real-time updates
-- **Angular HttpClient** - HTTP communication
-
-**State Management:**
-- Component state (local)
-- Services for shared state
-- RxJS Observables for reactive data
+- **[Angular 17](https://angular.io/)** - Web application framework
+- **[Angular Material](https://material.angular.io/)** - UI components
+- **[Socket.IO Client](https://socket.io/)** - WebSocket for real-time progress updates
 
 ### Backend
+- **[NestJS](https://nestjs.com/)** - Node.js framework
+- **[Socket.IO](https://socket.io/)** - WebSocket server
+- **Child Process** - Spawn whisper.cpp binary
 
-**Framework:**
-- **NestJS** - Node.js framework
-- **TypeScript** - Type-safe development
-- **Express** - HTTP server (under NestJS)
-
-**Communication:**
-- **Socket.IO** - WebSocket server
-- **Multer** - File upload handling
-
-**Processing:**
-- **Child Process** - Spawn whisper.cpp
-- **FFmpeg** - Audio format conversion
-
-### Electron
-
-**Core:**
-- **Electron 28** - Desktop application framework
+### Desktop
+- **[Electron 28](https://www.electronjs.org/)** - Cross-platform desktop framework
+- **IPC** - Secure main/renderer communication
 - **Context Isolation** - Security boundary
-- **IPC** - Inter-process communication
 
-**Security:**
-- Sandboxed renderer process
-- Preload script for safe API exposure
-- No Node.js in renderer
-
-### External Tools
-
-**Audio Processing:**
-- **whisper.cpp** - C++ implementation of OpenAI Whisper
-- **FFmpeg** - Audio format conversion
-
-**Models:**
+### Audio Processing
+- **[whisper.cpp](https://github.com/ggerganov/whisper.cpp)** - C++ Whisper implementation
+- **[FFmpeg](https://ffmpeg.org/)** - Audio format conversion
 - **Whisper Models** - Pre-trained neural networks (.bin files)
 
 ## Component Architecture

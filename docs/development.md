@@ -292,46 +292,15 @@ npm run test:e2e           # End-to-end tests
 
 ### Writing Tests
 
-**Frontend (Jest + Angular Testing):**
-```typescript
-describe('TranscriptionComponent', () => {
-  let component: TranscriptionComponent;
-  let fixture: ComponentFixture<TranscriptionComponent>;
+**Framework Testing Guides:**
+- [Angular Testing Guide](https://angular.io/guide/testing)
+- [NestJS Testing Guide](https://docs.nestjs.com/fundamentals/testing)
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [TranscriptionComponent],
-      imports: [HttpClientTestingModule]
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(TranscriptionComponent);
-    component = fixture.componentInstance;
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
-```
-
-**Backend (Jest + NestJS Testing):**
-```typescript
-describe('TranscriptionService', () => {
-  let service: TranscriptionService;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [TranscriptionService],
-    }).compile();
-
-    service = module.get<TranscriptionService>(TranscriptionService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-});
-```
+**Project-Specific Testing:**
+- Test transcription service integration
+- Test WebSocket communication
+- Test IPC handlers
+- Test Whisper.cpp process spawning
 
 ## Building and Packaging
 
@@ -416,82 +385,24 @@ All PRs require:
 
 ## Code Style
 
-### TypeScript
+### Code Style Guidelines
 
-**General Rules:**
-- Use TypeScript strict mode
+**TypeScript:**
+- Use strict mode
 - Explicit types for public APIs
-- Use interfaces over types when possible
-- Avoid `any`, use `unknown` if needed
+- Avoid `any`
 
-**Example:**
-```typescript
-// Good
-interface TranscriptionOptions {
-  model: string;
-  language: string;
-}
+**Framework Style Guides:**
+- [Angular Style Guide](https://angular.io/guide/styleguide)
+- [NestJS Best Practices](https://docs.nestjs.com/techniques/performance)
+- [Electron Security Best Practices](https://www.electronjs.org/docs/latest/tutorial/security)
 
-function transcribe(options: TranscriptionOptions): Promise<string> {
-  // implementation
-}
-
-// Avoid
-function transcribe(options: any): any {
-  // implementation
-}
-```
-
-### Angular
-
-- Use Angular CLI for generation
-- Follow Angular style guide
-- Use OnPush change detection when possible
+**Project-Specific Rules:**
+- Always validate file paths in IPC handlers
+- Use OnPush change detection in Angular
 - Unsubscribe from observables
-
-**Example:**
-```typescript
-@Component({
-  selector: 'app-transcription',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class TranscriptionComponent implements OnDestroy {
-  private destroy$ = new Subject<void>();
-
-  ngOnInit() {
-    this.service.data$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(data => {
-        // handle data
-      });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-}
-```
-
-### NestJS
-
-- Use dependency injection
-- Follow NestJS conventions
-- Use DTOs for validation
-- Use pipes for transformation
-
-**Example:**
-```typescript
-@Controller('transcription')
-export class TranscriptionController {
-  constructor(private readonly service: TranscriptionService) {}
-
-  @Post('process')
-  async process(@Body() dto: TranscriptionDto) {
-    return this.service.process(dto);
-  }
-}
-```
+- Clean up child processes (whisper-cli)
+- Handle FFmpeg conversion errors gracefully
 
 ### Formatting
 
