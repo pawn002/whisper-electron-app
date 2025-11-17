@@ -3,6 +3,7 @@ import * as path from "path";
 import isDev from "electron-is-dev";
 import * as fs from "fs";
 import { io, Socket } from "socket.io-client";
+import { spawn, ChildProcess } from "child_process";
 
 // Import package.json for app version
 const packageJson = require(path.join(__dirname, "../../package.json"));
@@ -11,6 +12,7 @@ const BACKEND_URL = "http://localhost:3333";
 
 let mainWindow: BrowserWindow | null = null;
 let socket: Socket | null = null;
+let backendProcess: ChildProcess | null = null;
 
 // Helper function to convert Whisper timestamp format to SRT
 function convertToSRT(text: string): string {
@@ -78,10 +80,7 @@ function createWindow() {
   } else {
     // In production, files are in app.asar
     const indexPath = path.join(__dirname, "../../frontend/dist/index.html");
-    console.log("Loading from:", indexPath);
-    console.log("File exists:", fs.existsSync(indexPath));
     mainWindow.loadFile(indexPath);
-    mainWindow.webContents.openDevTools(); // Open devtools to debug
   }
 
   // Create application menu
@@ -143,10 +142,19 @@ function createWindow() {
 
 // Initialize WebSocket connection for progress tracking
 function initializeSocket() {
-  socket = io(BACKEND_URL);
+  socket = io(BACKEND_URL, {
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    reconnectionAttempts: 10,
+  });
 
   socket.on("connect", () => {
     console.log("Connected to backend WebSocket");
+  });
+
+  socket.on("connect_error", (error) => {
+    console.log("WebSocket connection error (will retry):", error.message);
   });
 
   socket.on("progress", (data: any) => {
@@ -177,12 +185,115 @@ function initializeSocket() {
 }
 
 // App lifecycle
+// Start the NestJS backend server
+function startBackend() {
+  if (isDev) {
+    console.log(
+      "Development mode: Backend should be started manually with 'npm run dev:backend'",
+    );
+    return;
+  }
+
+  const backendMainPath = path.join(
+    process.resourcesPath,
+    "backend",
+    "dist",
+    "main.js",
+  );
+  const backendDir = path.join(process.resourcesPath, "backend");
+
+  // Log to a file for debugging
+  const logPath = path.join(app.getPath("userData"), "backend-startup.log");
+  const logMessage = `
+Starting backend...
+Backend path: ${backendMainPath}
+Backend directory: ${backendDir}
+Backend exists: ${fs.existsSync(backendMainPath)}
+process.resourcesPath: ${process.resourcesPath}
+process.execPath: ${process.execPath}
+__dirname: ${__dirname}
+`;
+
+  fs.writeFileSync(logPath, logMessage);
+  console.log("Backend startup log written to:", logPath);
+  console.log("Starting backend...");
+  console.log("Backend path:", backendMainPath);
+  console.log("Backend directory:", backendDir);
+  console.log("Backend exists:", fs.existsSync(backendMainPath));
+  console.log("process.resourcesPath:", process.resourcesPath);
+
+  if (!fs.existsSync(backendMainPath)) {
+    console.error("Backend main.js not found at:", backendMainPath);
+    return;
+  }
+
+  // Use Electron's bundled Node.js
+  const backendLogPath = path.join(
+    app.getPath("userData"),
+    "backend-output.log",
+  );
+  const backendErrorPath = path.join(
+    app.getPath("userData"),
+    "backend-error.log",
+  );
+
+  backendProcess = spawn(process.execPath, [backendMainPath], {
+    cwd: backendDir,
+    env: {
+      ...process.env,
+      PORT: "3333",
+      NODE_ENV: "production",
+      ELECTRON_RUN_AS_NODE: "1", // Run as Node.js instead of Electron
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  backendProcess.stdout?.on("data", (data) => {
+    const output = data.toString();
+    console.log(`Backend: ${output}`);
+    fs.appendFileSync(backendLogPath, output);
+  });
+
+  backendProcess.stderr?.on("data", (data) => {
+    const output = data.toString();
+    console.error(`Backend Error: ${output}`);
+    fs.appendFileSync(backendErrorPath, output);
+  });
+
+  backendProcess.on("error", (error) => {
+    const errorMsg = `Failed to start backend: ${error}\n`;
+    console.error(errorMsg);
+    fs.appendFileSync(backendErrorPath, errorMsg);
+  });
+
+  backendProcess.on("exit", (code, signal) => {
+    const exitMsg = `Backend process exited with code ${code}, signal ${signal}\n`;
+    console.log(exitMsg);
+    fs.appendFileSync(backendLogPath, exitMsg);
+    backendProcess = null;
+  });
+}
+
 app.whenReady().then(() => {
-  createWindow();
-  initializeSocket();
+  startBackend();
+
+  // Wait for backend to start before creating window
+  setTimeout(
+    () => {
+      createWindow();
+      initializeSocket();
+    },
+    isDev ? 0 : 7000,
+  );
 });
 
 app.on("window-all-closed", () => {
+  // Kill backend process
+  if (backendProcess) {
+    backendProcess.kill();
+    backendProcess = null;
+  }
+
   if (process.platform !== "darwin") {
     app.quit();
   }
@@ -191,6 +302,14 @@ app.on("window-all-closed", () => {
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
+  }
+});
+
+app.on("before-quit", () => {
+  // Ensure backend is killed on app quit
+  if (backendProcess) {
+    backendProcess.kill();
+    backendProcess = null;
   }
 });
 
@@ -416,14 +535,27 @@ ipcMain.handle("get-app-path", async () => {
 });
 
 ipcMain.handle("get-transcription-history", async () => {
-  try {
-    const response = await fetch(`${BACKEND_URL}/api/transcription/history`);
-    if (!response.ok) {
-      throw new Error("Failed to fetch history from backend");
+  // Retry logic for initial backend startup
+  const maxRetries = 5;
+  const retryDelay = 1500;
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/transcription/history`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch history from backend");
+      }
+      return await response.json();
+    } catch (error: any) {
+      if (i === maxRetries - 1) {
+        // Last attempt failed, return empty history instead of throwing
+        console.error("Error fetching history after retries:", error);
+        return [];
+      }
+      // Wait before retrying
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
     }
-    return await response.json();
-  } catch (error: any) {
-    console.error("Error fetching history:", error);
-    throw error;
   }
+
+  return [];
 });

@@ -32,7 +32,16 @@ export class TranscriptionService {
   }
 
   private initializeSocket() {
-    this.socket = io("http://localhost:3333");
+    this.socket = io("http://localhost:3333", {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 10,
+    });
+
+    this.socket.on("connect_error", () => {
+      // Silently retry - backend may still be starting up
+    });
 
     this.socket.on("progress", (data: any) => {
       const subject = this.progressSubjects.get(data.jobId);

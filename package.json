@@ -58,16 +58,28 @@
     },
     "files": [
       "dist/electron/**/*",
-      "backend/dist/**/*",
-      "backend/node_modules/**/*",
-      "backend/package.json",
       "frontend/dist/**/*",
       "package.json"
     ],
-    "asarUnpack": [
-      "backend/node_modules/**/*"
-    ],
     "extraResources": [
+      {
+        "from": "backend/dist",
+        "to": "backend/dist",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "backend/node_modules",
+        "to": "backend/node_modules",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "backend/package.json",
+        "to": "backend/package.json"
+      },
       {
         "from": "whisper.cpp",
         "to": "whisper.cpp",
