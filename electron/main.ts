@@ -4,6 +4,9 @@ import * as isDev from "electron-is-dev";
 import * as fs from "fs";
 import { io, Socket } from "socket.io-client";
 
+// Import package.json for app version
+const packageJson = require(path.join(__dirname, "../../package.json"));
+
 const BACKEND_URL = "http://localhost:3333";
 
 let mainWindow: BrowserWindow | null = null;
@@ -393,7 +396,7 @@ ipcMain.handle("get-system-info", async () => {
   return {
     platform: os.platform(),
     arch: os.arch(),
-    version: os.release(),
+    version: packageJson.version,
     totalMemory: os.totalmem(),
     freeMemory: os.freemem(),
     cpus: os.cpus().length,

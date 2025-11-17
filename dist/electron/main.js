@@ -38,6 +38,8 @@ const path = __importStar(require("path"));
 const isDev = __importStar(require("electron-is-dev"));
 const fs = __importStar(require("fs"));
 const socket_io_client_1 = require("socket.io-client");
+// Import package.json for app version
+const packageJson = require(path.join(__dirname, "../../package.json"));
 const BACKEND_URL = "http://localhost:3333";
 let mainWindow = null;
 let socket = null;
@@ -377,7 +379,7 @@ electron_1.ipcMain.handle("get-system-info", async () => {
     return {
         platform: os.platform(),
         arch: os.arch(),
-        version: os.release(),
+        version: packageJson.version,
         totalMemory: os.totalmem(),
         freeMemory: os.freemem(),
         cpus: os.cpus().length,
