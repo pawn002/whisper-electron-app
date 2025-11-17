@@ -32,10 +32,13 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const path = __importStar(require("path"));
-const isDev = __importStar(require("electron-is-dev"));
+const electron_is_dev_1 = __importDefault(require("electron-is-dev"));
 const fs = __importStar(require("fs"));
 const socket_io_client_1 = require("socket.io-client");
 // Import package.json for app version
@@ -89,12 +92,19 @@ function createWindow() {
         backgroundColor: "#303030",
     });
     // Load the app
-    if (isDev) {
+    console.log("isDev:", electron_is_dev_1.default);
+    console.log("__dirname:", __dirname);
+    if (electron_is_dev_1.default) {
         mainWindow.loadURL("http://localhost:4200");
         mainWindow.webContents.openDevTools();
     }
     else {
-        mainWindow.loadFile(path.join(__dirname, "../frontend/dist/index.html"));
+        // In production, files are in app.asar
+        const indexPath = path.join(__dirname, "../../frontend/dist/index.html");
+        console.log("Loading from:", indexPath);
+        console.log("File exists:", fs.existsSync(indexPath));
+        mainWindow.loadFile(indexPath);
+        mainWindow.webContents.openDevTools(); // Open devtools to debug
     }
     // Create application menu
     const template = [

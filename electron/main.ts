@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, Menu } from "electron";
 import * as path from "path";
-import * as isDev from "electron-is-dev";
+import isDev from "electron-is-dev";
 import * as fs from "fs";
 import { io, Socket } from "socket.io-client";
 
@@ -69,11 +69,19 @@ function createWindow() {
   });
 
   // Load the app
+  console.log("isDev:", isDev);
+  console.log("__dirname:", __dirname);
+
   if (isDev) {
     mainWindow.loadURL("http://localhost:4200");
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, "../frontend/dist/index.html"));
+    // In production, files are in app.asar
+    const indexPath = path.join(__dirname, "../../frontend/dist/index.html");
+    console.log("Loading from:", indexPath);
+    console.log("File exists:", fs.existsSync(indexPath));
+    mainWindow.loadFile(indexPath);
+    mainWindow.webContents.openDevTools(); // Open devtools to debug
   }
 
   // Create application menu

@@ -52,6 +52,7 @@
   "build": {
     "appId": "com.yourcompany.whisper-electron",
     "productName": "Whisper Transcription",
+    "electronCompile": false,
     "directories": {
       "output": "release"
     },
@@ -97,8 +98,7 @@
       ]
     },
     "win": {
-      "target": "dir",
-      "requestedExecutionLevel": "asInvoker"
+      "target": "dir"
     },
     "linux": {
       "target": [
