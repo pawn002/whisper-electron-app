@@ -104,81 +104,137 @@ npm run dist:linux  # Linux
 ```
 whisper-electron-app/
 ├── electron/               # Electron main process
-│   ├── main.ts            # Main process entry
-│   ├── preload.ts         # Preload script for IPC
+│   ├── main.ts            # Main process entry (backend auto-start, IPC handlers)
+│   ├── preload.ts         # Preload script for secure IPC
 │   └── tsconfig.json      # TypeScript config
-├── backend/               # NestJS backend
+├── backend/               # NestJS backend (auto-starts in production)
 │   └── src/
-│       ├── main.ts
-│       ├── app.module.ts
+│       ├── main.ts        # Backend entry point
+│       ├── app.module.ts  # Root module
 │       ├── transcription/ # Transcription module
 │       │   ├── transcription.controller.ts
 │       │   ├── transcription.service.ts
-│       │   └── transcription.gateway.ts
+│       │   └── transcription.gateway.ts  # WebSocket gateway
 │       └── common/        # Shared services
-│           ├── whisper.service.ts
-│           └── file.service.ts
-├── frontend/              # Angular frontend
+│           └── whisper.service.ts        # Whisper.cpp integration
+├── frontend/              # Angular frontend (Material Design)
 │   └── src/
-│       ├── app/
-│       │   ├── app.component.ts
-│       │   └── app.module.ts
+│       ├── app.component.ts
 │       ├── components/
-│       │   └── transcription/
+│       │   ├── transcription/  # Main transcription UI
+│       │   ├── model-selector/ # Model download/management
+│       │   └── history/        # Transcription history
 │       └── services/
-│           ├── electron.service.ts
-│           └── transcription.service.ts
-├── whisper.cpp/           # Whisper.cpp repository
-│   ├── main.exe          # Windows binary (or 'main' on Unix)
-│   └── models/           # (symlinked or referenced)
-├── models/               # Whisper model files
+│           ├── electron.service.ts       # Electron IPC wrapper
+│           └── transcription.service.ts  # Backend API client
+├── whisper.cpp/           # Whisper.cpp repository (cloned during setup)
+│   ├── whisper-cli.exe   # Windows binary (or 'whisper-cli' on Unix)
+│   └── models/           # Symlinked to ../models
+├── models/               # Whisper model files (.bin)
 │   ├── ggml-tiny.bin
 │   ├── ggml-base.bin
-│   └── ggml-*.bin       # Other downloaded models
+│   └── ggml-*.bin       # Additional downloaded models
+├── ffmpeg/               # Bundled FFmpeg for audio conversion
+│   └── bin/
+│       └── ffmpeg.exe   # Platform-specific binary
 ├── dist/                 # Build output
 │   ├── electron/        # Compiled Electron code
 │   ├── backend/         # Compiled backend code
 │   └── frontend/        # Built Angular app
+├── release/              # Distribution packages
+│   └── win-unpacked/    # Unpacked Windows build
+│       ├── Whisper Transcription.exe
+│       └── resources/
+│           ├── backend/           # Backend bundled in resources
+│           ├── whisper.cpp/       # Whisper binaries
+│           ├── models/            # Model files
+│           └── ffmpeg/            # FFmpeg binary
 ├── scripts/              # Build and setup scripts
-│   ├── setup-whisper.js # Whisper.cpp setup script
-│   └── build-whisper.js # Legacy build script
+│   ├── setup-whisper.js         # Whisper.cpp setup script
+│   ├── download-ffmpeg.js       # FFmpeg download script
+│   ├── sync-version.js          # Version synchronization
+│   └── interactive-release.js   # Interactive release tool
 └── package.json         # Main package configuration
 ```
 
 ## 🎯 Usage
 
-### In Electron Mode
+### Basic Transcription Workflow
 
-1. **Select Audio File**: 
-   - Click "Select Audio" or use Cmd/Ctrl+O
-   - Choose an audio file (MP3, WAV, etc.)
+1. **Launch the Application**
+   - Run `Whisper Transcription.exe` (or platform equivalent)
+   - The app automatically starts the backend server (no manual setup needed)
 
-2. **Choose Model**:
-   - Go to Models tab
-   - Download additional models if needed
-   - Select desired model for transcription
+2. **Select an Audio File**
+   - Click **"Select Audio File"** button in the Transcription tab
+   - Choose any supported audio file (MP3, WAV, OGG, M4A, FLAC, AAC, WEBM)
+   - Selected filename will be displayed
+   - Non-WAV files are automatically converted using bundled FFmpeg
 
-3. **Configure Options**:
-   - Language detection or specific language
-   - Enable translation to English
-   - Choose output format
+3. **Configure Transcription Settings**
+   - **Model**: Select which Whisper model to use (default: base)
+     - tiny: Fastest, less accurate (39 MB)
+     - base: Good balance - recommended for most users (74 MB)
+     - small: Better accuracy (244 MB)
+     - medium: Great accuracy, slower (769 MB)
+     - large: Best accuracy, slowest (1.5 GB)
+   - **Language**: Choose specific language or "Auto Detect"
+     - Auto Detect (recommended)
+     - English, Spanish, French, German
+     - More languages supported via auto-detect
 
-4. **Start Transcription**:
-   - Click "Transcribe"
-   - Wait for processing to complete
-   - View results in the editor
+4. **Start Transcription**
+   - Click **"Start Transcription"** button
+   - Progress spinner shows processing is active
+   - Processing time varies based on:
+     - Audio file length
+     - Selected model (tiny is fastest, large is slowest)
+     - Hardware performance
 
-5. **Export Results**:
-   - Edit transcript if needed
-   - Save as TXT, SRT, VTT, or JSON
-   - Use Cmd/Ctrl+S for quick save
+5. **Review and Edit Results**
+   - Transcript appears in the text editor once complete
+   - Edit the transcript directly in the editor if needed
+   - Text is fully editable
 
-### In Browser Mode (Development)
+6. **Save or Copy Transcript**
+   - **Copy**: Click "Copy" button to copy transcript to clipboard
+   - **Export**: Click "Export" button to save as file
+     - Choose format: TXT, JSON, SRT, or VTT
+     - Select save location
 
-The app can run in browser mode for development, with limited features:
-- File upload via web interface
-- Server-side processing
-- No local file system access
+### Managing Models
+
+Navigate to the **Models** tab to manage Whisper models:
+
+1. **View Available Models**
+   - See all Whisper models with their sizes and installation status
+   - Installed models show a green checkmark
+   - Download progress shown for models being downloaded
+
+2. **Download New Models**
+   - Click **"Download"** button next to any model
+   - Progress bar shows download status
+   - Models are downloaded from Hugging Face
+   - Downloaded models are immediately available for transcription
+   - Initial setup downloads tiny and base models
+
+### Viewing History
+
+Navigate to the **History** tab to access past transcriptions:
+
+1. **Browse Previous Transcriptions**
+   - See list of all completed transcriptions
+   - View metadata for each: filename, model used, language, date/time
+   - See processing duration and audio file length
+
+2. **Copy Previous Transcripts**
+   - Click **"Copy Transcript"** button on any history item
+   - Toast notification confirms successful copy
+   - Paste transcript anywhere you need it
+
+### System Information
+
+Platform and app version information is displayed in the footer, visible from any tab.
 
 ## 🔧 Configuration
 
