@@ -97,7 +97,8 @@
       ]
     },
     "win": {
-      "target": "dir"
+      "target": "dir",
+      "requestedExecutionLevel": "asInvoker"
     },
     "linux": {
       "target": [
