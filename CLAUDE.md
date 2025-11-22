@@ -104,6 +104,7 @@ Angular (Renderer) <-> IPC (preload.ts) <-> Electron Main <-> HTTP/WebSocket <->
 - Context isolation is enabled - all renderer/main communication goes through preload.ts
 - WebSocket (Socket.IO) used for real-time transcription progress updates
 - Supported audio formats: MP3, WAV, OGG, M4A, FLAC, AAC, WEBM (auto-converted via FFmpeg)
+- Use Context7 MCP server for up-to-date library documentation when generating code
 
 ## Version Sync
 
