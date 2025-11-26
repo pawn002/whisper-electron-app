@@ -12,6 +12,7 @@
 
 .app-container {
   height: calc(100vh - 64px - 32px);
+  min-height: 300px; // Prevent container from becoming too small
   padding: 16px;
   overflow: auto;
 
@@ -19,12 +20,14 @@
   ::ng-deep .mat-mdc-tab-group {
     .mat-mdc-tab-header {
       background-color: #303030;
+      flex-shrink: 0; // Prevent header from shrinking
     }
 
     // Inactive tab labels - lighter gray for better contrast
     .mat-mdc-tab:not(.mat-mdc-tab-disabled) {
       .mdc-tab__text-label {
         color: rgba(255, 255, 255, 0.7);
+        white-space: nowrap; // Prevent text wrapping
       }
 
       &:hover .mdc-tab__text-label {
@@ -49,6 +52,7 @@
       .mdc-tab__text-label {
         color: #ffffff;
         font-weight: 500;
+        white-space: nowrap; // Prevent text wrapping
       }
 
       // Focus state for active tab
@@ -74,6 +78,7 @@
     .mat-mdc-tab-disabled {
       .mdc-tab__text-label {
         color: rgba(255, 255, 255, 0.3);
+        white-space: nowrap; // Prevent text wrapping
       }
     }
   }
