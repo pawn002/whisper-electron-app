@@ -30,9 +30,11 @@ cd frontend && npm test     # Angular tests
 ```
 
 ### Packaging
+> **⚠️ Windows**: All `dist` commands require administrator privileges. Run terminal as admin.
+
 ```bash
-npm run dist                # Build and package for current platform
-npm run dist:win            # Windows
+npm run dist                # Build and package for current platform (admin on Windows)
+npm run dist:win            # Windows (requires admin)
 npm run dist:mac            # macOS
 npm run dist:linux          # Linux
 ```

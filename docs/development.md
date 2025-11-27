@@ -317,12 +317,14 @@ Builds:
 
 ### Production Package
 
+> **⚠️ Windows Users**: All distribution commands require **administrator privileges**. Run your terminal as administrator before executing these commands.
+
 ```bash
 # All platforms (based on current OS)
-npm run dist
+npm run dist          # Requires admin on Windows
 
 # Specific platforms
-npm run dist:win      # Windows
+npm run dist:win      # Windows (requires admin)
 npm run dist:mac      # macOS
 npm run dist:linux    # Linux
 ```

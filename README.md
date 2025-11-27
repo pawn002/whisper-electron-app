@@ -53,10 +53,12 @@ npm run dev
 
 ### Production Build
 
+> **⚠️ Windows Users**: Building distribution packages (`npm run dist`, `npm run dist:win`, etc.) requires **administrator privileges**. Run your terminal as administrator before executing these commands.
+
 ```bash
 # Build and package the app
 npm run build
-npm run dist
+npm run dist            # Run with admin privileges on Windows
 ```
 
 ## 🎯 Usage
@@ -126,13 +128,15 @@ This interactive script guides you through the entire release process:
 
 ### Manual Release
 
+> **⚠️ Windows Users**: Distribution commands require **administrator privileges**.
+
 ```bash
 # Update version
 npm run version:patch    # Bug fixes (1.0.0 → 1.0.1)
 npm run version:minor    # New features (1.0.0 → 1.1.0)
 npm run version:major    # Breaking changes (1.0.0 → 2.0.0)
 
-# Build and distribute
+# Build and distribute (requires admin on Windows)
 npm run build
 npm run dist
 
