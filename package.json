@@ -12,7 +12,7 @@
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:electron\"",
     "dev:backend": "cd backend && npm run start:dev",
     "dev:frontend": "cd frontend && npm run start",
-    "dev:electron": "wait-on http://localhost:4200 && electron . --dev",
+    "dev:electron": "wait-on tcp:4200 && npx electron . --dev",
     "setup": "npm install && npm run install:all && node scripts/setup-whisper.js",
     "install:all": "cd backend && npm install && cd ../frontend && npm install",
     "build:whisper": "node scripts/build-whisper.js",
