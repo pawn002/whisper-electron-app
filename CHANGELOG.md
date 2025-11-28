@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-11-28
+
+### Added
+- feat: display file size alongside filename in transcription UI
+- docs: add Windows admin privilege warnings for dist commands
+- docs: add Context7 MCP guidance to CLAUDE.md
+- docs: add CLAUDE.md for Claude Code guidance
+
+### Changed
+- docs: comprehensive documentation audit and updates
+
+### Fixed
+- fix: wrap Electron IPC callbacks in NgZone for proper change detection
+- fix: ensure toast notifications always appear at bottom-center
+- fix: reset UI state when selecting a new audio file
+- fix: configure baseHref per environment to fix dev server routing
+- fix: update dev:electron script to use npx and tcp port check
+
+### Removed
+- refactor: remove deprecated ::ng-deep selector from app component
+- chore: remove build artifact from git tracking
+
+
 ## [1.1.0] - 2025-11-17
 
 ### Added

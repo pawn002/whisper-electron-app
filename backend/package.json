@@ -1,6 +1,6 @@
 {
   "name": "whisper-backend",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Backend server for Whisper Electron App",
   "main": "dist/main.js",
   "scripts": {
