@@ -12,6 +12,7 @@ import { Subject, takeUntil } from "rxjs";
 export class TranscriptionComponent implements OnInit, OnDestroy {
   selectedFile: File | null = null;
   selectedFilePath: string | null = null;
+  selectedFileSize: number | null = null;
   isTranscribing = false;
   transcriptionProgress = 0;
   progressMessage = "";
@@ -121,14 +122,30 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
   async selectAudioFile() {
     if (this.electronService.isElectron()) {
       try {
-        const filePath = await this.electronService.selectAudioFile();
-        if (filePath) {
+        const fileData = await this.electronService.selectAudioFile();
+        if (fileData) {
           this.resetUI();
-          this.selectedFilePath = filePath;
-          const fileName = filePath.split(/[\\/]/).pop();
-          this.snackBar.open(`Selected: ${fileName}`, "Close", {
-            duration: 3000,
-          });
+          // Handle both old string format and new object format for backwards compatibility
+          if (typeof fileData === "string") {
+            this.selectedFilePath = fileData;
+            this.selectedFileSize = null;
+          } else if (
+            fileData &&
+            typeof fileData === "object" &&
+            "path" in fileData
+          ) {
+            this.selectedFilePath = (fileData as any).path;
+            this.selectedFileSize = (fileData as any).size;
+          }
+          if (this.selectedFilePath) {
+            const fileName = this.selectedFilePath.split(/[\\/]/).pop();
+            const sizeInfo = this.selectedFileSize
+              ? ` (${this.formatFileSize(this.selectedFileSize)})`
+              : "";
+            this.snackBar.open(`Selected: ${fileName}${sizeInfo}`, "Close", {
+              duration: 3000,
+            });
+          }
         }
       } catch (error) {
         this.snackBar.open("Failed to select file", "Close", {
@@ -270,6 +287,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
     this.transcriptionProgress = 0;
     this.progressMessage = "";
     this.isTranscribing = false;
+    this.selectedFileSize = null;
   }
 
   private handleError(error: any) {

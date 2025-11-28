@@ -20,9 +20,15 @@
             <div *ngIf="selectedFile || selectedFilePath" class="file-info">
                 <mat-icon>audiotrack</mat-icon>
                 <span>{{ getFileName() }}</span>
-                <span class="file-size" *ngIf="selectedFile">{{
-                    formatFileSize(selectedFile.size)
-                }}</span>
+                <span
+                    class="file-size"
+                    *ngIf="selectedFile || selectedFileSize"
+                    >{{
+                        formatFileSize(
+                            selectedFile?.size || selectedFileSize || 0
+                        )
+                    }}</span
+                >
             </div>
         </div>
 

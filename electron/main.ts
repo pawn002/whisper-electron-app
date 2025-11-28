@@ -328,7 +328,12 @@ ipcMain.handle("select-audio-file", async () => {
   });
 
   if (!result.canceled && result.filePaths.length > 0) {
-    return result.filePaths[0];
+    const filePath = result.filePaths[0];
+    const stats = fs.statSync(filePath);
+    return {
+      path: filePath,
+      size: stats.size,
+    };
   }
   return null;
 });
