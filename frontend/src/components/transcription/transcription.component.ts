@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
+import { Component, OnInit, OnDestroy, NgZone } from "@angular/core";
 import { ElectronService } from "../../services/electron.service";
 import { TranscriptionService } from "../../services/transcription.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -49,6 +49,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
     private electronService: ElectronService,
     private transcriptionService: TranscriptionService,
     private snackBar: MatSnackBar,
+    private ngZone: NgZone,
   ) {}
 
   ngOnInit() {
@@ -63,20 +64,24 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
 
       // Listen for transcription completion
       (window as any).electronAPI?.onTranscriptionCompleted?.((result: any) => {
-        this.transcriptionResult = result;
-        this.isTranscribing = false;
-        this.transcriptionProgress = 100;
-        this.snackBar.open("Transcription completed!", "Close", {
-          duration: 3000,
+        this.ngZone.run(() => {
+          this.transcriptionResult = result;
+          this.isTranscribing = false;
+          this.transcriptionProgress = 100;
+          this.snackBar.open("Transcription completed!", "Close", {
+            duration: 3000,
+          });
         });
       });
 
       // Listen for transcription errors
       (window as any).electronAPI?.onTranscriptionError?.((error: string) => {
-        this.isTranscribing = false;
-        this.transcriptionProgress = 0;
-        this.snackBar.open(error || "Transcription failed", "Close", {
-          duration: 5000,
+        this.ngZone.run(() => {
+          this.isTranscribing = false;
+          this.transcriptionProgress = 0;
+          this.snackBar.open(error || "Transcription failed", "Close", {
+            duration: 5000,
+          });
         });
       });
 
