@@ -123,6 +123,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
       try {
         const filePath = await this.electronService.selectAudioFile();
         if (filePath) {
+          this.resetUI();
           this.selectedFilePath = filePath;
           const fileName = filePath.split(/[\\/]/).pop();
           this.snackBar.open(`Selected: ${fileName}`, "Close", {
@@ -140,6 +141,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
+      this.resetUI();
       this.selectedFile = file;
       this.snackBar.open(`Selected: ${file.name}`, "Close", { duration: 3000 });
     }
@@ -261,6 +263,13 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
     this.isTranscribing = false;
     this.transcriptionProgress = 0;
     // Implement cancellation logic
+  }
+
+  private resetUI() {
+    this.transcriptionResult = null;
+    this.transcriptionProgress = 0;
+    this.progressMessage = "";
+    this.isTranscribing = false;
   }
 
   private handleError(error: any) {
