@@ -14,7 +14,10 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatInputModule } from "@angular/material/input";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatTabsModule } from "@angular/material/tabs";
-import { MatSnackBarModule } from "@angular/material/snack-bar";
+import {
+  MatSnackBarModule,
+  MAT_SNACK_BAR_DEFAULT_OPTIONS,
+} from "@angular/material/snack-bar";
 
 import { MatChipsModule } from "@angular/material/chips";
 import { MatTooltipModule } from "@angular/material/tooltip";
@@ -55,7 +58,17 @@ import { TranscriptionService } from "./services/transcription.service";
     HistoryComponent,
     ModelSelectorComponent,
   ],
-  providers: [ElectronService, TranscriptionService],
+  providers: [
+    ElectronService,
+    TranscriptionService,
+    {
+      provide: MAT_SNACK_BAR_DEFAULT_OPTIONS,
+      useValue: {
+        horizontalPosition: "center",
+        verticalPosition: "bottom",
+      },
+    },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
