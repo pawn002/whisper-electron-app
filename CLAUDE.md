@@ -108,6 +108,15 @@ Angular (Renderer) <-> IPC (preload.ts) <-> Electron Main <-> HTTP/WebSocket <->
 - Supported audio formats: MP3, WAV, OGG, M4A, FLAC, AAC, WEBM (auto-converted via FFmpeg)
 - Use Context7 MCP server for up-to-date library documentation when generating code
 
+## Styling Guidelines
+
+- **NEVER use `::ng-deep`** - This selector is deprecated and will be removed in future Angular versions
+- Use Angular's ViewEncapsulation strategies instead:
+  - `ViewEncapsulation.None` for component-wide global styles
+  - Component host element selectors (`:host ::ng-deep` replacement)
+  - CSS custom properties (CSS variables) for theming
+  - Direct element selectors within component templates
+
 ## Version Sync
 
 The project maintains synchronized versions across `package.json`, `backend/package.json`, and `frontend/package.json`. Use `npm run version:*` commands which auto-sync via `scripts/sync-version.js`.
