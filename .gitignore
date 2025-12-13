@@ -10,3 +10,9 @@ backend/uploads
 ffmpeg
 release
 nul
+
+# Optimization testing
+.claude/
+system-info.json
+whisper-bins/
+benchmarks/results/
