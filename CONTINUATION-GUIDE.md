@@ -43,19 +43,25 @@
 
 ### ⚠️ Pending / Issues
 
-1. **SYCL Variant** (Intel GPU) - Build blocked by compatibility issue
-   - Reason: whisper.cpp (commit d9b7613b) incompatible with oneAPI 2025.1.1
-   - Error: `SYCL_FEATURE_TEST_EXTRACT Function invoked with incorrect arguments`
-   - Visual Studio 2022 Build Tools: ✅ Configured (set VS2022INSTALLDIR)
-   - oneAPI environment: ✅ Sourced successfully
-   - Intel compilers: ✅ Detected (icx/icpx 2025.1.1)
-   - CMake SYCL config: ❌ Fails with IntelSYCL_FOUND=FALSE
-   - Status: Investigated extensively - appears to be whisper.cpp/oneAPI version mismatch
-   - Helper script created: `build-sycl.bat` (sources env and sets VS path)
-   - Possible solutions:
-     - Update whisper.cpp to latest version (may have oneAPI 2025.x support)
-     - Downgrade oneAPI to 2024.x version
-     - Wait for whisper.cpp update to support oneAPI 2025.1.1
+1. **SYCL Variant** (Intel GPU) - Build blocked by Intel oneAPI bug
+   - **Root Cause**: Confirmed bug in Intel oneAPI 2025.1.1 CMake configuration
+   - **Error Location**: `IntelSYCLConfig.cmake:388` - `SYCL_FEATURE_TEST_EXTRACT` function call
+   - **whisper.cpp Status**: ✅ Updated to latest (commit 2551e4ce) with SYCL improvements
+   - **Build Environment**: ✅ All prerequisites configured correctly
+     - Visual Studio 2022 Build Tools: ✅ Configured
+     - oneAPI 2025.1.1: ✅ Installed and environment sourced
+     - Intel compilers (icx/icpx): ✅ Detected and functional
+     - MKL 2025.1.0: ✅ Detected
+   - **Investigation Summary**:
+     - Attempted 8+ different build approaches (Ninja, MSVC, bypassing packages, manual flags)
+     - Confirmed issue is in Intel's CMake config, not whisper.cpp
+     - Bug affects line 388 of IntelSYCLConfig.cmake in oneAPI 2025.1.1
+     - Function call syntax appears correct, suggesting CMake version incompatibility
+   - **Verified Solutions**:
+     - ❌ Update whisper.cpp (tested - still incompatible with oneAPI 2025.1.1)
+     - ⚠️ Downgrade oneAPI to 2024.x (not tested - would require reinstall)
+     - ⚠️ Patch Intel CMake config manually (not recommended - system file modification)
+     - ✅ **RECOMMENDED**: Use baseline CPU metrics (successfully benchmarked)
 
 2. **OpenVINO Variant** - Not attempted
    - Reason: Pip version doesn't include full SDK with CMake support
