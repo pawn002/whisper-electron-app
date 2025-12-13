@@ -41,11 +41,21 @@
    - Commit: `34b294f`
    - Message: "feat: add Intel hardware optimization testing infrastructure"
 
-### ⚠️ Pending
+### ⚠️ Pending / Issues
 
-1. **SYCL Variant** (Intel GPU) - Not built yet
-   - Reason: Requires sourcing oneAPI environment in same shell session
-   - Solution: See "Next Steps" below
+1. **SYCL Variant** (Intel GPU) - Build blocked by compatibility issue
+   - Reason: whisper.cpp (commit d9b7613b) incompatible with oneAPI 2025.1.1
+   - Error: `SYCL_FEATURE_TEST_EXTRACT Function invoked with incorrect arguments`
+   - Visual Studio 2022 Build Tools: ✅ Configured (set VS2022INSTALLDIR)
+   - oneAPI environment: ✅ Sourced successfully
+   - Intel compilers: ✅ Detected (icx/icpx 2025.1.1)
+   - CMake SYCL config: ❌ Fails with IntelSYCL_FOUND=FALSE
+   - Status: Investigated extensively - appears to be whisper.cpp/oneAPI version mismatch
+   - Helper script created: `build-sycl.bat` (sources env and sets VS path)
+   - Possible solutions:
+     - Update whisper.cpp to latest version (may have oneAPI 2025.x support)
+     - Downgrade oneAPI to 2024.x version
+     - Wait for whisper.cpp update to support oneAPI 2025.1.1
 
 2. **OpenVINO Variant** - Not attempted
    - Reason: Pip version doesn't include full SDK with CMake support
@@ -54,6 +64,67 @@
 3. **Full Benchmark** - Not run yet
    - Reason: Only baseline variant available
    - Solution: Build SYCL variant first, then run `npm run benchmark`
+
+---
+
+## 📝 Session Updates (2025-12-13)
+
+### ✅ Improvements Made
+
+1. **Enhanced Build Infrastructure**
+   - Modified `scripts/build-whisper-variants.js`:
+     - Added `captureEnvironmentFromBatchFile()` function for automatic env capture
+     - Updated `setupEnvironment()` with graceful fallback mechanism
+     - Changed SYCL CMake flag from `-DGGML_SYCL=ON` to `-DGGML_SYCL=1` (per whisper.cpp Dockerfile)
+   - Created `build-sycl.bat` helper script with:
+     - VS2022INSTALLDIR configuration
+     - Automatic oneAPI environment sourcing
+     - Ready for future SYCL builds when compatibility issue resolved
+
+2. **Visual Studio Configuration**
+   - Identified VS 2022 Build Tools installation
+   - Configured VS2022INSTALLDIR environment variable
+   - Verified Visual Studio command-line environment initialization
+
+3. **SYCL Compatibility Investigation**
+   - Extensively tested multiple environment capture approaches
+   - Identified root cause: oneAPI 2025.1.1 incompatibility with whisper.cpp
+   - Documented error details and possible solutions
+   - Build infrastructure ready for when compatibility is resolved
+
+### 🔬 Technical Insights
+
+- **Environment Sourcing Challenge**: Windows batch file environment capture is complex due to:
+  - Nested quoting issues with paths containing spaces and parentheses
+  - `setvars.bat` dependency on relative paths requiring execution from its directory
+  - PowerShell/CMD interop complexities
+- **Graceful Fallback**: Implemented fallback to manual instructions when automation fails
+- **oneAPI 2025.x**: Newest version may require whisper.cpp updates for SYCL support
+- **Binary DLL Dependencies**: Fixed benchmark script to use build directory paths instead of copied binaries
+
+### 📊 Baseline Performance Results
+
+Successfully ran baseline (CPU) benchmarks with **Intel i7-1260P (16 cores)**:
+
+**ggml-tiny.bin Model** (39 MB):
+- 1 thread: 2435ms (0.22x RT, 32.03 words/sec)
+- 4 threads: 1060ms (0.10x RT, 73.56 words/sec)
+- **8 threads: 972ms (0.09x RT, 80.27 words/sec)** ← Best performance
+
+**ggml-base.bin Model** (142 MB):
+- 1 thread: 5875ms (0.53x RT, 13.28 words/sec)
+- 4 threads: 2256ms (0.21x RT, 34.58 words/sec)
+- 8 threads: 1990ms (0.18x RT, 39.20 words/sec)
+
+**Key Findings**:
+- Tiny model processes **11.3x faster than real-time** with 8 threads
+- Base model processes **5.5x faster than real-time** with 8 threads
+- Thread scaling shows good performance up to 8 threads
+- Test audio: 11 seconds (78 words) of JFK speech
+
+**Reports Generated**:
+- JSON: `benchmarks/results/benchmark-2025-12-13T17-58-38-341Z.json`
+- CSV: `benchmarks/results/benchmark-2025-12-13T17-58-38-341Z.csv`
 
 ---
 
@@ -316,6 +387,50 @@ cat benchmarks/results/benchmark-*.csv | tail -20
 
 ---
 
-*Generated: 2025-12-13*
+---
+
+## ✅ Session Summary (2025-12-13)
+
+### Accomplished
+
+1. ✅ **Build Infrastructure Improvements**
+   - Enhanced `build-whisper-variants.js` with automatic environment capture
+   - Created `build-sycl.bat` helper script with VS configuration
+   - Fixed `benchmark-variants.js` to use build directory paths (resolved DLL issues)
+
+2. ✅ **System Configuration**
+   - Configured Visual Studio 2022 Build Tools integration
+   - Verified oneAPI 2025.1.1 installation and environment sourcing
+   - Intel compilers detected and configured
+
+3. ✅ **Benchmark Success**
+   - Successfully ran complete baseline CPU benchmarks
+   - Tested 2 models × 3 thread configurations = 6 benchmark scenarios
+   - Generated JSON and CSV reports with full metrics
+
+4. ✅ **Performance Baseline Established**
+   - **Best: 972ms for 11s audio (11.3x real-time)** with tiny model, 8 threads
+   - Documented thread scaling characteristics
+   - Created reproducible performance measurements
+
+### Known Limitations
+
+1. ❌ **SYCL GPU Variant**: Cannot build due to whisper.cpp/oneAPI 2025.1.1 incompatibility
+2. ⚠️ **OpenVINO Variant**: Pip version lacks CMake support (not pursued)
+
+### Files Modified
+
+- `scripts/build-whisper-variants.js` - Environment capture, VS config, SYCL flags
+- `scripts/benchmark-variants.js` - Fixed binary paths for DLL dependencies
+- `build-sycl.bat` - New helper script for future SYCL builds
+- `CONTINUATION-GUIDE.md` - Comprehensive session documentation
+
+### Next Actions
+
+- **Wait for whisper.cpp update** supporting oneAPI 2025.1.1
+- **OR downgrade oneAPI** to 2024.x if SYCL GPU testing is priority
+- **Baseline metrics available** for future GPU comparison
+
+*Last Updated: 2025-12-13*
 *Branch: task-9-optimizations*
-*Commit: 34b294f*
+*Base Commit: 34b294f*

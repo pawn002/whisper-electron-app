@@ -76,7 +76,7 @@ function getVariantConfig(variantName) {
       cmakeArgs: [
         '-DWHISPER_BUILD_EXAMPLES=ON',
         '-DCMAKE_BUILD_TYPE=Release',
-        '-DGGML_SYCL=ON',
+        '-DGGML_SYCL=1',
         '-DCMAKE_C_COMPILER=icx',
         '-DCMAKE_CXX_COMPILER=icpx'
       ],
@@ -129,6 +129,37 @@ async function ensureWhisperCpp(projectRoot, verbose) {
   }
 }
 
+// Capture environment variables from Windows batch file
+function captureEnvironmentFromBatchFile(batchFilePath) {
+  // Use PowerShell to run CMD batch file and capture environment
+  // Escape the path for PowerShell: backticks for quotes and parentheses
+  const escapedPath = batchFilePath.replace(/\(/g, '`(').replace(/\)/g, '`)');
+  const psCommand = `cmd /c "\\"${escapedPath}\\" && set"`;
+
+  try {
+    const output = execSync(`powershell -NoProfile -Command "${psCommand}"`, {
+      encoding: 'utf8',
+      maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+      timeout: 60000 // 60 second timeout
+    });
+
+    const envVars = {};
+    const lines = output.split('\n');
+
+    for (const line of lines) {
+      const match = line.match(/^([^=]+)=(.*)$/);
+      if (match) {
+        const [, key, value] = match;
+        envVars[key.trim()] = value.trimRight();
+      }
+    }
+
+    return envVars;
+  } catch (error) {
+    throw new Error(`Failed to capture environment from ${batchFilePath}: ${error.message}`);
+  }
+}
+
 // Setup environment for specific toolchains
 function setupEnvironment(variantName, systemInfo, verbose) {
   const env = { ...process.env };
@@ -138,14 +169,29 @@ function setupEnvironment(variantName, systemInfo, verbose) {
     const setvars = systemInfo.toolchains.oneAPI.setvars;
 
     if (process.platform === 'win32') {
-      // On Windows, we need to run setvars.bat and capture the environment
-      // This is complex, so we'll provide instructions instead
-      console.log(`  ⚠️  Before building SYCL variant, run:`);
-      console.log(`      "${setvars}"`);
-      console.log(`      Then run this script again.\n`);
+      console.log('  🔄 Sourcing oneAPI environment variables...');
+
+      try {
+        const oneAPIEnv = captureEnvironmentFromBatchFile(setvars);
+        Object.assign(env, oneAPIEnv);
+
+        console.log('  ✅ oneAPI environment configured successfully');
+
+        if (verbose) {
+          console.log(`     Captured ${Object.keys(oneAPIEnv).length} environment variables`);
+          console.log(`     Compiler: ${env.ICPX_COMPILER_DIR || 'detected'}`);
+        }
+      } catch (error) {
+        console.error('  ❌ Failed to source oneAPI environment');
+        console.error(`     ${error.message}`);
+        console.log('  ⚠️  Falling back to manual setup:');
+        console.log(`      Run: "${setvars}"`);
+        console.log(`      Then: npm run build:whisper-sycl\n`);
+        // Don't throw - let CMake fail with helpful error message
+      }
     }
 
-    // Add compiler paths to PATH
+    // Add compiler paths to PATH (fallback for non-Windows or if capture failed)
     if (systemInfo.toolchains.oneAPI.compilerPath) {
       env.PATH = `${systemInfo.toolchains.oneAPI.compilerPath};${env.PATH}`;
     }

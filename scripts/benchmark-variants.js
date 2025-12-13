@@ -99,14 +99,21 @@ class WhisperBenchmark {
   }
 
   getAvailableVariants() {
-    const binsDir = path.join(this.projectRoot, 'whisper-bins');
     const available = [];
 
     for (const variant of this.config.variants) {
       const binaryName = process.platform === 'win32' ? 'whisper-cli.exe' : 'whisper-cli';
-      const binaryPath = path.join(binsDir, variant, binaryName);
+      // Check build directory first (has all DLL dependencies)
+      const buildBinaryPath = path.join(
+        this.projectRoot,
+        'whisper.cpp',
+        `build-${variant}`,
+        'bin',
+        'Release',
+        binaryName
+      );
 
-      if (fs.existsSync(binaryPath)) {
+      if (fs.existsSync(buildBinaryPath)) {
         available.push(variant);
       }
     }
@@ -120,7 +127,15 @@ class WhisperBenchmark {
     console.log('─────────────────────────────────────────────────────────');
 
     const binaryName = process.platform === 'win32' ? 'whisper-cli.exe' : 'whisper-cli';
-    const binaryPath = path.join(this.projectRoot, 'whisper-bins', variant, binaryName);
+    // Use build directory path (has all DLL dependencies)
+    const binaryPath = path.join(
+      this.projectRoot,
+      'whisper.cpp',
+      `build-${variant}`,
+      'bin',
+      'Release',
+      binaryName
+    );
     const modelPath = path.join(this.projectRoot, 'models', model);
     const audioPath = path.join(this.projectRoot, this.config.audio.testFile);
 
