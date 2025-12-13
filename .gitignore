@@ -16,3 +16,5 @@ nul
 system-info.json
 whisper-bins/
 benchmarks/results/
+openvino_2025.4.0/
+openvino_2025.4.0.zip

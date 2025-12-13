@@ -130,7 +130,9 @@ async function checkOneAPI() {
 }
 
 async function checkOpenVINO() {
+  const projectRoot = path.join(__dirname, '..');
   const possiblePaths = [
+    path.join(projectRoot, 'openvino_2025.4.0'),  // Project-local installation
     'C:\\Program Files (x86)\\Intel\\openvino',
     'C:\\Program Files\\Intel\\openvino',
     '/opt/intel/openvino',

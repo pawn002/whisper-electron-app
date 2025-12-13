@@ -214,12 +214,23 @@ class WhisperBenchmark {
         args.push('-l', this.config.options.language);
       }
 
-      const process = spawn(binaryPath, args);
+      // Setup environment for OpenVINO variant (needs DLLs in PATH)
+      const env = { ...process.env };
+      if (binaryPath.includes('openvino')) {
+        const openvinoPath = path.join(this.projectRoot, 'openvino_2025.4.0');
+        if (fs.existsSync(openvinoPath)) {
+          const openvinoBinPath = path.join(openvinoPath, 'runtime', 'bin', 'intel64', 'Release');
+          const tbbBinPath = path.join(openvinoPath, 'runtime', '3rdparty', 'tbb', 'bin');
+          env.PATH = `${openvinoBinPath};${tbbBinPath};${env.PATH}`;
+        }
+      }
+
+      const whisperProcess = spawn(binaryPath, args, { env });
 
       let stdout = '';
       let stderr = '';
 
-      process.stdout.on('data', (data) => {
+      whisperProcess.stdout.on('data', (data) => {
         const chunk = data.toString();
         stdout += chunk;
 
@@ -229,15 +240,15 @@ class WhisperBenchmark {
         }
       });
 
-      process.stderr.on('data', (data) => {
+      whisperProcess.stderr.on('data', (data) => {
         stderr += data.toString();
       });
 
-      process.on('error', (error) => {
+      whisperProcess.on('error', (error) => {
         reject(new Error(`Failed to spawn process: ${error.message}`));
       });
 
-      process.on('close', (code) => {
+      whisperProcess.on('close', (code) => {
         const endTime = Date.now();
         const totalTime = endTime - startTime;
 

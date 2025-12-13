@@ -202,9 +202,26 @@ function setupEnvironment(variantName, systemInfo, verbose) {
     const setupvars = systemInfo.toolchains.openVINO.setupvars;
 
     if (process.platform === 'win32') {
-      console.log(`  ⚠️  Before building OpenVINO variant, run:`);
-      console.log(`      "${setupvars}"`);
-      console.log(`      Then run this script again.\n`);
+      console.log('  🔄 Sourcing OpenVINO environment variables...');
+
+      try {
+        const openvinoEnv = captureEnvironmentFromBatchFile(setupvars);
+        Object.assign(env, openvinoEnv);
+
+        console.log('  ✅ OpenVINO environment configured successfully');
+
+        if (verbose) {
+          console.log(`     Captured ${Object.keys(openvinoEnv).length} environment variables`);
+          console.log(`     OpenVINO: ${env.INTEL_OPENVINO_DIR || 'detected'}`);
+        }
+      } catch (error) {
+        console.error('  ❌ Failed to source OpenVINO environment');
+        console.error(`     ${error.message}`);
+        console.log('  ⚠️  Falling back to manual setup:');
+        console.log(`      Run: "${setupvars}"`);
+        console.log(`      Then: npm run build:whisper-openvino\n`);
+        // Don't throw - let CMake fail with helpful error message
+      }
     }
   }
 
@@ -252,13 +269,21 @@ async function buildVariant(variantName, systemInfo, options) {
 
   try {
     // Configure with CMake
-    const cmakeArgs = config.cmakeArgs.join(' ');
-    console.log('🔧 Configuring with CMake...');
-    if (options.verbose) {
-      console.log(`   Command: cmake ${cmakeArgs} ..`);
+    let cmakeArgs = [...config.cmakeArgs];
+
+    // Add OpenVINO cmake path if building openvino variant
+    if (variantName === 'openvino' && systemInfo.toolchains.openVINO.installed) {
+      const openvinoCmakePath = path.join(systemInfo.toolchains.openVINO.path, 'runtime', 'cmake');
+      cmakeArgs.push(`-DCMAKE_PREFIX_PATH=${openvinoCmakePath}`);
     }
 
-    execSync(`cmake ${cmakeArgs} ..`, {
+    const cmakeArgsStr = cmakeArgs.join(' ');
+    console.log('🔧 Configuring with CMake...');
+    if (options.verbose) {
+      console.log(`   Command: cmake ${cmakeArgsStr} ..`);
+    }
+
+    execSync(`cmake ${cmakeArgsStr} ..`, {
       cwd: buildDir,
       stdio: options.verbose ? 'inherit' : 'pipe',
       env: env
