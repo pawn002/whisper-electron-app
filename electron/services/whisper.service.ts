@@ -430,6 +430,53 @@ export class WhisperService {
     });
   }
 
+  async getAudioDuration(audioPath: string): Promise<number | undefined> {
+    if (!this.ffmpegAvailable) {
+      console.warn('[WhisperService] ffmpeg not available, cannot get audio duration');
+      return undefined;
+    }
+
+    return new Promise((resolve) => {
+      // Use ffmpeg to get duration by analyzing the file
+      const ffmpegProcess = spawn(this.ffmpegPath, [
+        '-i',
+        audioPath,
+        '-f',
+        'null',
+        '-',
+      ]);
+
+      let errorOutput = '';
+
+      ffmpegProcess.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+      });
+
+      ffmpegProcess.on('close', () => {
+        // Parse duration from ffmpeg output: "Duration: HH:MM:SS.mmm"
+        const durationMatch = errorOutput.match(/Duration:\s*(\d{2}):(\d{2}):(\d{2}\.\d{2})/);
+
+        if (durationMatch) {
+          const hours = parseInt(durationMatch[1], 10);
+          const minutes = parseInt(durationMatch[2], 10);
+          const seconds = parseFloat(durationMatch[3]);
+
+          const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+          console.log(`[WhisperService] Audio duration: ${totalSeconds.toFixed(2)}s`);
+          resolve(totalSeconds);
+        } else {
+          console.warn('[WhisperService] Failed to extract duration from ffmpeg output');
+          resolve(undefined);
+        }
+      });
+
+      ffmpegProcess.on('error', (err) => {
+        console.warn('[WhisperService] ffmpeg error:', err);
+        resolve(undefined);
+      });
+    });
+  }
+
   async convertAudioToWav(inputPath: string): Promise<string> {
     if (!this.ffmpegAvailable) {
       throw new Error(

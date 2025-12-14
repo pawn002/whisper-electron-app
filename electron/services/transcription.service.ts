@@ -47,6 +47,9 @@ export class TranscriptionService {
       job.status = 'processing';
       const processingStartTime = Date.now();
 
+      // Get audio duration before transcription
+      job.audioDuration = await this.whisperService.getAudioDuration(job.filePath);
+
       // Small delay to ensure IPC event listeners are ready
       await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -87,12 +90,6 @@ export class TranscriptionService {
       job.progress = 100;
       job.transcriptionTime = Date.now() - processingStartTime;
 
-      // Extract audio duration from transcription timestamps
-      const resultText = typeof result === 'string' ? result : result?.text;
-      if (resultText) {
-        job.audioDuration = this.extractDurationFromTranscript(resultText);
-      }
-
       // Add to history
       this.transcriptionHistory.unshift(job);
       if (this.transcriptionHistory.length > 50) {
@@ -107,29 +104,6 @@ export class TranscriptionService {
       job.completedAt = new Date();
 
       this.emitError(error.message);
-    }
-  }
-
-  private extractDurationFromTranscript(text: string): number | undefined {
-    try {
-      // Extract duration from Whisper's timestamp format: [HH:MM:SS.mmm --> HH:MM:SS.mmm]
-      const timestampRegex =
-        /\[(\d{2}):(\d{2}):(\d{2}\.\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2}\.\d{3})\]/g;
-      const matches = Array.from(text.matchAll(timestampRegex));
-
-      if (matches.length === 0) return undefined;
-
-      // Get the last timestamp (end time)
-      const lastMatch = matches[matches.length - 1];
-      const hours = parseInt(lastMatch[4], 10);
-      const minutes = parseInt(lastMatch[5], 10);
-      const seconds = parseFloat(lastMatch[6]);
-
-      const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-      return totalSeconds;
-    } catch (error) {
-      console.error('[TranscriptionService] Failed to extract duration from transcript:', error);
-      return undefined;
     }
   }
 
