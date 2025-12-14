@@ -169,7 +169,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
         language:
           this.selectedLanguage === 'auto' ? undefined : this.selectedLanguage,
         outputFormat: this.outputFormat,
-        timestamps: this.outputFormat !== 'txt',
+        timestamps: true,
         threads: 4,
       };
 
