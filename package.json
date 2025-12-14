@@ -58,7 +58,7 @@
     "productName": "Whisper Transcription",
     "electronCompile": false,
     "directories": {
-      "output": "release"
+      "output": "dist-output"
     },
     "files": [
       "dist/electron/**/*",
@@ -70,7 +70,11 @@
         "from": "whisper.cpp",
         "to": "whisper.cpp",
         "filter": [
-          "**/*"
+          "**/*",
+          "!**/nul",
+          "!**/con",
+          "!**/prn",
+          "!**/aux"
         ]
       },
       {
