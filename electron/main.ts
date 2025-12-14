@@ -12,7 +12,63 @@ let mainWindow: BrowserWindow | null = null;
 let transcriptionService: TranscriptionService | null = null;
 let whisperService: WhisperService | null = null;
 
-// Helper function to convert Whisper timestamp format to SRT
+// Helper function to format seconds to SRT timestamp (HH:MM:SS,mmm)
+function formatTimestampForSRT(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  const milliseconds = Math.floor((secs % 1) * 1000);
+
+  const hh = hours.toString().padStart(2, '0');
+  const mm = minutes.toString().padStart(2, '0');
+  const ss = Math.floor(secs).toString().padStart(2, '0');
+  const mmm = milliseconds.toString().padStart(3, '0');
+
+  return `${hh}:${mm}:${ss},${mmm}`;
+}
+
+// Helper function to format seconds to VTT timestamp (HH:MM:SS.mmm)
+function formatTimestampForVTT(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  const milliseconds = Math.floor((secs % 1) * 1000);
+
+  const hh = hours.toString().padStart(2, '0');
+  const mm = minutes.toString().padStart(2, '0');
+  const ss = Math.floor(secs).toString().padStart(2, '0');
+  const mmm = milliseconds.toString().padStart(3, '0');
+
+  return `${hh}:${mm}:${ss}.${mmm}`;
+}
+
+// Helper function to convert segments array to SRT format
+function convertSegmentsToSRT(segments: any[]): string {
+  return segments.map((segment, index) => {
+    const startTime = formatTimestampForSRT(segment.start);
+    const endTime = formatTimestampForSRT(segment.end);
+    const text = segment.text.trim();
+
+    return `${index + 1}\n${startTime} --> ${endTime}\n${text}\n`;
+  }).join('\n');
+}
+
+// Helper function to convert segments array to VTT format
+function convertSegmentsToVTT(segments: any[]): string {
+  let vttContent = 'WEBVTT\n\n';
+
+  vttContent += segments.map(segment => {
+    const startTime = formatTimestampForVTT(segment.start);
+    const endTime = formatTimestampForVTT(segment.end);
+    const text = segment.text.trim();
+
+    return `${startTime} --> ${endTime}\n${text}\n`;
+  }).join('\n');
+
+  return vttContent;
+}
+
+// Helper function to convert Whisper timestamp format to SRT (for backward compatibility)
 function convertToSRT(text: string): string {
   const lines = text.split('\n').filter((line) => line.trim());
   let srtContent = '';
@@ -252,24 +308,46 @@ ipcMain.handle('save-transcript', async (event, resultData: any) => {
 
     let content: string;
 
+    // Extract segments if available
+    const segments = resultData?.segments;
+    const hasSegments = segments && Array.isArray(segments) && segments.length > 0;
+
     // Format content based on selected extension
     if (ext === '.json') {
-      const jsonData =
-        typeof resultData === 'string' ? { text: resultData } : resultData;
-      content = JSON.stringify(jsonData, null, 2);
+      // Full structured JSON
+      content = JSON.stringify(resultData, null, 2);
+
+    } else if (ext === '.txt') {
+      // Plain text without timestamps
+      if (hasSegments) {
+        content = segments.map((seg: any) => seg.text).join(' ');
+      } else {
+        content = resultData?.text || JSON.stringify(resultData);
+      }
+
     } else if (ext === '.srt') {
-      const text =
-        typeof resultData === 'string' ? resultData : resultData.text || '';
-      content = convertToSRT(text);
+      // SRT subtitle format
+      if (hasSegments) {
+        content = convertSegmentsToSRT(segments);
+      } else {
+        // Fallback: try to parse timestamped text
+        const text = resultData?.text || '';
+        content = convertToSRT(text);
+      }
+
     } else if (ext === '.vtt') {
-      const text =
-        typeof resultData === 'string' ? resultData : resultData.text || '';
-      content = convertToVTT(text);
+      // WebVTT subtitle format
+      if (hasSegments) {
+        content = convertSegmentsToVTT(segments);
+      } else {
+        // Fallback: try to parse timestamped text
+        const text = resultData?.text || '';
+        content = convertToVTT(text);
+      }
+
     } else {
-      content =
-        typeof resultData === 'string'
-          ? resultData
-          : resultData.text || JSON.stringify(resultData);
+      // Default: plain text
+      content = resultData?.text || JSON.stringify(resultData);
     }
 
     const fsSync = require('fs');

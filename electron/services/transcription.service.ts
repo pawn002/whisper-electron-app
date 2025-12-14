@@ -55,14 +55,14 @@ export class TranscriptionService {
 
       this.emitProgress(job.id, 5, 'Starting transcription');
 
-      // Prepare whisper options
+      // Prepare whisper options - always use JSON format for structured data
       const whisperOptions: TranscriptionOptions = {
         model: job.options.model || 'base',
         language: job.options.language,
         threads: job.options.threads || 4,
         processors: 1,
-        outputFormat: job.options.outputFormat || 'txt',
-        timestamps: job.options.timestamps !== false,
+        outputFormat: 'json',
+        timestamps: true,
         translate: job.options.translate,
       };
 

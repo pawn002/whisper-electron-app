@@ -17,7 +17,6 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
   transcriptionResult: any = null;
   selectedModel = 'base';
   selectedLanguage = 'auto';
-  outputFormat = 'txt';
 
   availableModels = [
     { id: 'tiny', name: 'Tiny (39 MB)', installed: false },
@@ -168,7 +167,6 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
         model: this.selectedModel,
         language:
           this.selectedLanguage === 'auto' ? undefined : this.selectedLanguage,
-        outputFormat: this.outputFormat,
         timestamps: true,
         threads: 4,
       };
@@ -253,13 +251,42 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
     if (!this.transcriptionResult) {
       return '';
     }
+
+    // If result is a string, return as-is (backward compatibility)
     if (typeof this.transcriptionResult === 'string') {
       return this.transcriptionResult;
     }
+
+    // If result has segments, format as timestamped text for display
+    if (this.transcriptionResult.segments && Array.isArray(this.transcriptionResult.segments)) {
+      return this.formatSegmentsAsTimestampedText(this.transcriptionResult.segments);
+    }
+
+    // Fallback to text property or JSON stringified
     return (
       this.transcriptionResult.text ||
       JSON.stringify(this.transcriptionResult, null, 2)
     );
+  }
+
+  private formatSegmentsAsTimestampedText(segments: any[]): string {
+    return segments.map(segment => {
+      const start = this.formatTimestamp(segment.start);
+      const end = this.formatTimestamp(segment.end);
+      return `[${start} --> ${end}] ${segment.text}`;
+    }).join('\n');
+  }
+
+  private formatTimestamp(seconds: number): string {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    const hh = hours.toString().padStart(2, '0');
+    const mm = minutes.toString().padStart(2, '0');
+    const ss = secs.toFixed(3).padStart(6, '0');
+
+    return `${hh}:${mm}:${ss}`;
   }
 
   setTranscriptionText(value: string): void {
