@@ -103,12 +103,11 @@ npm run setup
 
 This command will:
 1. Install root dependencies
-2. Install backend dependencies
-3. Install frontend dependencies
-4. Clone whisper.cpp repository
-5. Build whisper.cpp for your platform
-6. Download and bundle FFmpeg
-7. Download tiny and base Whisper models (~113 MB)
+2. Install frontend dependencies
+3. Clone whisper.cpp repository
+4. Build whisper.cpp for your platform
+5. Download and bundle FFmpeg
+6. Download tiny and base Whisper models (~113 MB)
 
 **Expected Duration**: 5-15 minutes depending on your internet speed and CPU.
 
@@ -181,9 +180,8 @@ After installation, test that everything works:
    ```
 
 2. **Verify Services**
-   - Backend should start on http://localhost:3333
    - Frontend should start on http://localhost:4200
-   - Electron app should launch
+   - Electron app should launch immediately (no startup delay)
 
 3. **Test Transcription**
    - Select an audio file

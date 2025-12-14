@@ -31,7 +31,7 @@ npm run setup
 ```
 
 This will:
-1. Install all dependencies (root, backend, frontend)
+1. Install all dependencies (root, frontend)
 2. Clone and build whisper.cpp
 3. Download FFmpeg
 4. Download base Whisper models
@@ -57,23 +57,14 @@ This will:
 
 ### Environment Configuration
 
-Create `.env` files for local development:
-
-**backend/.env**
-```env
-PORT=3333
-NODE_ENV=development
-MAX_FILE_SIZE=500MB
-UPLOAD_DIR=./uploads
-```
-
 **frontend/src/environments/environment.ts** (already configured)
 ```typescript
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:3333',
+  production: false
 };
 ```
+
+Note: The application no longer requires a backend server. All business logic runs directly in the Electron main process via services.
 
 ## Project Architecture
 
@@ -83,18 +74,13 @@ export const environment = {
 - Angular 17
 - Angular Material (UI components)
 - RxJS (reactive programming)
-- Socket.IO client (WebSocket communication)
-
-**Backend:**
-- NestJS
-- Socket.IO (WebSocket server)
-- Multer (file uploads)
-- TypeScript
 
 **Electron:**
 - Electron 28
 - Context isolation enabled
 - IPC for secure communication
+- Services (TranscriptionService, WhisperService) in main process
+- TypeScript throughout
 
 **Transcription Engine:**
 - whisper.cpp (C++ implementation)
@@ -103,23 +89,22 @@ export const environment = {
 ### Component Communication
 
 ```
-User Interface (Angular)
-    ↕️ (HTTP/WebSocket)
-Backend Server (NestJS)
-    ↕️ (Child Process)
-Whisper.cpp Binary
-    ↕️ (File I/O)
-Audio Files & Models
-```
-
-In Electron mode:
-```
 Renderer Process (Angular)
     ↕️ (IPC via Preload)
 Main Process (Electron)
-    ↕️ (HTTP/WebSocket)
-Backend Server (NestJS - auto-started)
+    ├── TranscriptionService (job management)
+    └── WhisperService (whisper.cpp integration)
+            ↕️ (Child Process)
+        Whisper.cpp Binary / FFmpeg
+            ↕️ (File I/O)
+        Audio Files & Models
 ```
+
+**Key Points:**
+- Direct IPC communication (no HTTP/WebSocket)
+- Services run in Electron main process
+- Child processes for whisper-cli and FFmpeg
+- Models stored in user data directory
 
 ## Development Workflow
 
@@ -131,46 +116,33 @@ npm run dev
 ```
 
 This starts:
-- Backend on http://localhost:3333
 - Frontend on http://localhost:4200
-- Electron app with hot reload
+- Electron app (instant startup, no delay!)
 
 **Start services individually:**
 
 ```bash
-# Terminal 1 - Backend
-npm run dev:backend
-
-# Terminal 2 - Frontend
+# Terminal 1 - Frontend
 npm run dev:frontend
 
-# Terminal 3 - Electron
+# Terminal 2 - Electron
 npm run dev:electron
 ```
 
 ### Hot Reload
 
 - **Frontend**: Automatic reload on file changes (Angular dev server)
-- **Backend**: Automatic reload on file changes (NestJS watch mode)
-- **Electron**: Manual reload (`Ctrl+R` / `Cmd+R`) or restart
+- **Electron Services**: Requires Electron restart to pick up changes
+- **Electron Main**: Manual reload (`Ctrl+R` / `Cmd+R`) or restart process
 
 ### Debugging
-
-**Backend Debugging:**
-```bash
-# Start backend in debug mode
-cd backend
-npm run start:debug
-```
-
-Attach debugger on port 9229.
 
 **Frontend Debugging:**
 - Open browser DevTools (http://localhost:4200)
 - Use Angular DevTools extension
 
 **Electron Debugging:**
-- Main process: `--inspect` flag or VS Code debugger
+- Main process (including services): `--inspect` flag or VS Code debugger
 - Renderer process: DevTools (`Ctrl+Shift+I` / `Cmd+Option+I`)
 
 **VS Code Launch Configuration:**
@@ -179,14 +151,6 @@ Attach debugger on port 9229.
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Backend",
-      "type": "node",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/backend",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start:debug"]
-    },
-    {
       "name": "Debug Electron Main",
       "type": "node",
       "request": "launch",
@@ -194,6 +158,13 @@ Attach debugger on port 9229.
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev:electron"],
       "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug Frontend",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}/frontend/src"
     }
   ]
 }
@@ -220,8 +191,7 @@ frontend/src/
 │       ├── history.component.html
 │       └── history.component.scss
 └── services/
-    ├── electron.service.ts   # Electron IPC wrapper
-    └── transcription.service.ts  # Backend API client
+    └── electron.service.ts   # Electron IPC wrapper
 ```
 
 **Key Patterns:**
@@ -230,44 +200,28 @@ frontend/src/
 - RxJS Observables for async operations
 - Material Design components
 
-### Backend (NestJS)
-
-```
-backend/src/
-├── main.ts                   # Application entry point
-├── app.module.ts             # Root module
-├── transcription/
-│   ├── transcription.module.ts
-│   ├── transcription.controller.ts   # REST endpoints
-│   ├── transcription.service.ts      # Business logic
-│   └── transcription.gateway.ts      # WebSocket gateway
-└── common/
-    └── whisper.service.ts            # Whisper.cpp integration
-```
-
-**Key Patterns:**
-- Module-based architecture
-- Dependency injection
-- Controllers for HTTP endpoints
-- Gateways for WebSocket
-- Services for business logic
-
 ### Electron
 
 ```
 electron/
-├── main.ts        # Main process (Node.js environment)
-│                  # - Window management
-│                  # - Backend auto-start
-│                  # - IPC handlers
-└── preload.ts     # Preload script (sandboxed)
-                   # - Exposes safe APIs to renderer
+├── main.ts            # Main process (Node.js environment)
+│                      # - Window management
+│                      # - IPC handlers
+│                      # - Service initialization
+├── preload.ts         # Preload script (sandboxed)
+│                      # - Exposes safe APIs to renderer
+└── services/          # Business logic services
+    ├── types.ts       # Shared TypeScript interfaces
+    ├── transcription.service.ts  # Job management, orchestration
+    └── whisper.service.ts        # Whisper.cpp integration
 ```
 
 **Key Patterns:**
 - Context isolation enabled
 - IPC for secure communication
 - Preload script as bridge
+- Service classes for business logic
+- Direct child process spawning
 
 ## Testing
 
@@ -281,26 +235,24 @@ npm run test:watch         # Watch mode
 npm run test:coverage      # With coverage
 ```
 
-**Backend Tests:**
-```bash
-cd backend
-npm test                    # Run tests once
-npm run test:watch         # Watch mode
-npm run test:cov           # With coverage
-npm run test:e2e           # End-to-end tests
-```
+**Electron/Service Tests:**
+Currently, testing infrastructure for Electron services is minimal. Future improvements could include:
+- Unit tests for service methods
+- Integration tests for IPC handlers
+- E2E tests for transcription workflow
 
 ### Writing Tests
 
 **Framework Testing Guides:**
 - [Angular Testing Guide](https://angular.io/guide/testing)
-- [NestJS Testing Guide](https://docs.nestjs.com/fundamentals/testing)
+- [Electron Testing](https://www.electronjs.org/docs/latest/tutorial/automated-testing)
 
-**Project-Specific Testing:**
-- Test transcription service integration
-- Test WebSocket communication
+**Project-Specific Testing Areas:**
 - Test IPC handlers
-- Test Whisper.cpp process spawning
+- Test service methods (TranscriptionService, WhisperService)
+- Test Whisper.cpp and FFmpeg process spawning
+- Test error handling and edge cases
+- Test progress event emission
 
 ## Building and Packaging
 
@@ -312,8 +264,7 @@ npm run build
 
 Builds:
 - Frontend: `frontend/dist/`
-- Backend: `backend/dist/`
-- Electron: `dist/electron/`
+- Electron (including services): `dist/electron/`
 
 ### Production Package
 
@@ -470,9 +421,10 @@ npm run lint:fix      # Auto-fix issues
 ### Documentation
 
 - [Angular Docs](https://angular.io/docs)
-- [NestJS Docs](https://docs.nestjs.com/)
 - [Electron Docs](https://www.electronjs.org/docs)
+- [Electron IPC Guide](https://www.electronjs.org/docs/latest/tutorial/ipc)
 - [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+- [FFmpeg Documentation](https://ffmpeg.org/documentation.html)
 
 ### Community
 
