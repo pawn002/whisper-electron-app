@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "electron-is-dev": "^2.0.0",
-    "uuid": "^13.0.0"
+    "uuid": "^9.0.1"
   },
   "build": {
     "appId": "com.yourcompany.whisper-electron",
