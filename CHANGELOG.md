@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-12-17
+
+### Added
+- feat: implement format-specific export with JSON-based transcription
+- feat: add OpenVINO variant support and benchmarking
+- feat: enhance build infrastructure and establish baseline performance metrics
+- docs: add continuation guide for Intel optimization testing session
+- feat: add Intel hardware optimization testing infrastructure
+
+### Changed
+- refactor: migrate to Electron-native architecture
+- docs: document comprehensive SYCL build investigation and whisper.cpp update
+
+### Fixed
+- fix: remove backend references from release script
+- fix: prevent Windows reserved device names in build output
+- fix: enable timestamps in transcription results by default
+- fix: display actual audio duration in History tab
+- fix: downgrade uuid to v9.0.1 for CommonJS compatibility
+
+### Removed
+- chore: remove build artifacts from version control
+- docs: remove redundant build step from distribution instructions
+
+### Other
+- Merge pull request #13 from pawn002/task-10-electron-native-backend
+- chore: finalize post-migration cleanup
+- docs: complete comprehensive documentation audit and corrections
+- Merge branch 'main' into task-10-electron-native-backend
+
+
 ## [1.1.1] - 2025-11-28
 
 ### Added
