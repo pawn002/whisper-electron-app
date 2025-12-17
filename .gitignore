@@ -10,3 +10,4 @@ backend/uploads
 ffmpeg
 release
 nul
+.claude/
