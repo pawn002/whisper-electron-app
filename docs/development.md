@@ -190,7 +190,7 @@ frontend/src/
 │       ├── history.component.ts
 │       ├── history.component.html
 │       └── history.component.scss
-└── services/
+└── services/                 # Note: services/ is at src/ level, not app/ level
     └── electron.service.ts   # Electron IPC wrapper
 ```
 

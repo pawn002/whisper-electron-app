@@ -315,7 +315,6 @@ User Data Directory (app.getPath('userData')):
 | `get-available-models` | Renderer → Main | Fetch model list |
 | `download-model` | Renderer → Main | Download Whisper model |
 | `get-system-info` | Renderer → Main | Get system information |
-| `get-app-path` | Renderer → Main | Get app data path |
 | `get-transcription-history` | Renderer → Main | Fetch history |
 | `transcription-progress` | Main → Renderer | Progress updates |
 | `transcription-completed` | Main → Renderer | Completion event |

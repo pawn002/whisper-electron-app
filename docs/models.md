@@ -23,7 +23,7 @@ Whisper models are neural networks trained by OpenAI on 680,000 hours of multili
 | base | 74 M | 74 MB | ~16x | ✅ | ✅ |
 | small | 244 M | 244 MB | ~6x | ✅ | ✅ |
 | medium | 769 M | 769 MB | ~2x | ✅ | ✅ |
-| large | 1550 M | 1.5 GB | 1x | ❌ | ✅ |
+| large | 1550 M | 1550 MB (1.55 GB) | 1x | ❌ | ✅ |
 
 **Note**: Relative speed is compared to the large model. Actual speed depends on your hardware.
 
@@ -129,7 +129,7 @@ large    ██████████ 95% accuracy  ██░░░░░░�
 
 **Characteristics:**
 - 🐌 Slowest processing
-- 💾 Very large disk space (1.5 GB)
+- 💾 Very large disk space (1550 MB / 1.55 GB)
 - 🧠 Very high RAM usage (~4-8 GB)
 - ✅ Best possible accuracy
 - ✅ Excellent language support
@@ -292,7 +292,7 @@ Typical RAM usage during transcription:
 ### Disk Space
 
 Total disk space with all models:
-- All models: ~2.7 GB
+- All models: ~2.68 GB (2682 MB)
 - Recommended (tiny + base + small): ~357 MB
 - Minimum (base only): 74 MB
 

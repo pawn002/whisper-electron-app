@@ -413,10 +413,6 @@ ipcMain.handle('get-system-info', async () => {
   };
 });
 
-ipcMain.handle('get-app-path', async () => {
-  return app.getPath('userData');
-});
-
 ipcMain.handle('get-transcription-history', async () => {
   try {
     if (!transcriptionService) {

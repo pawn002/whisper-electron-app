@@ -82,7 +82,7 @@ Angular (Renderer) <-> IPC (preload.ts) <-> Electron Main <-> Services <-> whisp
 - `components/transcription/` - Main transcription UI component (Electron-only)
 - `components/model-selector/` - Model management component (standalone)
 - `components/history/` - Transcription history component (standalone)
-- `services/electron.service.ts` - Electron IPC bridge service
+- `services/electron.service.ts` - Electron IPC bridge service (note: located at `frontend/src/services/`, not `frontend/src/app/services/`)
 
 ### External Dependencies
 - `whisper.cpp/` - Pre-built whisper-cli binary
@@ -100,7 +100,6 @@ Angular (Renderer) <-> IPC (preload.ts) <-> Electron Main <-> Services <-> whisp
 | `get-available-models` | List available models | none | Array of model objects |
 | `download-model` | Download Whisper model | `modelName: string` | `{success: boolean, message: string}` |
 | `get-system-info` | Get system information | none | System info object |
-| `get-app-path` | Get app data path | none | `string` (path) |
 | `get-transcription-history` | Fetch transcription history | none | Array of transcription records |
 
 ### Renderer Process Events (on-based)
@@ -129,6 +128,7 @@ Angular (Renderer) <-> IPC (preload.ts) <-> Electron Main <-> Services <-> whisp
 - `convertAudioToWav(inputPath)` - Convert audio to 16kHz mono WAV
 - `downloadModel(modelName, progressCallback)` - Download model from Hugging Face
 - `getAvailableModels()` - List installed and available models
+- `getAudioDuration(audioPath)` - Get audio file duration in seconds using FFmpeg
 
 **Path Resolution:**
 - Development: `app.getAppPath()` for binaries
@@ -211,7 +211,7 @@ whisper-electron-app/
 │   │   │   ├── transcription/
 │   │   │   ├── model-selector/
 │   │   │   └── history/
-│   │   └── services/
+│   │   └── services/         # Note: services/ is directly under src/, not src/app/
 │   │       └── electron.service.ts   # IPC bridge
 │   └── package.json
 ├── whisper.cpp/             # Whisper binary and dependencies

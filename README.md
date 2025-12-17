@@ -93,7 +93,7 @@ whisper-electron-app/
 | base   | 74 MB   | Fast    | Good     | General use (recommended) |
 | small  | 244 MB  | Medium  | Better   | Professional work |
 | medium | 769 MB  | Slow    | Great    | High accuracy needs |
-| large  | 1.5 GB  | Slowest | Best     | Maximum quality |
+| large  | 1550 MB | Slowest | Best     | Maximum quality |
 
 See [Model Guide](docs/models.md) for detailed comparison and recommendations.
 
