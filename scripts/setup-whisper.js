@@ -241,8 +241,7 @@ async function setupWhisper() {
 
   console.log("\n✨ Setup complete!");
   console.log("\nNext steps:");
-  console.log("1. Start the backend: cd backend && npm run start:dev");
-  console.log("2. Start the app: npm run dev");
+  console.log("1. Start the app: npm run dev");
 }
 
 // Run the setup

@@ -58,7 +58,7 @@
     "productName": "Whisper Transcription",
     "electronCompile": false,
     "directories": {
-      "output": "dist-output"
+      "output": "release"
     },
     "files": [
       "dist/electron/**/*",
