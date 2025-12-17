@@ -9,5 +9,14 @@ uploads
 backend/uploads
 ffmpeg
 release
+release_old_with_nul_issue
+dist-output
 nul
+
+# Optimization testing
 .claude/
+system-info.json
+whisper-bins/
+benchmarks/results/
+openvino_2025.4.0/
+openvino_2025.4.0.zip

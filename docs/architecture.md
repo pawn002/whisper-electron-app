@@ -34,26 +34,14 @@ Technical architecture documentation for the Whisper Electron App.
 │                        ↕️ IPC                            │
 │  ┌────────────────────────────────────────────────────┐ │
 │  │           Main Process (Node.js)                   │ │
+│  │  ┌──────────────────────────────────┐             │ │
+│  │  │  Services (electron/services/)   │             │ │
+│  │  │  - TranscriptionService          │             │ │
+│  │  │  - WhisperService                │             │ │
+│  │  └──────────────────────────────────┘             │ │
 │  │  - Window Management                               │ │
-│  │  - Backend Auto-start                              │ │
 │  │  - IPC Handlers                                    │ │
 │  │  - File System Access                              │ │
-│  └────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────┘
-                        ↕️ HTTP/WebSocket
-┌─────────────────────────────────────────────────────────┐
-│              Backend Server (NestJS)                     │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │          Transcription Module                      │ │
-│  │  - REST Controller (HTTP endpoints)               │ │
-│  │  - WebSocket Gateway (progress updates)           │ │
-│  │  - Business Logic Service                         │ │
-│  └────────────────────────────────────────────────────┘ │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │            Whisper Service                         │ │
-│  │  - Spawns whisper-cli process                     │ │
-│  │  - Manages audio conversion (FFmpeg)              │ │
-│  │  - Handles model management                       │ │
 │  └────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────┘
                         ↕️ Child Process
@@ -63,32 +51,36 @@ Technical architecture documentation for the Whisper Electron App.
 │  - Processes audio files                                │
 │  - Outputs transcriptions                               │
 └─────────────────────────────────────────────────────────┘
+                        ↕️ Uses
+┌─────────────────────────────────────────────────────────┐
+│                  FFmpeg Binary                           │
+│  - Audio format conversion                              │
+│  - Preprocesses audio files                             │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ### Architecture Layers
 
 1. **Presentation Layer** - Angular UI components
-2. **Application Layer** - Electron main process
-3. **Business Logic Layer** - NestJS backend services
-4. **Integration Layer** - Whisper service (FFmpeg, whisper.cpp)
-5. **Infrastructure Layer** - File system, models, audio files
+2. **Application Layer** - Electron main process with integrated services
+3. **Integration Layer** - Whisper and transcription services (FFmpeg, whisper.cpp)
+4. **Infrastructure Layer** - File system, models, audio files
+
+> **Architecture Migration Note:** In December 2025, the application was refactored from a 3-layer architecture (Angular + NestJS + Electron) to a 2-layer Electron-native architecture. The NestJS backend was eliminated, with business logic moved directly into Electron main process services. This change eliminated the 7-second startup delay and simplified the communication from HTTP/WebSocket to direct IPC.
 
 ## Technology Stack
 
 ### Frontend
 - **[Angular 17](https://angular.io/)** - Web application framework
 - **[Angular Material](https://material.angular.io/)** - UI components
-- **[Socket.IO Client](https://socket.io/)** - WebSocket for real-time progress updates
+- **RxJS** - Reactive programming for state management
 
-### Backend
-- **[NestJS](https://nestjs.com/)** - Node.js framework
-- **[Socket.IO](https://socket.io/)** - WebSocket server
-- **Child Process** - Spawn whisper.cpp binary
-
-### Desktop
+### Desktop (Electron)
 - **[Electron 28](https://www.electronjs.org/)** - Cross-platform desktop framework
 - **IPC** - Secure main/renderer communication
 - **Context Isolation** - Security boundary
+- **Services** - Business logic in main process (TranscriptionService, WhisperService)
+- **Child Process** - Spawn whisper.cpp and FFmpeg binaries
 
 ### Audio Processing
 - **[whisper.cpp](https://github.com/ggerganov/whisper.cpp)** - C++ Whisper implementation
@@ -125,26 +117,28 @@ App Component
 | `ModelSelectorComponent` | Model management, downloads |
 | `HistoryComponent` | Display past transcriptions |
 
-### Backend Modules
+### Electron Services
 
 ```
-App Module
-├── Transcription Module
-│   ├── TranscriptionController
-│   ├── TranscriptionService
-│   └── TranscriptionGateway
-└── Common Module
-    └── WhisperService
+electron/services/
+├── types.ts              # Shared TypeScript interfaces
+├── transcription.service.ts
+└── whisper.service.ts
 ```
 
-**Module Responsibilities:**
+**Service Responsibilities:**
 
-| Module/Service | Responsibility |
-|----------------|---------------|
-| `TranscriptionController` | HTTP endpoints for transcription |
-| `TranscriptionService` | Business logic, job management |
-| `TranscriptionGateway` | WebSocket events, progress updates |
-| `WhisperService` | Integration with whisper.cpp, FFmpeg |
+| Service | Responsibility |
+|---------|---------------|
+| `TranscriptionService` | Job queue management, orchestration, IPC progress events |
+| `WhisperService` | Integration with whisper.cpp, FFmpeg, model management |
+
+**Key Features:**
+- **Direct Integration**: Services run in Electron main process (no HTTP/WebSocket overhead)
+- **IPC Events**: Real-time progress via `webContents.send()`
+- **In-Memory Storage**: Job queue stored in `Map` (no database)
+- **File Path Access**: Direct file system access (no file uploads)
+- **Model Storage**: Models stored in user data directory (`app.getPath('userData')/models`)
 
 ## Data Flow
 
@@ -153,27 +147,31 @@ App Module
 ```
 1. User selects file
    ↓
-2. Frontend → IPC → Main Process
+2. Frontend → IPC invoke('transcribe-audio') → Main Process
    ↓
-3. Main Process → HTTP → Backend
+3. Main Process → TranscriptionService.processAudio()
    ↓
-4. Backend validates file
+4. TranscriptionService validates file (size, format)
    ↓
-5. Backend → FFmpeg (if needed)
+5. TranscriptionService → WhisperService.convertAudioToWav() (FFmpeg)
    ↓
-6. Backend → Spawn whisper-cli
+6. TranscriptionService → WhisperService.transcribe()
    ↓
-7. whisper-cli processes audio
+7. WhisperService spawns whisper-cli child process
    ↓
-8. Backend emits progress via WebSocket
+8. whisper-cli processes audio, outputs progress to stdout
    ↓
-9. Frontend receives progress updates
+9. WhisperService parses progress, notifies TranscriptionService
    ↓
-10. whisper-cli completes
+10. TranscriptionService emits IPC event ('transcription-progress')
    ↓
-11. Backend sends final result
+11. Frontend receives progress updates via IPC listener
    ↓
-12. Frontend displays transcript
+12. whisper-cli completes with transcript
+   ↓
+13. TranscriptionService emits final result via IPC
+   ↓
+14. Frontend displays transcript
 ```
 
 ### Model Download Flow
@@ -181,21 +179,23 @@ App Module
 ```
 1. User clicks Download
    ↓
-2. Frontend → HTTP → Backend
+2. Frontend → IPC invoke('download-model') → Main Process
    ↓
-3. Backend → Hugging Face API
+3. Main Process → WhisperService.downloadModel()
    ↓
-4. Backend streams file
+4. WhisperService → Hugging Face API (HTTP request)
    ↓
-5. Backend emits download progress
+5. WhisperService streams file, emits progress via IPC
    ↓
-6. Frontend updates progress bar
+6. Frontend receives IPC events ('model-download-progress')
    ↓
-7. Download completes
+7. Frontend updates progress bar
    ↓
-8. Backend saves to models/
+8. Download completes
    ↓
-9. Frontend updates model list
+9. WhisperService saves to app.getPath('userData')/models/
+   ↓
+10. Frontend updates model list
 ```
 
 ### History Retrieval Flow
@@ -203,15 +203,13 @@ App Module
 ```
 1. User opens History tab
    ↓
-2. Frontend → IPC → Main Process
+2. Frontend → IPC invoke('get-transcription-history') → Main Process
    ↓
-3. Main Process → HTTP → Backend
+3. Main Process → TranscriptionService.getHistory()
    ↓
-4. Backend queries database/file system
+4. TranscriptionService returns in-memory history array
    ↓
-5. Backend returns history array
-   ↓
-6. Frontend displays history list
+5. Frontend displays history list
 ```
 
 ## Security Architecture
@@ -247,28 +245,27 @@ contextBridge.exposeInMainWorld('electronAPI', {
 - No direct Node.js access from renderer
 - Sanitized file paths
 
-### Backend Security
+### Service Security
 
-**File Upload Security:**
-- File size limits (500MB default)
-- Type validation
-- Temporary file storage
-- Cleanup after processing
+**File Access Security:**
+- File size limits (500MB default) validated in IPC handlers
+- File type validation before processing
+- Direct file path access (no temporary uploads)
+- Read-only access to user-selected files
 
 **Path Traversal Prevention:**
 ```typescript
-// Validate and sanitize paths
-const safePath = path.join(uploadDir, path.basename(filename));
+// Validate file paths from IPC
+const stats = await fs.promises.stat(audioPath);
+if (stats.size > 500 * 1024 * 1024) {
+  throw new Error('File exceeds 500MB limit');
+}
 ```
 
-**CORS Configuration:**
-```typescript
-// Development: Allow localhost
-// Production: Electron-specific origin
-app.enableCors({
-  origin: isDev ? '*' : 'file://',
-});
-```
+**Model Storage Security:**
+- Models stored in app.getPath('userData') - writable user directory
+- Automatic migration from project directory on first run
+- Download verification (file size, integrity)
 
 ## File Structure
 
@@ -276,32 +273,34 @@ app.enableCors({
 
 ```
 whisper-electron-app/
-├── electron/          # Electron main & preload
-├── backend/          # NestJS backend
-├── frontend/         # Angular frontend
-├── whisper.cpp/      # Cloned whisper.cpp repo
-├── models/           # Whisper model files
-├── ffmpeg/           # FFmpeg binaries
-└── scripts/          # Build scripts
+├── electron/          # Electron main, preload, and services
+│   └── services/      # Business logic services
+├── frontend/          # Angular frontend
+├── whisper.cpp/       # Cloned whisper.cpp repo
+├── models/            # Whisper model files (legacy, migrated on first run)
+├── ffmpeg/            # FFmpeg binaries
+└── scripts/           # Build scripts
 ```
 
 ### Production Structure (Packaged)
 
 ```
 Whisper Transcription.exe
-app.asar              # Frontend + Electron code (compressed)
+app.asar               # Frontend + Electron code (compressed)
 resources/
-  ├── backend/        # Backend code & dependencies
-  │   ├── dist/       # Compiled backend
-  │   └── node_modules/
   ├── whisper.cpp/
   │   └── whisper-cli.exe
-  ├── models/
+  ├── models/          # Pre-bundled models (migrated to user data on first run)
   │   ├── ggml-tiny.bin
   │   └── ggml-base.bin
   └── ffmpeg/
       └── bin/
           └── ffmpeg.exe
+
+User Data Directory (app.getPath('userData')):
+  └── models/          # Runtime model storage (writable location)
+      ├── ggml-tiny.bin
+      └── ggml-base.bin
 ```
 
 ## IPC Communication
@@ -316,7 +315,6 @@ resources/
 | `get-available-models` | Renderer → Main | Fetch model list |
 | `download-model` | Renderer → Main | Download Whisper model |
 | `get-system-info` | Renderer → Main | Get system information |
-| `get-app-path` | Renderer → Main | Get app data path |
 | `get-transcription-history` | Renderer → Main | Fetch history |
 | `transcription-progress` | Main → Renderer | Progress updates |
 | `transcription-completed` | Main → Renderer | Completion event |
@@ -328,22 +326,47 @@ resources/
 
 ```typescript
 // Renderer (Angular Service)
-async transcribe(file: File, options: Options): Promise<string> {
-  const jobId = await window.electronAPI.transcribeAudio(
-    filePath, 
+async transcribe(filePath: string, options: Options): Promise<any> {
+  const result = await window.electronAPI.transcribeAudio(
+    filePath,
     options
   );
-  return jobId;
+  return result;
 }
 
+// Listen for progress events
+window.electronAPI.onTranscriptionProgress((data) => {
+  console.log('Progress:', data.progress, data.message);
+});
+
 // Main Process (IPC Handler)
-ipcMain.handle('transcribe-audio', async (event, path, options) => {
-  // Forward to backend
-  const response = await fetch(`${BACKEND_URL}/api/transcription/process`, {
-    method: 'POST',
-    body: formData,
-  });
-  return await response.json();
+ipcMain.handle('transcribe-audio', async (event, audioPath: string, options: any) => {
+  try {
+    if (!transcriptionService) {
+      return { success: false, error: 'Service not initialized' };
+    }
+
+    // Validate file size
+    const stats = await fs.promises.stat(audioPath);
+    if (stats.size > 500 * 1024 * 1024) {
+      return { success: false, error: 'File exceeds 500MB limit' };
+    }
+
+    // Call service directly (no HTTP)
+    const job = await transcriptionService.processAudio(audioPath, {
+      model: options.model || 'base',
+      language: options.language,
+      outputFormat: options.outputFormat || 'txt',
+      timestamps: options.timestamps !== false,
+      threads: options.threads || 4,
+      processors: options.processors || 1,
+      translate: options.translate || false,
+    });
+
+    return { success: true, data: { id: job.id, status: job.status } };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
 });
 ```
 
@@ -358,33 +381,37 @@ ipcMain.handle('transcribe-audio', async (event, path, options) => {
 
 **Service State:**
 - Shared state via Angular services
-- RxJS BehaviorSubjects for reactive state
+- RxJS for reactive state management
 - No global state library needed
+- IPC events for real-time updates
 
 **Example:**
 ```typescript
 @Injectable()
-export class TranscriptionService {
-  private progressSubject = new BehaviorSubject<number>(0);
-  progress$ = this.progressSubject.asObservable();
-
-  updateProgress(value: number) {
-    this.progressSubject.next(value);
+export class ElectronService {
+  // Listen for IPC events
+  constructor() {
+    window.electronAPI.onTranscriptionProgress((data) => {
+      // Update UI reactively
+    });
   }
 }
 ```
 
-### Backend State
+### Electron Main Process State
 
-**In-Memory State:**
-- Active transcription jobs (Map)
-- WebSocket connections (Map)
-- Download progress tracking
+**In-Memory State (TranscriptionService):**
+- Active transcription jobs (Map<string, TranscriptionJob>)
+- Job history (last 50 jobs)
+- Progress tracking per job
+
+**In-Memory State (WhisperService):**
+- Available models cache
+- Model download progress
 
 **Persistent State:**
-- Transcription history (JSON file)
-- Downloaded models (file system)
-- User settings (future: database)
+- Downloaded models (file system: app.getPath('userData')/models)
+- User preferences (future: could add JSON file or database)
 
 ## Build and Packaging
 
@@ -395,18 +422,13 @@ export class TranscriptionService {
    - Compiles TypeScript → JavaScript
    - Bundles with Webpack
    - Outputs to frontend/dist/
-   
-2. Backend Build (NestJS)
-   - Compiles TypeScript → JavaScript
-   - Outputs to backend/dist/
-   
-3. Electron Build
-   - Compiles TypeScript → JavaScript
+
+2. Electron Build
+   - Compiles TypeScript → JavaScript (main + services)
    - Outputs to dist/electron/
 
-4. electron-builder Packaging
-   - Creates app.asar (frontend + electron)
-   - Copies backend to resources/
+3. electron-builder Packaging
+   - Creates app.asar (frontend + electron + services)
    - Bundles whisper.cpp binaries
    - Bundles models
    - Bundles FFmpeg
@@ -424,14 +446,18 @@ export class TranscriptionService {
     "package.json"
   ],
   "extraResources": [
-    { "from": "backend/dist", "to": "backend/dist" },
-    { "from": "backend/node_modules", "to": "backend/node_modules" },
-    { "from": "whisper.cpp/whisper-cli", "to": "whisper.cpp/" },
+    { "from": "whisper.cpp/build/bin/Release/whisper-cli.exe", "to": "whisper.cpp/build/bin/Release/" },
     { "from": "models/", "to": "models/" },
     { "from": "ffmpeg/bin/", "to": "ffmpeg/bin/" }
   ]
 }
 ```
+
+**Key Changes from Previous Architecture:**
+- No backend build step required
+- Services bundled directly in app.asar with Electron code
+- Smaller package size (no NestJS runtime dependencies)
+- Faster build times
 
 ### Startup Sequence (Production)
 
@@ -440,19 +466,16 @@ export class TranscriptionService {
    ↓
 2. Electron main process starts
    ↓
-3. Main process spawns backend server
-   (from resources/backend/dist/main.js)
+3. Create browser window
    ↓
-4. Wait 7 seconds for backend initialization
+4. Initialize services (TranscriptionService, WhisperService)
    ↓
-5. Create browser window
+5. Load frontend (from app.asar)
    ↓
-6. Load frontend (from app.asar)
-   ↓
-7. Initialize WebSocket connection
-   ↓
-8. App ready for user interaction
+6. App ready for user interaction (instant!)
 ```
+
+**Performance Improvement:** Startup is now instant. The previous architecture required waiting 7 seconds for the NestJS backend to initialize before showing the UI. With services integrated directly into the Electron main process, the app is ready immediately.
 
 ## Performance Considerations
 
@@ -464,16 +487,17 @@ export class TranscriptionService {
 - Virtual scrolling for large lists
 - Debounce user input
 
-**Backend:**
-- Stream file uploads
-- Process transcriptions asynchronously
+**Electron Services:**
+- Process transcriptions asynchronously with child processes
 - Cache model metadata
-- Efficient file I/O
+- Efficient file I/O (direct file access, no uploads)
+- In-memory job queue (no database overhead)
 
 **Electron:**
 - Separate main/renderer processes
-- Offload heavy work to backend
-- Minimize IPC overhead
+- Offload heavy work (whisper-cli, FFmpeg) to child processes
+- Direct IPC communication (no HTTP/WebSocket overhead)
+- Instant startup (no backend initialization delay)
 
 ### Resource Management
 
@@ -525,19 +549,33 @@ export class TranscriptionService {
 - Access to native APIs
 - Large ecosystem
 
-### Why NestJS Backend?
+### Why Electron-Native Services (No Separate Backend)?
 
-- Separation of concerns
-- Testable architecture
-- WebSocket support
-- TypeScript throughout
+**Previous Architecture (Before Dec 2025):**
+- Separate NestJS backend server
+- HTTP/WebSocket communication
+- 7-second startup delay
+- Added complexity and dependencies
 
-### Why Separate Backend?
+**Current Architecture (After Dec 2025):**
+- Services integrated directly into Electron main process
+- Direct IPC communication
+- Instant startup
+- Simplified codebase (~1,300 fewer lines)
+- Lower memory footprint (no NestJS runtime)
+- Easier debugging (no network layer)
 
-- Isolate native dependencies
-- Easier testing
-- Can run standalone
-- Clean architecture
+**Decision Rationale:**
+The separate backend was initially chosen for separation of concerns, but in practice:
+1. The app is Electron-only (no browser mode needed)
+2. HTTP/WebSocket added unnecessary complexity for inter-process communication
+3. The 7-second startup delay hurt user experience
+4. Electron main process can handle business logic directly
+5. IPC is sufficient for communication needs
+
+**Trade-offs:**
+- ✅ Pros: Faster startup, simpler architecture, fewer dependencies, easier debugging
+- ❌ Cons: Less separation of concerns (mitigated by service classes), tighter coupling to Electron
 
 ### Why Angular?
 
@@ -546,9 +584,19 @@ export class TranscriptionService {
 - Dependency injection
 - Mature ecosystem
 
+### Why whisper.cpp Over Other Implementations?
+
+- Native C++ performance
+- No Python runtime required
+- Cross-platform support
+- Active community
+- Smaller memory footprint than Python implementation
+
 ## References
 
 - [Electron Security](https://www.electronjs.org/docs/latest/tutorial/security)
-- [NestJS Architecture](https://docs.nestjs.com/fundamentals/custom-providers)
+- [Electron IPC](https://www.electronjs.org/docs/latest/tutorial/ipc)
+- [Electron Main Process](https://www.electronjs.org/docs/latest/tutorial/process-model)
 - [Angular Architecture](https://angular.io/guide/architecture)
 - [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+- [FFmpeg](https://ffmpeg.org/documentation.html)

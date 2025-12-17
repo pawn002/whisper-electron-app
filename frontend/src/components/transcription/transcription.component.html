@@ -17,22 +17,20 @@
                 Select Audio File
             </button>
 
-            <div *ngIf="selectedFile || selectedFilePath" class="file-info">
+            <div *ngIf="selectedFilePath" class="file-info">
                 <mat-icon>audiotrack</mat-icon>
                 <span>{{ getFileName() }}</span>
                 <span
                     class="file-size"
-                    *ngIf="selectedFile || selectedFileSize"
+                    *ngIf="selectedFileSize"
                     >{{
-                        formatFileSize(
-                            selectedFile?.size || selectedFileSize || 0
-                        )
+                        formatFileSize(selectedFileSize || 0)
                     }}</span
                 >
             </div>
         </div>
 
-        <div class="options-section" *ngIf="selectedFile || selectedFilePath">
+        <div class="options-section" *ngIf="selectedFilePath">
             <mat-form-field appearance="outline">
                 <mat-label>Model</mat-label>
                 <mat-select [(value)]="selectedModel">

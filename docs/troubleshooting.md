@@ -144,32 +144,6 @@ npm run setup
 
 ## Runtime Issues
 
-### Backend Connection Failed
-
-**Error**: Connection refused to `http://localhost:3333`
-
-**Solutions**:
-
-1. **In Development Mode**:
-   - Ensure backend is running: `npm run dev:backend`
-   - Check port 3333 is not in use:
-     ```bash
-     # Windows
-     netstat -ano | findstr :3333
-     
-     # macOS/Linux
-     lsof -i :3333
-     ```
-   - If port is in use, kill the process or change port in `backend/.env`
-
-2. **In Production Mode**:
-   - The app auto-starts the backend
-   - Wait 7-10 seconds after launch for backend to initialize
-   - Check logs in app data folder:
-     - Windows: `C:\Users\<user>\AppData\Roaming\whisper-transcription\`
-     - macOS: `~/Library/Application Support/whisper-transcription/`
-     - Linux: `~/.config/whisper-transcription/`
-
 ### Blank White Screen (Electron App)
 
 **Error**: Application launches but shows blank window
@@ -256,9 +230,10 @@ npm run setup
    ls ffmpeg/bin/
    ```
 
-3. **Check backend logs**:
-   - Look in app data folder (see [Backend Connection Failed](#backend-connection-failed))
-   - Check for specific error messages
+3. **Check Electron DevTools**:
+   - Press `Ctrl+Shift+I` / `Cmd+Option+I`
+   - Check Console for error messages
+   - Look for file path or permission errors
 
 ### Transcription Produces Gibberish
 
@@ -389,17 +364,17 @@ Before reporting an issue, collect:
 - **Error messages**: Copy exact error text
 - **Steps to reproduce**: What you did before the error occurred
 
-### 3. Check Log Files
+### 3. Check Log Files and Console
 
-Log files are located in:
+Application data directory:
 - **Windows**: `C:\Users\<user>\AppData\Roaming\whisper-transcription\`
 - **macOS**: `~/Library/Application Support/whisper-transcription/`
 - **Linux**: `~/.config/whisper-transcription/`
 
-Useful logs:
-- `backend-startup.log` - Backend initialization
-- `backend-output.log` - Backend activity
-- `backend-error.log` - Backend errors
+**Electron DevTools Console**:
+- Press `Ctrl+Shift+I` / `Cmd+Option+I` to open DevTools
+- Check Console tab for errors
+- Look for specific error messages and stack traces
 
 ### 4. Report the Issue
 
@@ -426,36 +401,36 @@ Include:
 
 **Meaning**: A dependency is missing
 
-**Solution**: 
-```bash
-npm install
-cd backend && npm install
-cd ../frontend && npm install
-```
-
-### "Port 3333 already in use"
-
-**Meaning**: Another process is using the backend port
-
 **Solution**:
 ```bash
-# Find and kill the process
-# Windows
-netstat -ano | findstr :3333
-taskkill /PID <process_id> /F
-
-# macOS/Linux
-lsof -ti:3333 | xargs kill
+npm install
+cd frontend && npm install
+cd ..
 ```
 
-### "Unexpected end of form"
+### "Spawn ENOENT" or "Process Failed"
 
-**Meaning**: File upload was interrupted
+**Meaning**: Whisper.cpp or FFmpeg binary not found or can't be executed
 
-**Solution**: This issue is fixed in recent versions. Update to latest version.
+**Solution**:
+1. **Verify binaries exist**:
+   ```bash
+   # Windows
+   dir whisper.cpp\whisper-cli.exe
+   dir ffmpeg\bin\ffmpeg.exe
 
-### "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+   # macOS/Linux
+   ls -la whisper.cpp/whisper-cli
+   ls -la ffmpeg/bin/ffmpeg
+   ```
 
-**Meaning**: Frontend can't connect to backend
+2. **Rebuild if missing**:
+   ```bash
+   npm run setup
+   ```
 
-**Solution**: See [Backend Connection Failed](#backend-connection-failed)
+3. **Check permissions** (macOS/Linux):
+   ```bash
+   chmod +x whisper.cpp/whisper-cli
+   chmod +x ffmpeg/bin/ffmpeg
+   ```

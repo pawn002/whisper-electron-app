@@ -5,17 +5,22 @@
   "main": "dist/electron/main.js",
   "scripts": {
     "start": "npm run build && electron .",
-    "build": "npm run build:backend && npm run build:frontend && npm run build:electron",
-    "build:backend": "cd backend && npm run build",
+    "build": "npm run build:frontend && npm run build:electron",
     "build:frontend": "cd frontend && npm run build",
     "build:electron": "tsc -p electron",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:electron\"",
-    "dev:backend": "cd backend && npm run start:dev",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:electron\"",
     "dev:frontend": "cd frontend && npm run start",
     "dev:electron": "wait-on tcp:4200 && npx electron . --dev",
     "setup": "npm install && npm run install:all && node scripts/setup-whisper.js",
-    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "install:all": "cd frontend && npm install",
     "build:whisper": "node scripts/build-whisper.js",
+    "system-info": "node scripts/system-info.js",
+    "build:whisper-variants": "node scripts/build-whisper-variants.js",
+    "build:whisper-baseline": "node scripts/build-whisper-variants.js --variant=baseline",
+    "build:whisper-avx512": "node scripts/build-whisper-variants.js --variant=avx512",
+    "build:whisper-sycl": "node scripts/build-whisper-variants.js --variant=sycl",
+    "build:whisper-openvino": "node scripts/build-whisper-variants.js --variant=openvino",
+    "benchmark": "node scripts/benchmark-variants.js",
     "dist": "npm run build && electron-builder",
     "dist:mac": "npm run build && electron-builder --mac",
     "dist:win": "npm run build && electron-builder --win",
@@ -31,13 +36,13 @@
     "electron",
     "whisper",
     "speech-to-text",
-    "angular",
-    "nestjs"
+    "angular"
   ],
   "author": "Your Name",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "@types/uuid": "^10.0.0",
     "concurrently": "^8.2.2",
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1",
@@ -46,8 +51,7 @@
   },
   "dependencies": {
     "electron-is-dev": "^2.0.0",
-    "form-data": "^4.0.4",
-    "socket.io-client": "^4.8.1"
+    "uuid": "^9.0.1"
   },
   "build": {
     "appId": "com.yourcompany.whisper-electron",
@@ -63,28 +67,14 @@
     ],
     "extraResources": [
       {
-        "from": "backend/dist",
-        "to": "backend/dist",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "backend/node_modules",
-        "to": "backend/node_modules",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "backend/package.json",
-        "to": "backend/package.json"
-      },
-      {
         "from": "whisper.cpp",
         "to": "whisper.cpp",
         "filter": [
-          "**/*"
+          "**/*",
+          "!**/nul",
+          "!**/con",
+          "!**/prn",
+          "!**/aux"
         ]
       },
       {

@@ -25,7 +25,7 @@ npm run dev
 - **macOS**: Open `Whisper Transcription.app`
 - **Linux**: Run `./whisper-transcription`
 
-The application automatically starts the backend server - no manual setup required.
+The application starts instantly with no delay - all processing is handled natively by Electron services.
 
 ## Transcription Workflow
 

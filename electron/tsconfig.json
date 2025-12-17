@@ -11,7 +11,11 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@services/*": ["./services/*"]
+    }
   },
   "include": ["./**/*"],
   "exclude": ["node_modules"]

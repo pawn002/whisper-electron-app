@@ -9,34 +9,29 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 })
 export class AppComponent implements OnInit {
   title = "Whisper Transcription";
-  isElectron: boolean = false;
   systemInfo: any = null;
 
   constructor(
     private electronService: ElectronService,
-    private snackBar: MatSnackBar,
-  ) {
-    this.isElectron = this.electronService.isElectron();
-  }
+    private snackBar: MatSnackBar
+  ) {}
 
   async ngOnInit() {
-    if (this.isElectron) {
-      try {
-        this.systemInfo = await this.electronService.getSystemInfo();
-        console.log("System Info:", this.systemInfo);
-      } catch (error) {
-        console.error("Failed to get system info:", error);
-      }
-
-      // Set up menu action listeners
-      this.electronService.onMenuAction("open-file", () => {
-        this.openFile();
-      });
-
-      this.electronService.onMenuAction("save-transcript", () => {
-        this.saveTranscript();
-      });
+    try {
+      this.systemInfo = await this.electronService.getSystemInfo();
+      console.log("System Info:", this.systemInfo);
+    } catch (error) {
+      console.error("Failed to get system info:", error);
     }
+
+    // Set up menu action listeners
+    this.electronService.onMenuAction("open-file", () => {
+      this.openFile();
+    });
+
+    this.electronService.onMenuAction("save-transcript", () => {
+      this.saveTranscript();
+    });
   }
 
   async openFile() {

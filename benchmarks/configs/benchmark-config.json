@@ -1,0 +1,51 @@
+{
+  "benchmark": {
+    "name": "Intel Hardware Optimization Comparison",
+    "version": "1.0.0",
+    "description": "Compare whisper.cpp performance across Intel CPU/GPU optimizations"
+  },
+  "audio": {
+    "testFile": "benchmarks/audio-samples/test-sample.wav",
+    "duration": 11.0,
+    "expectedWords": 78,
+    "description": "JFK inaugural speech excerpt (11 seconds)"
+  },
+  "models": [
+    "ggml-tiny.bin",
+    "ggml-base.bin"
+  ],
+  "variants": [
+    "baseline",
+    "avx512",
+    "sycl",
+    "openvino"
+  ],
+  "options": {
+    "threads": [1, 4, 8],
+    "processors": [1],
+    "outputFormat": "json",
+    "warmupRuns": 1,
+    "benchmarkRuns": 3,
+    "language": "en",
+    "noTimestamps": true
+  },
+  "metrics": {
+    "primary": [
+      "transcriptionSpeed",
+      "realTimeFactor",
+      "latencyToFirstToken"
+    ],
+    "secondary": [
+      "loadTime",
+      "encodeTime",
+      "decodeTime",
+      "totalTime",
+      "memoryUsage"
+    ]
+  },
+  "notes": {
+    "transcriptionSpeed": "Words per second",
+    "realTimeFactor": "Processing time / audio duration (< 1.0 = faster than real-time)",
+    "latencyToFirstToken": "Time until transcription begins (ms)"
+  }
+}

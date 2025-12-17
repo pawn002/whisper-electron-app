@@ -4,22 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Offline speech-to-text Electron application using OpenAI's Whisper model via whisper.cpp. Three-layer architecture: Angular frontend, NestJS backend, and Electron shell.
+Offline speech-to-text Electron application using OpenAI's Whisper model via whisper.cpp. Two-layer Electron-native architecture: Angular frontend and Electron main process with integrated services.
 
 ## Common Commands
 
 ### Development
 ```bash
-npm run dev                 # Start all services (backend, frontend, electron)
-npm run dev:backend         # Backend only (http://localhost:3333)
+npm run dev                 # Start all services (frontend, electron)
 npm run dev:frontend        # Frontend only (http://localhost:4200)
 npm run dev:electron        # Electron only (waits for frontend)
 ```
 
 ### Building
 ```bash
-npm run build               # Build all (backend, frontend, electron)
-npm run build:backend       # cd backend && npm run build
+npm run build               # Build all (frontend, electron)
 npm run build:frontend      # cd frontend && npm run build
 npm run build:electron      # tsc -p electron
 ```
@@ -42,7 +40,7 @@ npm run dist:linux          # Linux
 ### Setup & Installation
 ```bash
 npm run setup               # Full setup (deps, whisper.cpp, models)
-npm run install:all         # Install backend + frontend deps
+npm run install:all         # Install frontend deps
 npm run build:whisper       # Rebuild whisper.cpp
 ```
 
@@ -58,42 +56,37 @@ npm run version:major       # Bump major version
 
 ### Communication Flow
 ```
-Angular (Renderer) <-> IPC (preload.ts) <-> Electron Main <-> HTTP/WebSocket <-> NestJS Backend <-> whisper.cpp
+Angular (Renderer) <-> IPC (preload.ts) <-> Electron Main <-> Services <-> whisper.cpp
 ```
 
 ### Key Components
 
 **Electron Main Process** (`electron/main.ts`):
-- Window management and backend auto-start
+- Window management with instant startup (no delays)
 - IPC handlers for file dialogs, transcription, model management
-- Spawns backend server in production
+- Service initialization and lifecycle management
+- Direct IPC event emission for progress updates
+
+**Electron Services** (`electron/services/`):
+- `types.ts` - Shared TypeScript interfaces (TranscriptionOptions, TranscriptionResult, TranscriptionJob)
+- `whisper.service.ts` - Whisper.cpp integration, FFmpeg conversion, model management
+- `transcription.service.ts` - Job queue management, transcription orchestration, IPC event emission
 
 **Electron Preload** (`electron/preload.ts`):
 - Context-isolated bridge exposing `window.electronAPI`
 - Safe IPC wrappers for renderer process
 
-**Backend** (`backend/src/`):
-- `main.ts` - NestJS bootstrap (port 3333, CORS enabled)
-- `app.module.ts` - Root NestJS module
-- `transcription/transcription.controller.ts` - REST API endpoints
-- `transcription/transcription.service.ts` - Transcription job management
-- `transcription/transcription.gateway.ts` - WebSocket gateway for real-time progress
-- `transcription/transcription.module.ts` - Transcription feature module
-- `transcription/create-transcription.dto.ts` - Request validation DTO
-- `common/whisper.service.ts` - Whisper.cpp integration, FFmpeg conversion, model management
-
 **Frontend** (`frontend/src/`):
 - `app.module.ts` - Root Angular module
 - `app.component.ts` - Root component with tab navigation
-- `components/transcription/` - Main transcription UI component
+- `components/transcription/` - Main transcription UI component (Electron-only)
 - `components/model-selector/` - Model management component (standalone)
 - `components/history/` - Transcription history component (standalone)
-- `services/electron.service.ts` - Electron IPC bridge service
-- `services/transcription.service.ts` - HTTP/WebSocket API service
+- `services/electron.service.ts` - Electron IPC bridge service (note: located at `frontend/src/services/`, not `frontend/src/app/services/`)
 
 ### External Dependencies
 - `whisper.cpp/` - Pre-built whisper-cli binary
-- `models/` - Whisper model files (ggml-*.bin)
+- `models/` - Whisper model files (ggml-*.bin) - stored in user data directory for production
 - `ffmpeg/` - Bundled FFmpeg for audio conversion
 
 ## IPC Channels
@@ -107,32 +100,64 @@ Angular (Renderer) <-> IPC (preload.ts) <-> Electron Main <-> HTTP/WebSocket <->
 | `get-available-models` | List available models | none | Array of model objects |
 | `download-model` | Download Whisper model | `modelName: string` | `{success: boolean, message: string}` |
 | `get-system-info` | Get system information | none | System info object |
-| `get-app-path` | Get app data path | none | `string` (path) |
 | `get-transcription-history` | Fetch transcription history | none | Array of transcription records |
 
 ### Renderer Process Events (on-based)
 | Event | Purpose | Data |
 |-------|---------|------|
-| `transcription-progress` | Real-time transcription progress | `{progress: number, message?: string}` |
+| `transcription-progress` | Real-time transcription progress | `{jobId: string, progress: number, message?: string}` |
 | `transcription-completed` | Transcription completed | `result: any` |
 | `transcription-error` | Transcription error occurred | `error: string` |
-| `model-download-progress` | Model download progress | `data: any` |
+| `model-download-progress` | Model download progress | `{modelName: string, progress: number}` |
 | `menu-open-file` | Menu action: Open file | none |
 
-## Backend API Endpoints
+## Service Architecture
 
-All endpoints are prefixed with `/api/transcription`.
+### WhisperService (`electron/services/whisper.service.ts`)
 
-| Method | Endpoint | Purpose | Request Body/Params | Response |
-|--------|----------|---------|---------------------|----------|
-| POST | `/process` | Process audio file | FormData with `audio` file + options | `{success: boolean, data: {id: string, ...}}` |
-| GET | `/status/:jobId` | Get transcription status | `jobId` in path | Job status object |
-| GET | `/history` | Get transcription history | none | Array of transcription records |
-| GET | `/models` | Get available models | none | Array of model info objects |
-| POST | `/download-model/:modelName` | Download a model | `modelName` in path | `{success: boolean, message: string}` |
-| POST | `/cancel/:jobId` | Cancel transcription | `jobId` in path | `{success: boolean, message: string}` |
+**Responsibilities:**
+- Whisper.cpp binary integration via child process spawning
+- FFmpeg integration for audio format conversion (MP3, WAV, OGG, M4A, FLAC, AAC, WEBM)
+- Model download from Hugging Face
+- Model enumeration and availability checking
+- Progress tracking via stdout/stderr parsing
 
-### Transcription Options (for `/process` endpoint)
+**Key Methods:**
+- `initialize()` - Set up paths, check binaries, migrate models
+- `transcribe(audioPath, options, progressCallback)` - Run transcription
+- `convertAudioToWav(inputPath)` - Convert audio to 16kHz mono WAV
+- `downloadModel(modelName, progressCallback)` - Download model from Hugging Face
+- `getAvailableModels()` - List installed and available models
+- `getAudioDuration(audioPath)` - Get audio file duration in seconds using FFmpeg
+
+**Path Resolution:**
+- Development: `app.getAppPath()` for binaries
+- Production: `process.resourcesPath` for binaries, `app.getPath('userData')` for models
+- Platform-specific binary paths (Windows: `whisper-cli.exe`, Unix: `main`)
+
+### TranscriptionService (`electron/services/transcription.service.ts`)
+
+**Responsibilities:**
+- Job queue management (in-memory Map)
+- Transcription job lifecycle (pending → processing → completed/failed/cancelled)
+- WhisperService orchestration
+- IPC event emission for progress updates
+- Transcription history management (last 50 jobs)
+
+**Key Methods:**
+- `processAudio(audioPath, options)` - Create and process transcription job
+- `getJobStatus(jobId)` - Get job status
+- `cancelJob(jobId)` - Cancel active job
+- `getTranscriptionHistory()` - Get recent transcriptions
+- `getAvailableModels()` - Delegate to WhisperService
+- `downloadModel(modelName, progressCallback)` - Delegate to WhisperService
+
+**IPC Event Emission:**
+- `transcription-progress` - Emitted during processing with jobId, progress, message
+- `transcription-completed` - Emitted when job completes with result
+- `transcription-error` - Emitted on job failure with error message
+
+### Transcription Options
 - `model` - Model name (tiny, base, small, medium, large)
 - `language` - Language code (optional, auto-detect if not specified)
 - `outputFormat` - Output format (txt, json, srt, vtt)
@@ -143,12 +168,15 @@ All endpoints are prefixed with `/api/transcription`.
 
 ## Development Notes
 
-- Backend must be running for transcription (auto-starts in production, manual in dev)
-- Wait 7-10 seconds after launch for backend initialization in packaged app
-- Context isolation is enabled - all renderer/main communication goes through preload.ts
-- WebSocket (Socket.IO) used for real-time transcription progress updates
+- **Instant startup** - No backend server to wait for
+- Services initialized directly in Electron main process on window creation
+- Context isolation enabled - all renderer/main communication goes through preload.ts
+- IPC events used for real-time transcription progress updates (no WebSocket)
 - Supported audio formats: MP3, WAV, OGG, M4A, FLAC, AAC, WEBM (auto-converted via FFmpeg)
-- Use Context7 MCP server for up-to-date library documentation when generating code
+- Direct file access - no file uploads or temporary copies
+- In-memory job storage - history cleared on app restart
+- Models stored in user data directory in production (writable location)
+- Model migration on first run from old `models/` directory to user data
 
 ## Styling Guidelines
 
@@ -161,7 +189,38 @@ All endpoints are prefixed with `/api/transcription`.
 
 ## Version Sync
 
-The project maintains synchronized versions across `package.json`, `backend/package.json`, and `frontend/package.json`. Use `npm run version:*` commands which auto-sync via `scripts/sync-version.js`.
+The project maintains synchronized versions across `package.json` and `frontend/package.json`. Use `npm run version:*` commands which auto-sync via `scripts/sync-version.js`.
+
+## File Structure
+
+```
+whisper-electron-app/
+├── electron/
+│   ├── main.ts              # Electron main process, IPC handlers, service initialization
+│   ├── preload.ts           # Context bridge for IPC
+│   ├── tsconfig.json        # TypeScript config with path aliases
+│   └── services/
+│       ├── types.ts         # Shared interfaces
+│       ├── whisper.service.ts        # Whisper.cpp integration
+│       └── transcription.service.ts  # Job management
+├── frontend/
+│   ├── src/
+│   │   ├── app.module.ts
+│   │   ├── app.component.ts
+│   │   ├── components/
+│   │   │   ├── transcription/
+│   │   │   ├── model-selector/
+│   │   │   └── history/
+│   │   └── services/         # Note: services/ is directly under src/, not src/app/
+│   │       └── electron.service.ts   # IPC bridge
+│   └── package.json
+├── whisper.cpp/             # Whisper binary and dependencies
+├── models/                  # Default model location (migrated to user data)
+├── ffmpeg/                  # FFmpeg binaries
+├── scripts/                 # Build and setup scripts
+├── package.json             # Root package configuration
+└── CLAUDE.md                # This file
+```
 
 ## Documentation Maintenance
 
@@ -180,8 +239,8 @@ When asked to audit the project and update documentation, you MUST:
 
 2. **Verify Against Codebase:**
    - Check all IPC channels match implementation in `electron/main.ts` and `electron/preload.ts`
-   - Verify backend API endpoints match `backend/src/transcription/transcription.controller.ts`
-   - Confirm file paths and component locations in frontend and backend
+   - Verify service methods match `electron/services/*.ts`
+   - Confirm file paths and component locations in frontend
    - Validate npm scripts in all `package.json` files
    - Check version synchronization across packages
    - Verify supported features match actual implementation
@@ -203,11 +262,27 @@ When asked to audit the project and update documentation, you MUST:
 
 5. **Key Areas to Check:**
    - IPC channel names, parameters, and return types
-   - Backend REST endpoints (method, path, body, response)
-   - WebSocket events and data structures
+   - Service methods and their signatures
+   - IPC event names and data structures
    - Supported audio formats
    - Model names and sizes
    - npm script commands
    - File structure and component locations
    - Platform-specific instructions (especially Windows admin requirements)
    - Version numbers across all documentation
+
+## Migration Notes (December 2025)
+
+This project was migrated from a 3-layer architecture (Angular + NestJS + Electron) to a 2-layer Electron-native architecture (Angular + Electron) to:
+- Eliminate 7-second backend startup delay
+- Reduce code complexity (~1,300 lines removed)
+- Remove HTTP/WebSocket infrastructure
+- Simplify development and maintenance
+- Create a more native Electron experience
+
+All functionality was preserved during migration, including:
+- Transcription with all options and formats
+- Model management and downloads
+- Real-time progress updates (now via IPC)
+- Transcription history
+- File operations and system integration

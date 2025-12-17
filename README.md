@@ -1,6 +1,6 @@
 # Whisper Electron App - Offline Speech-to-Text
 
-A robust, production-ready Electron application that provides offline speech-to-text transcription using OpenAI's Whisper model via whisper.cpp. Built with Angular for the frontend and NestJS for the backend architecture.
+A robust, production-ready Electron application that provides offline speech-to-text transcription using OpenAI's Whisper model via whisper.cpp. Built with Angular for the frontend and native Electron services for business logic.
 
 ## 📚 Documentation
 
@@ -47,7 +47,7 @@ npm run setup
 ### Development
 
 ```bash
-# Start all services (backend, frontend, electron)
+# Start frontend and electron in development mode
 npm run dev
 ```
 
@@ -76,7 +76,7 @@ See [Usage Guide](docs/usage.md) for detailed instructions.
 ```
 whisper-electron-app/
 ├── electron/          # Electron main process
-├── backend/           # NestJS backend (auto-starts in production)
+│   └── services/      # Business logic services (Whisper, Transcription)
 ├── frontend/          # Angular frontend (Material Design)
 ├── whisper.cpp/       # Whisper.cpp binaries
 ├── models/            # Whisper model files (.bin)
@@ -93,7 +93,7 @@ whisper-electron-app/
 | base   | 74 MB   | Fast    | Good     | General use (recommended) |
 | small  | 244 MB  | Medium  | Better   | Professional work |
 | medium | 769 MB  | Slow    | Great    | High accuracy needs |
-| large  | 1.5 GB  | Slowest | Best     | Maximum quality |
+| large  | 1550 MB | Slowest | Best     | Maximum quality |
 
 See [Model Guide](docs/models.md) for detailed comparison and recommendations.
 
@@ -102,7 +102,6 @@ See [Model Guide](docs/models.md) for detailed comparison and recommendations.
 **Common Issues:**
 
 - **Setup fails**: Ensure Git, Node.js, and build tools are installed
-- **Backend connection failed**: Wait 7-10 seconds after launch for backend to initialize
 - **Model not found**: Download models from the Models tab in the app
 - **Slow transcription**: Use smaller models (tiny/base) or upgrade hardware
 
@@ -160,7 +159,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 - [whisper.cpp](https://github.com/ggerganov/whisper.cpp) - C++ implementation of Whisper
 - [OpenAI Whisper](https://github.com/openai/whisper) - Original Whisper model
-- Angular, NestJS, and Electron communities
+- Angular and Electron communities
 
 ## 📞 Support
 

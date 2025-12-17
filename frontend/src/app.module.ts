@@ -30,7 +30,6 @@ import { ModelSelectorComponent } from "./components/model-selector/model-select
 
 // Services
 import { ElectronService } from "./services/electron.service";
-import { TranscriptionService } from "./services/transcription.service";
 
 @NgModule({
   declarations: [AppComponent, TranscriptionComponent],
@@ -60,7 +59,6 @@ import { TranscriptionService } from "./services/transcription.service";
   ],
   providers: [
     ElectronService,
-    TranscriptionService,
     {
       provide: MAT_SNACK_BAR_DEFAULT_OPTIONS,
       useValue: {
