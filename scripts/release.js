@@ -298,14 +298,6 @@ async function main() {
   rootPkg.version = newVersion;
   fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + '\n');
 
-  // Update backend package.json
-  const backendPkgPath = path.join(__dirname, '../backend/package.json');
-  if (fs.existsSync(backendPkgPath)) {
-    const backendPkg = JSON.parse(fs.readFileSync(backendPkgPath, 'utf-8'));
-    backendPkg.version = newVersion;
-    fs.writeFileSync(backendPkgPath, JSON.stringify(backendPkg, null, 2) + '\n');
-  }
-
   // Update frontend package.json
   const frontendPkgPath = path.join(__dirname, '../frontend/package.json');
   if (fs.existsSync(frontendPkgPath)) {
@@ -318,7 +310,7 @@ async function main() {
 
   // Step 5: Commit version bump
   console.log('\n📋 Step 5: Committing version bump...');
-  exec('git add package.json backend/package.json frontend/package.json CHANGELOG.md');
+  exec('git add package.json frontend/package.json CHANGELOG.md');
   exec(`git commit -m "chore: release v${newVersion}"`);
   console.log('✅ Version bump committed');
 
