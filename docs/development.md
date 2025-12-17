@@ -271,7 +271,7 @@ Builds:
 > **⚠️ Windows Users**: All distribution commands require **administrator privileges**. Run your terminal as administrator before executing these commands.
 
 ```bash
-# All platforms (based on current OS)
+# Build and package for current platform
 npm run dist          # Requires admin on Windows
 
 # Specific platforms

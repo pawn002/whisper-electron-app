@@ -199,11 +199,10 @@ Once installation is complete:
 1. **Read the Usage Guide** - Learn how to use all features: [usage.md](usage.md)
 2. **Download Additional Models** - Get larger models for better accuracy: [models.md](models.md)
 3. **Build Production App** - Create distributable package:
-   
+
    > **⚠️ Windows Users**: Building distribution packages requires **administrator privileges**. Run your terminal as administrator before executing these commands.
-   
+
    ```bash
-   npm run build
    npm run dist    # Requires admin on Windows
    ```
 

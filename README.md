@@ -57,7 +57,6 @@ npm run dev
 
 ```bash
 # Build and package the app
-npm run build
 npm run dist            # Run with admin privileges on Windows
 ```
 
