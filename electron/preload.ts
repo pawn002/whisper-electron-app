@@ -1,5 +1,20 @@
 import { contextBridge, ipcRenderer } from "electron";
 
+// Whitelist of allowed IPC channels for security
+const ALLOWED_RECEIVE_CHANNELS = [
+  "transcription-progress",
+  "transcription-completed",
+  "transcription-error",
+  "model-download-progress",
+  "menu-open-file",
+] as const;
+
+// Allowed menu actions
+const ALLOWED_MENU_ACTIONS = ["open-file"] as const;
+
+type AllowedChannel = (typeof ALLOWED_RECEIVE_CHANNELS)[number];
+type AllowedMenuAction = (typeof ALLOWED_MENU_ACTIONS)[number];
+
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld("electronAPI", {
@@ -43,12 +58,21 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
 
   onMenuAction: (action: string, callback: () => void) => {
-    ipcRenderer.on(`menu:${action}`, () => callback());
+    // Validate action against whitelist
+    if (ALLOWED_MENU_ACTIONS.includes(action as AllowedMenuAction)) {
+      ipcRenderer.on(`menu-${action}`, () => callback());
+    } else {
+      console.warn(`[Preload] Blocked unrecognized menu action: ${action}`);
+    }
   },
 
-  // Remove listeners
+  // Remove listeners - only for whitelisted channels
   removeAllListeners: (channel: string) => {
-    ipcRenderer.removeAllListeners(channel);
+    if (ALLOWED_RECEIVE_CHANNELS.includes(channel as AllowedChannel)) {
+      ipcRenderer.removeAllListeners(channel);
+    } else {
+      console.warn(`[Preload] Blocked removeAllListeners for channel: ${channel}`);
+    }
   },
 });
 

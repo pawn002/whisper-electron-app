@@ -6,6 +6,10 @@ import { createWriteStream } from 'fs';
 import { app } from 'electron';
 import { TranscriptionOptions, TranscriptionResult } from './types';
 
+// Valid model names whitelist for security
+const VALID_MODEL_NAMES = ['tiny', 'base', 'small', 'medium', 'large'] as const;
+type ValidModelName = (typeof VALID_MODEL_NAMES)[number];
+
 export class WhisperService {
   private whisperPath: string;
   private modelsPath: string;
@@ -19,6 +23,13 @@ export class WhisperService {
     { name: 'medium', size: '769 MB', description: 'Slower, better accuracy' },
     { name: 'large', size: '1550 MB', description: 'Slowest, best accuracy' },
   ];
+
+  /**
+   * Validates that a model name is in the allowed list
+   */
+  private isValidModelName(name: string): name is ValidModelName {
+    return VALID_MODEL_NAMES.includes(name as ValidModelName);
+  }
 
   constructor() {
     // Determine base path based on environment
@@ -190,6 +201,13 @@ export class WhisperService {
     modelName: string,
     progressCallback?: (progress: number) => void
   ): Promise<void> {
+    // Validate model name against whitelist to prevent path injection
+    if (!this.isValidModelName(modelName)) {
+      throw new Error(
+        `Invalid model name: ${modelName}. Valid models are: ${VALID_MODEL_NAMES.join(', ')}`
+      );
+    }
+
     const modelUrl = `https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-${modelName}.bin`;
     const modelPath = path.join(this.modelsPath, `ggml-${modelName}.bin`);
 
@@ -260,7 +278,18 @@ export class WhisperService {
       await this.initialize();
     }
 
-    const modelPath = path.join(this.modelsPath, `ggml-${options.model}.bin`);
+    // Validate model name against whitelist
+    const modelName = options.model || 'base';
+    if (!this.isValidModelName(modelName)) {
+      throw new Error(
+        `Invalid model name: ${modelName}. Valid models are: ${VALID_MODEL_NAMES.join(', ')}`
+      );
+    }
+
+    // Canonicalize audio path to prevent path traversal
+    const resolvedAudioPath = path.resolve(audioPath);
+
+    const modelPath = path.join(this.modelsPath, `ggml-${modelName}.bin`);
 
     // Check if model exists
     try {
@@ -272,8 +301,8 @@ export class WhisperService {
     }
 
     // Check if audio needs conversion
-    const ext = path.extname(audioPath).toLowerCase();
-    let processedAudioPath = audioPath;
+    const ext = path.extname(resolvedAudioPath).toLowerCase();
+    let processedAudioPath = resolvedAudioPath;
     let needsCleanup = false;
 
     // Convert non-WAV files to WAV format
@@ -436,11 +465,14 @@ export class WhisperService {
       return undefined;
     }
 
+    // Canonicalize audio path
+    const resolvedAudioPath = path.resolve(audioPath);
+
     return new Promise((resolve) => {
       // Use ffmpeg to get duration by analyzing the file
       const ffmpegProcess = spawn(this.ffmpegPath, [
         '-i',
-        audioPath,
+        resolvedAudioPath,
         '-f',
         'null',
         '-',
@@ -484,16 +516,23 @@ export class WhisperService {
       );
     }
 
-    const outputPath = inputPath.replace(path.extname(inputPath), '.wav');
+    // Canonicalize input path to prevent path traversal
+    const resolvedInputPath = path.resolve(inputPath);
+
+    // Construct output path safely using path.join
+    const outputPath = path.join(
+      path.dirname(resolvedInputPath),
+      path.basename(resolvedInputPath, path.extname(resolvedInputPath)) + '.wav'
+    );
 
     console.log(
-      `[WhisperService] Converting ${inputPath} to WAV format using bundled ffmpeg...`
+      `[WhisperService] Converting ${resolvedInputPath} to WAV format using bundled ffmpeg...`
     );
 
     return new Promise((resolve, reject) => {
       const ffmpegProcess = spawn(this.ffmpegPath, [
         '-i',
-        inputPath,
+        resolvedInputPath,
         '-ar',
         '16000', // 16kHz sample rate
         '-ac',

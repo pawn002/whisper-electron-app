@@ -7,6 +7,7 @@ import { Subject } from 'rxjs';
   selector: 'app-transcription',
   templateUrl: './transcription.component.html',
   styleUrls: ['./transcription.component.scss'],
+  standalone: false,
 })
 export class TranscriptionComponent implements OnInit, OnDestroy {
   selectedFilePath: string | null = null;
