@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2026-01-02
+
+### Added
+- docs: add comprehensive security audit report
+
+### Changed
+- docs: update security audit with remediation status
+- chore: update package-lock.json files after dependency install
+
+### Fixed
+- fix: update qs package to version 6.14.1 for security improvements
+- fix: resolve all security vulnerabilities
+
+### Other
+- Merge pull request #15 from pawn002/claude/audit-security-issues-F0JbZ
+
+
 ## [1.1.2] - 2025-12-17
 
 ### Added
