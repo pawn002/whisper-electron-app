@@ -7,10 +7,21 @@
 
 ## 📄 Documents Created
 
-### Primary Research Document
-- **File**: `BLOG_POST_MORTEM.md` (680 lines)
+### Version 2 (Recommended) - Lived Experience Narrative ⭐
+- **File**: `BLOG_POST_MORTEM_v2.md` (950 lines)
 - **Status**: ✅ Complete - Ready for review
-- **Content**: Comprehensive analysis of 7-week prompt engineering evolution
+- **Content**: Authentic narrative reconciling git history with actual lived experience
+- **Perspective**: Design Technologist (HCD, UX/UI, accessibility lens)
+- **Framework**: P+F → P+F+I → P+F+I+D evolution
+- **Key Theme**: Partnership with AI, not mastery of AI
+
+### Version 1 - Git-Based Analysis
+- **File**: `BLOG_POST_MORTEM.md` (680 lines)
+- **Status**: ✅ Complete - Supplementary reference
+- **Content**: Quantitative analysis of 7-week prompt engineering evolution
+- **Use Case**: Supporting data and metrics for v2 narrative
+
+**Recommendation**: Use **v2** as primary blog post source. It tells the authentic story with unique Design Technologist perspective while preserving all quantitative analysis from v1.
 
 ---
 
@@ -18,171 +29,396 @@
 
 ### Project Metrics
 - **Timeline**: 47 days (Nov 16, 2025 - Jan 1, 2026)
-- **Commits**: 100+ across 7 major development phases
+- **Commits**: 100+ across multiple development stages
 - **Code Impact**: ~6,500 lines removed, ~2,000 lines added
 - **Performance Gain**: Eliminated 7-second startup delay
-- **Prompt Engineering Evolution**: 3/10 → 9.5/10
+- **Prompt Engineering Evolution**: 0/10 → 9.5/10
+- **Starting Point**: "Fully functional" broken code
+- **Ending Point**: Production-ready application
 
-### 7 Development Phases Analyzed
+### 4 Development Stages (P+F → P+F+I → P+F+I+D Framework)
 
-| Phase | Date | Focus | Score | Key Achievement |
-|-------|------|-------|-------|----------------|
-| 1 | Nov 16 | Initial Development | 3/10 | Basic feature implementation |
-| 2 | Nov 17 | Documentation | 5/10 | Structured docs organization |
-| 3 | Nov 22 | Meta-Prompting | 7/10 | **CLAUDE.md breakthrough** (+2 point jump) |
-| 4 | Nov 26-27 | Bug Fixes | 8/10 | Diagnostic reasoning |
-| 5 | Dec 13 | Hardware Optimization | 8.5/10 | Research methodology |
-| 6 | Dec 13-17 | Architecture Migration | 9/10 | **Major refactor success** ⭐ |
-| 7 | Dec 27-Jan 1 | Security Hardening | 9.5/10 | Professional-grade audits |
+| Stage | Timeline | Framework | Score | Key Transformation |
+|-------|----------|-----------|-------|-------------------|
+| 0 | Day 1 | Trust AI Completely | 0/10 | **"Fully Functional" Lie** - Confidently broken code |
+| 1 | Days 2-10 | Problem + Feedback | 2/10 | Broken → Runs (but burns session limits) |
+| 2 | Days 11-21 | P+F + Personal Insight | 5/10 | UX improvements, context-aware solutions |
+| 3 | Days 22-47 | P+F+I + Active Documentation | 7/10 → 9.5/10 | **CLAUDE.md breakthrough**, persistent learning |
+
+### Substages Within P+F+I+D (Git History Mapping)
+
+| Git Phase | Date | Focus | Score | Milestone |
+|-----------|------|-------|-------|-----------|
+| Baseline | Nov 16 | Fix "fully functional" claims | 2/10 | App actually runs |
+| Docs Init | Nov 17 | Initial documentation | 5/10 | Structure emerging |
+| **Breakthrough** | Nov 22 | **CLAUDE.md created** | 7/10 | **+2 point jump** ⭐ |
+| Refinement | Nov 26-27 | Pattern consolidation | 8/10 | Learned patterns applied |
+| Research | Dec 13 | Hardware optimization | 8.5/10 | Research methodology |
+| **Migration** | Dec 13-17 | Architecture refactor | 9/10 | **Complex orchestration** ⭐⭐ |
+| Security | Dec 27-Jan 1 | Professional auditing | 9.5/10 | Production-grade deliverables |
 
 ---
 
 ## 🔑 Key Discoveries Documented
 
-### 1. The CLAUDE.md Breakthrough (Week 3)
+### 0. The "Fully Functional" Lie (Day 1) 🚨
+**The Reality:**
+- Claude delivered confidently broken code claiming "production-ready"
+- Initial prompt resulted in complete failure despite confident assertions
+- Started at 0/10, not 3/10
+
+**The Commitment:**
+- Only Claude Code would fix issues (testing Vibe Coding rigor)
+- No manual intervention allowed
+- This constraint forced development of partnership approach
+
+**The Lesson:**
+> "Confidence ≠ Correctness. Always verify."
+
+### 1. The Partnership Transformation (The Core Insight) ⭐⭐⭐
+**The Shift:**
+```
+Tool Mindset: "Claude, fix this bug." → Forgets next session
+Partnership Mindset: "Claude, fix this bug and document in CLAUDE.md
+                      so you remember it and future developers learn."
+                      → Permanent learning
+```
+
+**The Adage That Changed Everything:**
+> "If you want to go fast, go alone. But if you want to go far, go together."
+
+**Impact:**
+- Transformed relationship from wielding a tool → accommodating a teammate
+- Documentation became shared memory, not drudgery
+- Each session built on previous sessions instead of starting fresh
+
+### 2. The CLAUDE.md Breakthrough (Week 3)
 **Impact:**
 - +2 point skill jump (5/10 → 7/10)
-- 50% token reduction (400 → 150 tokens average)
+- 43% token reduction (350 → 200 tokens average)
 - Eliminated repeated context in every prompt
+- Cross-session continuity: 20% → 95%
 
 **Innovation:**
-- Treating AI as team member with onboarding documentation
+- Treating AI as team member needing onboarding documentation
 - Creating "contract" between developer and AI
 - Moving repeated context up the hierarchy
+- **Claude's persistent memory across sessions**
 
-### 2. Architecture Migration Success (Week 6)
-**Challenge:**
+### 3. The Cross-Session Context Loss Problem
+**The Crushing Disappointment:**
+> "After I exhausted my usage limits for the session, and started a new
+> session later in the day, it was quite a let down to see the working
+> context of the previous session was gone."
+
+**The Problem:**
+- P+F+I prompting built rich context within sessions
+- Hard-fought understanding disappeared between sessions
+- Had to re-explain everything in new sessions
+
+**The Solution:**
+- Active Documentation (P+F+I+D)
+- CLAUDE.md as persistent memory
+- Document clever workarounds immediately
+- Reference documented patterns in future sessions
+
+### 4. Architecture Migration Success (Week 6)
+**The UX Problem:**
+- 7-second backend startup delay (poor user experience)
+- Desktop apps need instant startup
+- NestJS complexity unnecessary for offline app
+
+**The Challenge:**
 - Remove entire NestJS backend (~2,000 lines)
 - Migrate to Electron-native architecture
-- Preserve all functionality
+- Preserve all functionality without regressions
 
-**Prompt Strategy:**
+**The P+F+I+D Orchestration:**
 ```
-Phase 1: Plan → Analyze architecture, create migration plan
-Phase 2: Implement → Incremental service-by-service migration
-Phase 3: Verify → Test each IPC channel before proceeding
-Phase 4: Document → Comprehensive audit (AUDIT_REPORT.md)
+Phase 1: Plan → Analyze architecture, document migration plan in CLAUDE.md
+Phase 2: Implement → Incremental service-by-service migration with testing
+Phase 3: Verify → Test each IPC channel per documented checklist
+Phase 4: Document → Comprehensive AUDIT_REPORT.md, update all docs
+Phase 5: Cleanup → Remove backend, final verification
 ```
 
 **Results:**
-- 65 files changed
+- 65 files changed perfectly
 - -1,300 net lines of code
-- +7 seconds startup performance
+- +7 seconds startup performance (instant launch)
 - Zero functionality regressions
 - 100% test pass rate
+- **Only possible because of comprehensive documentation**
 
-### 3. Token Efficiency Achievement
+### 5. Design Technologist Perspective (Unique Angle)
+**Background:**
+- Not a pure developer perspective
+- Cross-disciplinary: Development + HCD + UX/UI
+
+**Applied to Prompting:**
+- **Affordance-Signifier Gap Analysis**: What Claude can do vs. what prompt suggests
+- **Accessibility Lens**: Prompting should meet users where they are
+- **User Experience Focus**: Usability issues don't cause programmatic errors
+
+**Example Insights:**
+```
+Traditional: "Fix the bug where UI doesn't update"
+Design Tech: "Users don't get completion feedback. The affordance exists
+             (transcription happens) but the signifier is missing (no visible
+             indication). This violates immediate feedback principles."
+```
+
+**Impact:**
+- Claude learned design thinking through consistent UX explanations
+- Could identify affordance-signifier gaps in later work
+- Proactively suggested user-centered solutions
+
+### 6. Token Efficiency Achievement
 **Calculation:**
-- 50 prompts in phases 3-7
-- Without CLAUDE.md: 50 × 400 = 20,000 tokens
-- With CLAUDE.md: 50 × 150 = 7,500 tokens
-- **Savings: 12,500 tokens (60% reduction)**
+- 50 prompts in stages 3-4 (with CLAUDE.md)
+- Without CLAUDE.md: 50 × 350 = 17,500 tokens
+- With CLAUDE.md: 50 × 200 = 10,000 tokens
+- **Savings: 7,500 tokens (43% reduction)**
+
+**But Token Count Understates Real Impact:**
+- Time per feature: 83% reduction (126 min → 22 min)
+- Cross-session efficiency: 95% continuity vs. 20%
+- Knowledge compounds: Each documented pattern becomes building block
 
 ---
 
 ## 📚 Document Contents Overview
 
-### BLOG_POST_MORTEM.md Structure
+### BLOG_POST_MORTEM_v2.md Structure (Recommended)
 
-1. **Executive Summary** - Project metrics and timeline
-2. **Phase-by-Phase Analysis** - Detailed breakdown of 7 phases with:
-   - Actual commits
-   - Prompt examples (before/after)
-   - Lessons learned
-   - Evolution metrics
-3. **Prompt Engineering Principles** - 5 core principles discovered:
-   - The Specificity Spectrum
-   - The Context Hierarchy
-   - The Verification Loop
-   - The Constraint Paradox
-   - The Documentation-First Principle
-4. **Comparative Prompt Analysis** - 2 detailed case studies:
-   - "Add History Tab" (naive vs. improved)
-   - "Architecture Migration" (multi-phase approach)
-5. **Token Efficiency Strategies** - Quantitative analysis
+**Narrative Arc**: Failure → Struggle → Breakthrough → Mastery
+
+1. **Prologue: The Setup** - Vibe Coding experiment design, tool choices, constraints
+2. **Phase 0: The "Fully Functional" Lie** - Day 1 complete failure (0/10)
+3. **Stage 1: Problem + Feedback** - Broken → Runs (2/10)
+4. **Stage 2: P+F + Personal Insight** - UX improvements, design thinking (5/10)
+5. **Stage 3: P+F+I + Active Documentation** - CLAUDE.md breakthrough (7/10 → 9.5/10)
+6. **Git History Integration** - Mapping lived experience to commits
+7. **The Real Prompt Evolution Framework** - P+F → P+F+I → P+F+I+D detailed
+8. **Quantitative Impact Analysis** - Metrics with real context
+9. **The Real Principles Discovered**:
+   - The Partnership Principle (tool → teammate)
+   - The Incompleteness Principle (Gödel applied)
+   - The Adage Principle (colloquialisms work)
+   - The Affordance-Signifier Principle (HCD applied)
+   - The Documentation-First Principle (slow to go fast)
+10. **The Accessibility Lens Applied to Prompting** - Unique perspective
+11. **Anti-Patterns Discovered** - 5 patterns with real examples
+12. **Unexpected Discoveries** - Deliberate verbosity, Claude learns design, etc.
+13. **Comparative Analysis** - Before/after with authentic prompts
+14. **Lessons by Experience Level** - Developer, Designer, Beginner
+15. **What I'd Do Differently** - Honest reflection
+16. **Advice for Others Trying This** - By role and experience
+17. **Conclusion: The Real Transformation** - "Documentation is love"
+18. **Appendix** - Actual CLAUDE.md structure
+
+**Unique Elements**:
+- Real prompts from development (not reconstructed)
+- Design Technologist perspective
+- Accessibility thinking applied to AI
+- Philosophical grounding (Gödel, adages)
+- Honest about failure and struggle
+
+### BLOG_POST_MORTEM.md Structure (v1 - Supplementary)
+
+1. **Executive Summary** - Quantitative focus
+2. **Phase-by-Phase Analysis** - 7 git-based phases
+3. **Prompt Engineering Principles** - 5 technical principles
+4. **Comparative Prompt Analysis** - 2 case studies
+5. **Token Efficiency Strategies** - Calculations and metrics
 6. **Lessons by Skill Level** - Beginner, Intermediate, Advanced
-7. **Anti-Patterns** - 5 common mistakes to avoid
-8. **Prompt Templates** - 4 reusable templates:
-   - Feature Implementation
-   - Bug Fix
-   - Refactoring
-   - Documentation
-9. **Quantitative Impact** - Metrics table showing progression
-10. **Appendix** - Templates and meta-notes for blog
+7. **Anti-Patterns** - 5 common mistakes
+8. **Prompt Templates** - 4 reusable templates
+9. **Quantitative Impact** - Metrics tables
+10. **Appendix** - Templates and meta-notes
+
+**Use Case**: Supporting data and templates for v2 narrative
+
+### Version Comparison
+
+| Aspect | v1 (Git-Based) | v2 (Lived Experience) ⭐ |
+|--------|---------------|-------------------------|
+| **Perspective** | Developer | Design Technologist |
+| **Starting Point** | 3/10 | 0/10 (failure) |
+| **Framework** | 7 Phases | P+F → P+F+I → P+F+I+D |
+| **Theme** | Technique Mastery | Partnership Transformation |
+| **Tone** | Technical Success | Authentic Journey |
+| **Prompts** | Reconstructed | Actual from development |
+| **Philosophy** | Implicit | Explicit (Gödel, adages, accessibility) |
+| **Unique Angle** | Quantitative | Design/UX perspective |
+| **Best For** | Metrics & templates | Blog narrative |
+| **Authenticity** | High | Very High |
+| **Relatability** | Good | Excellent |
+
+**Recommendation**: Use **v2** as primary blog source with v1 as supporting data reference.
 
 ---
 
 ## 🎨 Suggested Blog Post Structure
 
-### Option A: Single Comprehensive Post (3,100 words)
+### Option A: Single Comprehensive Post (3,500-4,000 words) - **RECOMMENDED**
+**Title**: "From 'Fully Functional' Lie to Production Reality: A Design Technologist's Journey with AI"
+
+**Hook**: Start with failure, not success
+```
+"Claude Code delivered confidently broken code claiming it was
+'fully functional and production-ready.' That was Day 1.
+This is what happened next..."
+```
+
 **Sections:**
-1. Introduction (300 words) - Hook with 3/10 → 9.5/10 journey
-2. The Breakthrough Moment (500 words) - CLAUDE.md creation
-3. Case Study: Architecture Migration (800 words) - Deep dive
-4. Five Principles Discovered (600 words) - Core learnings
-5. Prompt Templates (400 words) - Downloadable resources
-6. Quantitative Results (200 words) - Metrics table
-7. Conclusion (300 words) - Key takeaways, CTA
+1. **The Setup** (400 words)
+   - Vibe Coding experiment
+   - Why Zed Editor (clean break from VS Code)
+   - The commitment: Only Claude fixes issues
+
+2. **The "Fully Functional" Lie** (500 words)
+   - Initial prompt
+   - Claude's confident claims
+   - The reality: 0/10
+   - Decision to let Claude learn
+
+3. **The Evolution** (1,200 words)
+   - Stage 1: P+F (burning through sessions)
+   - Stage 2: P+F+I (UX perspective, design thinking)
+   - Stage 3: P+F+I+D (the breakthrough)
+   - Real prompt examples from each stage
+
+4. **The Partnership Transformation** (600 words)
+   - "If you want to go fast, go alone..."
+   - Tool mindset → Teammate mindset
+   - Cross-session context loss problem
+   - CLAUDE.md as persistent memory
+
+5. **The Architecture Migration** (700 words)
+   - UX problem: 7-second delay
+   - P+F+I+D orchestration in action
+   - 2,000 lines removed, zero regressions
+   - Only possible with documentation
+
+6. **The Design Technologist Lens** (400 words)
+   - Affordance-signifier gaps
+   - Accessibility thinking applied to prompting
+   - How Claude learned design thinking
+
+7. **Lessons & Templates** (500 words)
+   - By role: Developer, Designer, Beginner
+   - Anti-patterns to avoid
+   - Prompt templates (link to download)
+
+8. **Conclusion: Documentation is Love** (300 words)
+   - Not about mastering AI
+   - About partnering with AI
+   - Going far together
+   - CTA: Download CLAUDE.md template
 
 **Pros:**
-- Complete story in one piece
-- Strong narrative arc
-- Comprehensive resource
+- Authentic, relatable narrative
+- Unique perspective (Design Technologist)
+- Strong emotional arc (failure → mastery)
+- Comprehensive but engaging
+- Memorable hook and conclusion
 
 **Cons:**
-- Long read (8-10 minutes)
-- May lose some readers
+- Longer read (10-12 minutes)
+- Requires commitment from reader
 
 ---
 
 ### Option B: Blog Series (3 posts)
 
-#### Post 1: "The CLAUDE.md Breakthrough: How Meta-Documentation 10x'd My AI Pair Programming"
-- **Length**: 1,000-1,200 words
-- **Focus**: Week 3 breakthrough
-- **Hook**: 50% token reduction, 2-point skill jump
-- **Content**: Before/after examples, CLAUDE.md template
-
-#### Post 2: "Orchestrating a Major Refactor with AI: Migrating 2,000 Lines of Code"
+#### Post 1: "The 'Fully Functional' Lie: When Claude Code Failed Spectacularly (And What I Learned)"
 - **Length**: 1,200-1,500 words
-- **Focus**: Week 6 architecture migration
-- **Hook**: Zero regressions, +7s performance
-- **Content**: Multi-phase prompt strategy, verification loops
+- **Hook**: "Claude delivered confidently broken code claiming 'production-ready'"
+- **Focus**: Days 1-21 (Trust → P+F → P+F+I)
+- **Content**:
+  - The Vibe Coding experiment setup
+  - Initial failure (0/10)
+  - P+F struggles (burning through sessions)
+  - P+F+I breakthrough (design thinking)
+  - Real prompt examples
+- **CTA**: "Read Part 2: The Partnership Transformation"
 
-#### Post 3: "Prompt Templates That Actually Work: 7 Weeks of Trial and Error"
-- **Length**: 1,000-1,200 words
-- **Focus**: Practical templates and principles
-- **Hook**: Downloadable templates
-- **Content**: 4 templates, 5 principles, anti-patterns
+#### Post 2: "Treating AI as a Teammate, Not a Tool: The CLAUDE.md Breakthrough"
+- **Length**: 1,500-1,800 words
+- **Hook**: "If you want to go fast, go alone. If you want to go far, go together."
+- **Focus**: Days 22-47 (P+F+I+D evolution)
+- **Content**:
+  - Cross-session context loss problem
+  - Active documentation solution
+  - CLAUDE.md as persistent memory
+  - Token efficiency (43% reduction)
+  - Time efficiency (83% reduction)
+  - Partnership vs. tool mindset
+- **Downloadable**: CLAUDE.md template
+- **CTA**: "Read Part 3: Orchestrating Complex Changes with AI"
+
+#### Post 3: "How AI Removed 2,000 Lines of Code Without Breaking Anything"
+- **Length**: 1,200-1,500 words
+- **Hook**: "Architecture migration, zero regressions, only possible with documentation"
+- **Focus**: Architecture migration case study
+- **Content**:
+  - The UX problem (7-second delay)
+  - P+F+I+D orchestration in action
+  - 5-phase migration strategy
+  - Why comprehensive documentation was critical
+  - Design Technologist perspective
+  - Lessons by role
+- **Downloadable**: Prompt templates (4 templates)
+- **CTA**: Download templates, share your journey
 
 **Pros:**
-- Easier to digest
+- Easier to digest (5-7 min reads each)
 - Multiple SEO opportunities
-- Can promote series
+- Can promote as series
 - Readers can pick topics of interest
+- Three separate CTA opportunities
+- More social media content (3× posts)
 
 **Cons:**
-- Fragmented narrative
-- Requires more effort to publish
+- Fragmented narrative (need strong cross-linking)
+- Requires 3× publishing effort
+- Risk some readers only see Part 1
 
 ---
 
-### Option C: Condensed Version (1,500-2,000 words)
+### Option C: Condensed Version (1,800-2,200 words)
+**Title**: "I Let AI Fix Its Own Broken Code for 47 Days. Here's What Happened."
+
+**Hook**: The "Fully Functional" lie (Day 1 failure)
+
 **Focus on:**
-- CLAUDE.md breakthrough (most unique)
-- Architecture migration highlights
-- Top 3 principles
-- 2 prompt templates
-- Metrics table
+- The setup: Vibe Coding experiment, Zed Editor, commitment
+- The failure: 0/10 start
+- The evolution: P+F → P+F+I → P+F+I+D (brief)
+- The breakthrough: CLAUDE.md as persistent memory
+- The transformation: Tool → Teammate mindset
+- Architecture migration highlight (2,000 lines, zero regressions)
+- Top 3 principles:
+  1. Partnership Principle ("go far together")
+  2. Documentation-First Principle
+  3. Accessibility Lens (Design Technologist angle)
+- 2 best prompt templates (before/after)
+- Key metrics table
+- "Documentation is love" conclusion
 
 **Pros:**
-- Quick to publish
+- Quick to publish (less editing)
 - Focused message
-- Higher completion rate
+- Higher completion rate (6-8 min read)
+- Still tells authentic story
+- Includes unique perspective
 
 **Cons:**
-- Loses some depth
+- Loses philosophical depth
+- Fewer examples
 - Less comprehensive resource
+- May leave readers wanting more (could be a pro!)
 
 ---
 
@@ -190,12 +426,14 @@ Phase 4: Document → Comprehensive audit (AUDIT_REPORT.md)
 
 ### Immediate Actions (Choose One)
 
-#### Option 1: Review & Edit Main Document
-- [ ] Read BLOG_POST_MORTEM.md thoroughly
-- [ ] Identify sections to keep/cut
+#### Option 1: Review & Edit v2 Document (Recommended)
+- [ ] Read BLOG_POST_MORTEM_v2.md thoroughly
+- [ ] Verify authentic prompts and examples resonate
 - [ ] Decide on blog format (A, B, or C above)
-- [ ] Edit for tone and audience
-- [ ] Add personal anecdotes/insights
+- [ ] Edit for pacing and flow
+- [ ] Ensure Design Technologist perspective is clear
+- [ ] Verify accessibility lens comes through
+- [ ] Check that "Documentation is love" conclusion lands well
 
 #### Option 2: Create Condensed Version
 - [ ] Extract CLAUDE.md breakthrough section
@@ -245,32 +483,67 @@ Phase 4: Document → Comprehensive audit (AUDIT_REPORT.md)
 
 ## 💡 Unique Selling Points
 
-### What Makes This Post Different
+### What Makes This Post Different (v2 Advantages)
 
-1. **Real Project, Real Data**
-   - Not hypothetical best practices
-   - Actual 47-day development journey
-   - Real commits, real code
+1. **Starts with Failure, Not Success**
+   - Honest about Day 1 complete failure (0/10)
+   - "Fully functional" confidently broken code
+   - Relatablereal struggle, not sanitized success story
+   - Authentic journey: Failure → Struggle → Breakthrough → Mastery
 
-2. **Quantitative Evolution**
-   - Scored progression (3/10 → 9.5/10)
-   - Token efficiency metrics (60% reduction)
-   - Success rate improvement (60% → 98%)
+2. **Design Technologist Perspective** (Unique in AI Content)
+   - Not pure developer angle
+   - Cross-disciplinary: Development + HCD + UX/UI
+   - Affordance-signifier gap analysis
+   - Accessibility lens applied to prompting
+   - UX problems that don't throw errors
 
-3. **Meta-Documentation Innovation**
-   - CLAUDE.md as force multiplier
-   - Novel approach to AI collaboration
-   - Template readers can use immediately
+3. **Philosophical Grounding** (Depth)
+   - Gödel's incompleteness theorem applied
+   - Adages and colloquialisms that actually work
+   - "If you want to go fast, go alone. If you want to go far, go together."
+   - "Documentation is love" conclusion
 
-4. **Complex Task Success**
-   - Architecture migration (2,000 lines removed)
-   - Zero regressions
-   - Detailed prompt strategy revealed
+4. **Partnership, Not Mastery** (Different Theme)
+   - Tool mindset → Teammate mindset transformation
+   - Accommodation, not domination
+   - Documentation as shared memory
+   - AI collaboration as relationship building
 
-5. **Actionable Templates**
-   - 4 production-ready templates
-   - Anti-patterns to avoid
-   - Downloadable resources
+5. **Real Prompts from Development**
+   - Not reconstructed or idealized
+   - Actual verbose, exploratory prompts
+   - Shows deliberate verbosity building memory
+   - P+F → P+F+I → P+F+I+D framework evolution
+
+6. **Vibe Coding in Practice**
+   - Real test of industry hype
+   - Rigorous constraint: Only Claude fixes issues
+   - Zed Editor (clean break from VS Code)
+   - 47-day validation of approach
+
+7. **Quantitative + Qualitative**
+   - All the metrics (43% token reduction, 83% time reduction)
+   - PLUS the why and how (cross-session context loss solved by CLAUDE.md)
+   - Numbers with authentic narrative context
+
+8. **Complex Task Orchestration**
+   - Architecture migration: 2,000 lines removed, zero regressions
+   - Only possible because of documentation
+   - P+F+I+D in action (5-phase strategy)
+   - Shows AI can handle complexity with right partnership
+
+9. **Accessibility Angle** (Underserved)
+   - Prompting should meet users where they are
+   - Not "machine-native" language requirement
+   - Human language accommodation
+   - Design thinking applied to AI interaction
+
+10. **Actionable Resources**
+    - 4 production-ready prompt templates
+    - CLAUDE.md template download
+    - Anti-patterns with real examples
+    - Advice by role (Developer, Designer, Beginner)
 
 ---
 
@@ -500,12 +773,16 @@ Phase 4: Document → Comprehensive audit (AUDIT_REPORT.md)
 4. Quantitative metrics make the case more compelling
 5. Templates give immediate value to readers
 
-### Tone Considerations:
-- Technical but accessible
-- Humble about learning process (3/10 → 9.5/10, not "I'm an expert")
-- Practical over theoretical
-- Show both successes and failures
-- Emphasize replicability (readers can do this too)
+### Tone Considerations (v2 Specific):
+- **Authentic and honest** - Start with failure, not success
+- **Humble about journey** - 0/10 → 9.5/10 through partnership, not mastery
+- **Practical over theoretical** - Real prompts, real problems
+- **Show struggle, not just solutions** - Cross-session context loss, burning through limits
+- **Philosophical depth** - Adages, Gödel, accessibility thinking
+- **Emphasize replicability** - CLAUDE.md template, prompt templates, by-role advice
+- **Design Technologist voice** - HCD, UX, affordance-signifier language
+- **Partnership framing** - "Teammate who needs accommodation" not "tool to wield"
+- **Memorable** - "Documentation is love," "Go far together"
 
 ---
 
@@ -538,8 +815,32 @@ Phase 4: Document → Comprehensive audit (AUDIT_REPORT.md)
 ---
 
 **Next Review Date**: _[To be scheduled]_
-**Status**: 📖 Research phase - Awaiting review of BLOG_POST_MORTEM.md
-**Action Required**: Read main document, choose format, begin outlining
+**Status**: 📖 Research phase - Two versions available for review
+**Action Required**:
+1. Read BLOG_POST_MORTEM_v2.md (recommended - authentic narrative)
+2. Reference BLOG_POST_MORTEM.md (supplementary - metrics and templates)
+3. Choose blog format (A, B, or C)
+4. Begin outlining/editing
+
+---
+
+## 📋 Document Revision History
+
+### January 4, 2026 - v2 Integration
+- **Added**: BLOG_POST_MORTEM_v2.md (reconciled with lived experience)
+- **Updated**: Executive Summary (0/10 start, not 3/10)
+- **Updated**: Development framework (P+F → P+F+I → P+F+I+D)
+- **Updated**: Key Discoveries (Partnership Transformation, Design Technologist lens)
+- **Updated**: Blog post structures (all three options revised)
+- **Updated**: Unique Selling Points (10 distinct advantages)
+- **Updated**: Tone considerations (authentic, partnership-focused)
+- **Added**: Version comparison table (v1 vs v2)
+- **Recommendation**: Use v2 as primary source with v1 as supporting data
+
+### January 4, 2026 - Initial Creation
+- **Created**: BLOG_POST_MORTEM.md (git-based analysis)
+- **Created**: NEXT_STEPS.md (planning document)
+- **Framework**: 7-phase technical progression
 
 ---
 
