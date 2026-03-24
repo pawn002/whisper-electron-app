@@ -5,37 +5,32 @@
 
 .upload-section {
   margin-bottom: var(--spacing-md);
+}
 
-  button {
-    &:focus-visible {
-      outline: var(--focus-ring-width) solid var(--color-focus);
-      outline-offset: var(--focus-ring-offset);
-    }
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background-color: var(--color-bg-surface);
+  border: var(--border-width-thin) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-accessible);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-default);
+  letter-spacing: 0.02em;
+
+  .material-icons {
+    color: var(--color-text-subtle);
+    font-size: var(--font-size-lg);
+    flex-shrink: 0;
   }
 
-  // Aligned with Candor surface/card pattern
-  .file-info {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    margin-top: var(--spacing-sm);
-    padding: var(--spacing-sm);
-    background-color: var(--color-bg-surface);
-    border: var(--border-width-thin) solid var(--color-border-default);
-    border-radius: var(--radius-sm);
-
-    mat-icon {
-      color: var(--color-text-subtle);
-    }
-
-    .file-size {
-      margin-left: auto;
-      font-family: var(--font-family-accessible);
-      font-size: var(--font-size-sm);
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.02em;
-      color: var(--color-text-subtle);
-    }
+  .file-size {
+    margin-left: auto;
+    color: var(--color-text-subtle);
+    font-variant-numeric: tabular-nums;
   }
 }
 
@@ -43,23 +38,15 @@
   display: flex;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
-  align-items: flex-start;
+  align-items: flex-end;
   flex-wrap: wrap;
 
-  mat-form-field {
+  .input-wrapper {
     flex: 1;
-    min-width: 200px;
-  }
-
-  button {
-    &:focus-visible {
-      outline: var(--focus-ring-width) solid var(--color-focus);
-      outline-offset: var(--focus-ring-offset);
-    }
+    min-width: 180px;
   }
 }
 
-// Aligned with Candor progress bar container pattern
 .progress-section {
   margin: var(--spacing-md) 0;
   padding: var(--spacing-md);
@@ -67,48 +54,45 @@
   border: var(--border-width-thin) solid var(--color-border-default);
   border-radius: var(--radius-md);
   text-align: center;
+}
 
-  .spinner-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: var(--spacing-sm);
-  }
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
 
-  .progress-label {
-    font-family: var(--font-family-accessible);
-    font-weight: var(--font-weight-medium);
-    font-size: var(--font-size-sm);
-    letter-spacing: 0.02em;
-    color: var(--color-text-default);
-    margin: 0 0 var(--spacing-xs) 0;
-  }
+.progress-label {
+  font-family: var(--font-family-accessible);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.02em;
+  color: var(--color-text-default);
+  margin: 0;
 }
 
 .result-section {
   margin-top: var(--spacing-md);
 
   h3 {
-    margin-bottom: var(--spacing-sm);
+    margin: 0 0 var(--spacing-sm) 0;
     font-family: var(--font-family-base);
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-default);
   }
+}
 
-  .full-width {
-    width: 100%;
-  }
+.transcript-textarea {
+  resize: vertical;
+  min-height: 200px;
+  font-family: var(--font-family-mono) !important;
+  font-size: var(--font-size-sm) !important;
+  line-height: var(--line-height-relaxed);
+}
 
-  .result-actions {
-    display: flex;
-    gap: var(--spacing-xs);
-    margin-top: var(--spacing-sm);
-
-    button {
-      &:focus-visible {
-        outline: var(--focus-ring-width) solid var(--color-focus);
-        outline-offset: var(--focus-ring-offset);
-      }
-    }
-  }
+.result-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
 }

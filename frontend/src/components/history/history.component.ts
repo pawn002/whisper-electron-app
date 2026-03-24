@@ -1,13 +1,7 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { MatCardModule } from "@angular/material/card";
-import { MatIconModule } from "@angular/material/icon";
-import { MatButtonModule } from "@angular/material/button";
-import { MatTableModule } from "@angular/material/table";
-import { MatChipsModule } from "@angular/material/chips";
-import { MatTooltipModule } from "@angular/material/tooltip";
-import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
 import { ElectronService } from "../../services/electron.service";
+import { ToastService } from "../../services/toast.service";
 
 interface TranscriptionHistoryItem {
   id: string;
@@ -25,35 +19,17 @@ interface TranscriptionHistoryItem {
 @Component({
   selector: "app-history",
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTableModule,
-    MatChipsModule,
-    MatTooltipModule,
-    MatSnackBarModule,
-  ],
+  imports: [CommonModule],
   templateUrl: "./history.component.html",
   styleUrls: ["./history.component.scss"],
 })
 export class HistoryComponent implements OnInit, OnDestroy {
   history: TranscriptionHistoryItem[] = [];
-  displayedColumns: string[] = [
-    "fileName",
-    "model",
-    "status",
-    "duration",
-    "transcriptionTime",
-    "timestamp",
-    "actions",
-  ];
   isLoading = true;
 
   constructor(
     private electronService: ElectronService,
-    private snackBar: MatSnackBar,
+    private toastService: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -111,16 +87,16 @@ export class HistoryComponent implements OnInit, OnDestroy {
     return date.toLocaleString();
   }
 
-  getStatusColor(status: string): "primary" | "accent" | "warn" | undefined {
+  getStatusVariant(status: string): string {
     switch (status) {
       case "completed":
-        return "primary";
+        return "success";
       case "failed":
-        return "warn";
+        return "error";
       case "processing":
-        return "accent";
+        return "primary";
       default:
-        return undefined;
+        return "";
     }
   }
 
@@ -130,17 +106,9 @@ export class HistoryComponent implements OnInit, OnDestroy {
         const text =
           typeof item.result === "string" ? item.result : item.result.text;
         await navigator.clipboard.writeText(text);
-        this.snackBar.open("Transcript copied to clipboard", "Close", {
-          duration: 3000,
-          horizontalPosition: "center",
-          verticalPosition: "bottom",
-        });
+        this.toastService.show("Transcript copied to clipboard", "success", 3000);
       } catch (error) {
-        this.snackBar.open("Failed to copy transcript", "Close", {
-          duration: 3000,
-          horizontalPosition: "center",
-          verticalPosition: "bottom",
-        });
+        this.toastService.show("Failed to copy transcript", "error", 3000);
       }
     }
   }

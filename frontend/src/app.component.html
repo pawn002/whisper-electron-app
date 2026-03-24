@@ -1,32 +1,73 @@
-<mat-toolbar color="primary" class="app-toolbar">
-    <mat-icon>mic</mat-icon>
-    <span class="title">{{ title }}</span>
-</mat-toolbar>
+<header class="app-header">
+    <span class="material-icons" aria-hidden="true">mic</span>
+    <span class="app-title">{{ title }}</span>
+</header>
 
 <div class="app-container">
-    <mat-tab-group animationDuration="0ms">
-        <mat-tab label="Transcription">
-            <div class="tab-content">
+    <div class="tabs">
+        <div class="tabs__list" role="tablist">
+            <button
+                class="tabs__tab"
+                role="tab"
+                [attr.aria-selected]="activeTab === 0"
+                (click)="activeTab = 0"
+            >
+                Transcription
+            </button>
+            <button
+                class="tabs__tab"
+                role="tab"
+                [attr.aria-selected]="activeTab === 1"
+                (click)="activeTab = 1"
+            >
+                Models
+            </button>
+            <button
+                class="tabs__tab"
+                role="tab"
+                [attr.aria-selected]="activeTab === 2"
+                (click)="activeTab = 2"
+            >
+                History
+            </button>
+        </div>
+        <div class="tabs__panels">
+            <div role="tabpanel" [hidden]="activeTab !== 0">
                 <app-transcription></app-transcription>
             </div>
-        </mat-tab>
-
-        <mat-tab label="Models">
-            <div class="tab-content">
+            <div role="tabpanel" [hidden]="activeTab !== 1">
                 <app-model-selector></app-model-selector>
             </div>
-        </mat-tab>
-
-        <mat-tab label="History">
-            <div class="tab-content">
+            <div role="tabpanel" [hidden]="activeTab !== 2">
                 <app-history></app-history>
             </div>
-        </mat-tab>
-    </mat-tab-group>
+        </div>
+    </div>
 </div>
 
 <div class="status-bar" *ngIf="systemInfo">
     <span>Platform: {{ systemInfo.platform }}</span>
     <span>•</span>
     <span>Version: {{ systemInfo.version }}</span>
+</div>
+
+<div class="toast-container" aria-live="polite" aria-atomic="false">
+    <div
+        *ngFor="let toast of toastService.toasts$ | async"
+        class="toast toast--{{ toast.variant }}"
+    >
+        <div class="toast__content">
+            <p class="toast__message">{{ toast.message }}</p>
+        </div>
+        <button
+            class="toast__dismiss"
+            (click)="toastService.dismiss(toast.id)"
+            aria-label="Dismiss notification"
+        >
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <line x1="4" y1="4" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line x1="12" y1="4" x2="4" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </button>
+    </div>
 </div>

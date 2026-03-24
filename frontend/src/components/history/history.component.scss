@@ -1,22 +1,13 @@
 .history-card {
   max-width: 1200px;
   margin: 0 auto;
+}
 
-  mat-card-header {
-    position: relative;
-
-    .refresh-btn {
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-
-      &:focus-visible {
-        outline: var(--focus-ring-width) solid var(--color-focus);
-        outline-offset: var(--focus-ring-offset);
-      }
-    }
-  }
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .loading-container,
@@ -32,7 +23,7 @@
   color: var(--color-text-subtle);
   letter-spacing: 0.02em;
 
-  mat-icon {
+  .material-icons {
     font-size: 64px;
     width: 64px;
     height: 64px;
@@ -56,52 +47,21 @@
   margin-top: var(--spacing-sm);
 }
 
-.history-table {
-  width: 100%;
-  min-width: 800px;
+.file-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 
-  .file-cell {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-
-    mat-icon {
-      font-size: var(--font-size-lg);
-      width: 20px;
-      height: 20px;
-      color: var(--color-text-subtle);
-    }
-
-    span {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 250px;
-    }
+  .material-icons {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-subtle);
+    flex-shrink: 0;
   }
 
-  // Aligned with Candor badge--default pattern
-  .model-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.2rem 0.65rem;
-    background-color: var(--color-bg-surface);
-    color: var(--color-text-subtle-on-surface);
-    border-radius: var(--radius-full);
-    font-family: var(--font-family-accessible);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
-    letter-spacing: 0.06em;
-    line-height: var(--line-height-tight);
+  span:not(.material-icons) {
     white-space: nowrap;
-    text-transform: capitalize;
-  }
-
-  button {
-    &:focus-visible {
-      outline: var(--focus-ring-width) solid var(--color-focus);
-      outline-offset: var(--focus-ring-offset);
-    }
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px;
   }
 }

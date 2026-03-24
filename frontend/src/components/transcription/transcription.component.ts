@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { ElectronService } from '../../services/electron.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../services/toast.service';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -45,7 +45,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
 
   constructor(
     private electronService: ElectronService,
-    private snackBar: MatSnackBar,
+    private toastService: ToastService,
     private ngZone: NgZone
   ) {}
 
@@ -64,9 +64,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
         this.transcriptionResult = result;
         this.isTranscribing = false;
         this.transcriptionProgress = 100;
-        this.snackBar.open('Transcription completed!', 'Close', {
-          duration: 3000,
-        });
+        this.toastService.show('Transcription completed!', 'success', 3000);
       });
     });
 
@@ -75,9 +73,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
       this.ngZone.run(() => {
         this.isTranscribing = false;
         this.transcriptionProgress = 0;
-        this.snackBar.open(error || 'Transcription failed', 'Close', {
-          duration: 5000,
-        });
+        this.toastService.show(error || 'Transcription failed', 'error', 5000);
       });
     });
 
@@ -139,23 +135,17 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
           const sizeInfo = this.selectedFileSize
             ? ` (${this.formatFileSize(this.selectedFileSize)})`
             : '';
-          this.snackBar.open(`Selected: ${fileName}${sizeInfo}`, 'Close', {
-            duration: 3000,
-          });
+          this.toastService.show(`Selected: ${fileName}${sizeInfo}`, 'info', 3000);
         }
       }
     } catch (error) {
-      this.snackBar.open('Failed to select file', 'Close', {
-        duration: 3000,
-      });
+      this.toastService.show('Failed to select file', 'error', 3000);
     }
   }
 
   async startTranscription() {
     if (!this.selectedFilePath) {
-      this.snackBar.open('Please select an audio file', 'Close', {
-        duration: 3000,
-      });
+      this.toastService.show('Please select an audio file', 'info', 3000);
       return;
     }
 
@@ -190,7 +180,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
 
   async saveTranscript() {
     if (!this.transcriptionResult) {
-      this.snackBar.open('No transcript to save', 'Close', { duration: 3000 });
+      this.toastService.show('No transcript to save', 'info', 3000);
       return;
     }
 
@@ -199,14 +189,10 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
         this.transcriptionResult
       );
       if (savedPath) {
-        this.snackBar.open(`Saved to: ${savedPath}`, 'Close', {
-          duration: 5000,
-        });
+        this.toastService.show(`Saved to: ${savedPath}`, 'success', 5000);
       }
     } catch (error) {
-      this.snackBar.open('Failed to save transcript', 'Close', {
-        duration: 3000,
-      });
+      this.toastService.show('Failed to save transcript', 'error', 3000);
     }
   }
 
@@ -227,9 +213,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
   private handleError(error: any) {
     this.isTranscribing = false;
     this.transcriptionProgress = 0;
-    this.snackBar.open(error.message || 'Transcription failed', 'Close', {
-      duration: 5000,
-    });
+    this.toastService.show(error.message || 'Transcription failed', 'error', 5000);
     console.error('Transcription error:', error);
   }
 
@@ -314,12 +298,10 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
     navigator.clipboard
       .writeText(content)
       .then(() => {
-        this.snackBar.open('Copied to clipboard', 'Close', { duration: 2000 });
+        this.toastService.show('Copied to clipboard', 'success', 2000);
       })
       .catch((error) => {
-        this.snackBar.open('Failed to copy to clipboard', 'Close', {
-          duration: 3000,
-        });
+        this.toastService.show('Failed to copy to clipboard', 'error', 3000);
         console.error('Clipboard error:', error);
       });
   }

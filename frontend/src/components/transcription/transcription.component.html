@@ -1,100 +1,114 @@
-<mat-card class="transcription-card">
-    <mat-card-header>
-        <mat-card-title>Audio Transcription</mat-card-title>
-        <mat-card-subtitle
-            >Upload or select an audio file to transcribe</mat-card-subtitle
-        >
-    </mat-card-header>
+<div class="card card--elevated card--padding-md transcription-card">
+    <div class="card__header">
+        <h2>Audio Transcription</h2>
+        <p class="card-subtitle">Upload or select an audio file to transcribe</p>
+    </div>
 
-    <mat-card-content>
+    <div class="card__body">
         <div class="upload-section">
             <button
-                mat-raised-button
-                color="primary"
+                class="button button--primary button--medium"
                 (click)="selectAudioFile()"
             >
-                <mat-icon>folder_open</mat-icon>
+                <span class="material-icons" aria-hidden="true">folder_open</span>
                 Select Audio File
             </button>
 
             <div *ngIf="selectedFilePath" class="file-info">
-                <mat-icon>audiotrack</mat-icon>
+                <span class="material-icons" aria-hidden="true">audiotrack</span>
                 <span>{{ getFileName() }}</span>
-                <span
-                    class="file-size"
-                    *ngIf="selectedFileSize"
-                    >{{
-                        formatFileSize(selectedFileSize || 0)
-                    }}</span
-                >
+                <span class="file-size" *ngIf="selectedFileSize">{{
+                    formatFileSize(selectedFileSize || 0)
+                }}</span>
             </div>
         </div>
 
         <div class="options-section" *ngIf="selectedFilePath">
-            <mat-form-field appearance="outline">
-                <mat-label>Model</mat-label>
-                <mat-select [(value)]="selectedModel">
-                    <mat-option
+            <div class="input-wrapper">
+                <label class="input-label" for="model-select">Model</label>
+                <select
+                    id="model-select"
+                    class="input"
+                    [(ngModel)]="selectedModel"
+                >
+                    <option
                         *ngFor="let model of availableModels"
                         [value]="model.id"
                     >
                         {{ model.name }}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
+                    </option>
+                </select>
+            </div>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Language</mat-label>
-                <mat-select [(value)]="selectedLanguage">
-                    <mat-option value="auto">Auto Detect</mat-option>
-                    <mat-option value="en">English</mat-option>
-                    <mat-option value="es">Spanish</mat-option>
-                    <mat-option value="fr">French</mat-option>
-                    <mat-option value="de">German</mat-option>
-                </mat-select>
-            </mat-form-field>
+            <div class="input-wrapper">
+                <label class="input-label" for="language-select">Language</label>
+                <select
+                    id="language-select"
+                    class="input"
+                    [(ngModel)]="selectedLanguage"
+                >
+                    <option *ngFor="let lang of languages" [value]="lang.code">
+                        {{ lang.name }}
+                    </option>
+                </select>
+            </div>
 
             <button
-                mat-raised-button
-                color="accent"
+                class="button button--secondary button--medium"
                 (click)="startTranscription()"
                 [disabled]="isTranscribing"
             >
-                <mat-icon>play_arrow</mat-icon>
+                <span class="material-icons" aria-hidden="true">play_arrow</span>
                 Start Transcription
             </button>
         </div>
 
         <div class="progress-section" *ngIf="isTranscribing">
             <div class="spinner-container">
-                <mat-spinner diameter="60" color="accent"></mat-spinner>
+                <svg
+                    class="spinner spinner--lg"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    aria-label="Transcribing audio"
+                    role="status"
+                >
+                    <circle class="spinner__track" cx="10" cy="10" r="9" stroke-width="2"/>
+                    <circle class="spinner__arc" cx="10" cy="10" r="9" stroke-width="2" fill="none" stroke-linecap="round"/>
+                </svg>
             </div>
             <p class="progress-label">Transcribing audio...</p>
         </div>
 
         <div class="result-section" *ngIf="transcriptionResult">
             <h3>Transcription Result</h3>
-            <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Transcript</mat-label>
+            <div class="input-wrapper">
+                <label class="input-label" for="transcript">Transcript</label>
                 <textarea
-                    matInput
+                    id="transcript"
+                    class="input transcript-textarea"
                     rows="10"
                     [ngModel]="getTranscriptionText()"
                     (ngModelChange)="setTranscriptionText($event)"
                     placeholder="Transcription will appear here..."
                 ></textarea>
-            </mat-form-field>
+            </div>
 
             <div class="result-actions">
-                <button mat-button (click)="copyToClipboard()">
-                    <mat-icon>content_copy</mat-icon>
+                <button
+                    class="button button--ghost button--small"
+                    (click)="copyToClipboard()"
+                >
+                    <span class="material-icons" aria-hidden="true">content_copy</span>
                     Copy
                 </button>
-                <button mat-button (click)="exportTranscript()">
-                    <mat-icon>save</mat-icon>
+                <button
+                    class="button button--ghost button--small"
+                    (click)="exportTranscript()"
+                >
+                    <span class="material-icons" aria-hidden="true">save</span>
                     Export
                 </button>
             </div>
         </div>
-    </mat-card-content>
-</mat-card>
+    </div>
+</div>

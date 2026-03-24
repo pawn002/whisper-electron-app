@@ -1,148 +1,108 @@
-<mat-card class="models-card">
-    <mat-card-header>
-        <mat-card-title>Whisper Model Management</mat-card-title>
-        <mat-card-subtitle
-            >Download and manage speech recognition models</mat-card-subtitle
-        >
-    </mat-card-header>
+<div class="card card--elevated card--padding-md models-card">
+    <div class="card__header">
+        <h2>Whisper Model Management</h2>
+        <p class="card-subtitle">Download and manage speech recognition models</p>
+    </div>
 
-    <mat-card-content>
+    <div class="card__body">
         <div *ngIf="isLoading" class="loading-container">
             <p>Loading models...</p>
         </div>
 
-        <div class="info-section" *ngIf="!isLoading">
-            <mat-icon class="info-icon">info</mat-icon>
-            <div class="info-text">
-                <p>
-                    <strong>Tip:</strong> Smaller models are faster but less
-                    accurate. Larger models provide better accuracy but take
-                    longer to process.
-                </p>
-                <p>
+        <div class="alert alert--info info-alert" *ngIf="!isLoading">
+            <span class="material-icons alert__icon" aria-hidden="true">info</span>
+            <div class="alert__content">
+                <p class="alert__message">
+                    <strong>Tip:</strong> Smaller models are faster but less accurate.
+                    Larger models provide better accuracy but take longer to process.
                     Models are downloaded from
                     <a
                         href="https://huggingface.co/ggerganov/whisper.cpp"
                         target="_blank"
                         rel="noopener noreferrer"
-                        >Hugging Face<mat-icon
-                            aria-hidden="true"
-                            class="external-link-icon"
-                            >open_in_new</mat-icon
-                        ></a
-                    >
+                    >Hugging Face</a>
                     and stored locally for offline use.
                 </p>
             </div>
         </div>
 
-        <div class="table-container" *ngIf="!isLoading">
-            <table mat-table [dataSource]="models" class="models-table">
-                <ng-container matColumnDef="name">
-                    <th mat-header-cell *matHeaderCellDef>Model</th>
-                    <td mat-cell *matCellDef="let model">
-                        <div class="model-name">
-                            <mat-icon>memory</mat-icon>
-                            <span class="name-text">{{ model.name }}</span>
-                        </div>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="size">
-                    <th mat-header-cell *matHeaderCellDef>Size</th>
-                    <td mat-cell *matCellDef="let model">{{ model.size }}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="speed">
-                    <th mat-header-cell *matHeaderCellDef>Speed</th>
-                    <td mat-cell *matCellDef="let model">
-                        <span
-                            class="badge"
-                            [class]="'badge-' + getSpeedColor(model.speed)"
-                        >
-                            {{ model.speed }}
-                        </span>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="accuracy">
-                    <th mat-header-cell *matHeaderCellDef>Accuracy</th>
-                    <td mat-cell *matCellDef="let model">
-                        <span
-                            class="badge"
-                            [class]="
-                                'badge-' + getAccuracyColor(model.accuracy)
-                            "
-                        >
-                            {{ model.accuracy }}
-                        </span>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef>Status</th>
-                    <td mat-cell *matCellDef="let model">
-                        <mat-chip *ngIf="model.installed" color="primary">
-                            <mat-icon>check_circle</mat-icon>
-                            Installed
-                        </mat-chip>
-                        <mat-chip
-                            *ngIf="!model.installed && !model.downloading"
-                        >
-                            <mat-icon>cloud_download</mat-icon>
-                            Not Installed
-                        </mat-chip>
-                        <mat-chip *ngIf="model.downloading" color="accent">
-                            <mat-icon>downloading</mat-icon>
-                            Downloading...
-                        </mat-chip>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let model">
-                        <button
-                            mat-raised-button
-                            color="primary"
-                            (click)="downloadModel(model)"
-                            [disabled]="model.installed || model.downloading"
-                            [tabindex]="
-                                model.installed || model.downloading ? -1 : 0
-                            "
-                            *ngIf="!model.installed"
-                        >
-                            <mat-icon>cloud_download</mat-icon>
-                            Download
-                        </button>
-                        <button
-                            mat-button
-                            color="primary"
-                            disabled
-                            tabindex="-1"
-                            *ngIf="model.installed"
-                        >
-                            <mat-icon>check</mat-icon>
-                            Installed
-                        </button>
-                        <div
-                            *ngIf="model.downloading"
-                            class="download-progress"
-                        >
-                            <mat-progress-bar
-                                mode="indeterminate"
-                                color="accent"
-                            ></mat-progress-bar>
-                        </div>
-                    </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr
-                    mat-row
-                    *matRowDef="let row; columns: displayedColumns"
-                ></tr>
+        <div class="table-host table-container" *ngIf="!isLoading">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Size</th>
+                        <th>Speed</th>
+                        <th>Accuracy</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let model of models">
+                        <td>
+                            <div class="model-name">
+                                <span class="material-icons" aria-hidden="true">memory</span>
+                                <span>{{ model.name }}</span>
+                            </div>
+                        </td>
+                        <td>{{ model.size }}</td>
+                        <td>
+                            <span class="badge badge--sm badge--{{ getSpeedVariant(model.speed) }}">
+                                {{ model.speed }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge--sm badge--{{ getAccuracyVariant(model.accuracy) }}">
+                                {{ model.accuracy }}
+                            </span>
+                        </td>
+                        <td>
+                            <span *ngIf="model.installed" class="chip chip--success">
+                                <span class="chip__body">
+                                    <span class="material-icons" aria-hidden="true">check_circle</span>
+                                    Installed
+                                </span>
+                            </span>
+                            <span *ngIf="!model.installed && !model.downloading" class="chip">
+                                <span class="chip__body">
+                                    <span class="material-icons" aria-hidden="true">cloud_download</span>
+                                    Not Installed
+                                </span>
+                            </span>
+                            <span *ngIf="model.downloading" class="chip chip--primary">
+                                <span class="chip__body">
+                                    <span class="material-icons" aria-hidden="true">downloading</span>
+                                    Downloading...
+                                </span>
+                            </span>
+                        </td>
+                        <td>
+                            <button
+                                *ngIf="!model.installed && !model.downloading"
+                                class="button button--primary button--small"
+                                (click)="downloadModel(model)"
+                            >
+                                <span class="material-icons" aria-hidden="true">cloud_download</span>
+                                Download
+                            </button>
+                            <button
+                                *ngIf="model.installed"
+                                class="button button--ghost button--small"
+                                disabled
+                            >
+                                <span class="material-icons" aria-hidden="true">check</span>
+                                Installed
+                            </button>
+                            <div *ngIf="model.downloading" class="download-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-bar__fill progress-bar__fill--indeterminate"></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
-    </mat-card-content>
-</mat-card>
+    </div>
+</div>

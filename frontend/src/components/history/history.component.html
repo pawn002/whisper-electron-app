@@ -1,100 +1,84 @@
-<mat-card class="history-card">
-    <mat-card-header>
-        <mat-card-title>Transcription History</mat-card-title>
-        <mat-card-subtitle>View your past transcriptions</mat-card-subtitle>
-        <button
-            mat-icon-button
-            (click)="loadHistory()"
-            [disabled]="isLoading"
-            class="refresh-btn"
-        >
-            <mat-icon>refresh</mat-icon>
-        </button>
-    </mat-card-header>
+<div class="card card--elevated card--padding-md history-card">
+    <div class="card__header">
+        <div class="card-header-row">
+            <div>
+                <h2>Transcription History</h2>
+                <p class="card-subtitle">View your past transcriptions</p>
+            </div>
+            <button
+                class="button button--ghost button--small"
+                (click)="loadHistory()"
+                [disabled]="isLoading"
+                title="Refresh history"
+                aria-label="Refresh history"
+            >
+                <span class="material-icons" aria-hidden="true">refresh</span>
+            </button>
+        </div>
+    </div>
 
-    <mat-card-content>
+    <div class="card__body">
         <div *ngIf="isLoading" class="loading-container">
             <p>Loading history...</p>
         </div>
 
         <div *ngIf="!isLoading && history.length === 0" class="empty-state">
-            <mat-icon>history</mat-icon>
+            <span class="material-icons" aria-hidden="true">history</span>
             <p>No transcription history yet</p>
             <p class="hint">Your completed transcriptions will appear here</p>
         </div>
 
-        <div class="table-container" *ngIf="!isLoading && history.length > 0">
-            <table mat-table [dataSource]="history" class="history-table">
-                <ng-container matColumnDef="fileName">
-                    <th mat-header-cell *matHeaderCellDef>File</th>
-                    <td mat-cell *matCellDef="let item">
-                        <div class="file-cell">
-                            <mat-icon>audiotrack</mat-icon>
-                            <span>{{ item.fileName || "Unknown" }}</span>
-                        </div>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="model">
-                    <th mat-header-cell *matHeaderCellDef>Model</th>
-                    <td mat-cell *matCellDef="let item">
-                        <span class="model-badge">{{
-                            item.options?.model || "base"
-                        }}</span>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef>Status</th>
-                    <td mat-cell *matCellDef="let item">
-                        <mat-chip [color]="getStatusColor(item.status)">{{
-                            item.status
-                        }}</mat-chip>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="duration">
-                    <th mat-header-cell *matHeaderCellDef>Audio Duration</th>
-                    <td mat-cell *matCellDef="let item">
-                        {{ formatDuration(item.audioDuration) }}
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="transcriptionTime">
-                    <th mat-header-cell *matHeaderCellDef>Processing Time</th>
-                    <td mat-cell *matCellDef="let item">
-                        {{ formatTime(item.transcriptionTime) }}
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="timestamp">
-                    <th mat-header-cell *matHeaderCellDef>Date</th>
-                    <td mat-cell *matCellDef="let item">
-                        {{ formatTimestamp(item.startedAt) }}
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let item">
-                        <button
-                            mat-icon-button
-                            [matTooltip]="'Copy transcript'"
-                            (click)="copyTranscript(item)"
-                            [disabled]="item.status !== 'completed'"
-                            [tabindex]="item.status !== 'completed' ? -1 : 0"
-                        >
-                            <mat-icon>content_copy</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr
-                    mat-row
-                    *matRowDef="let row; columns: displayedColumns"
-                ></tr>
+        <div
+            class="table-host table-container"
+            *ngIf="!isLoading && history.length > 0"
+        >
+            <table>
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Model</th>
+                        <th>Status</th>
+                        <th>Audio Duration</th>
+                        <th>Processing Time</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of history">
+                        <td>
+                            <div class="file-cell">
+                                <span class="material-icons" aria-hidden="true">audiotrack</span>
+                                <span>{{ item.fileName || "Unknown" }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge--sm badge--default">
+                                {{ item.options?.model || "base" }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="chip chip--{{ getStatusVariant(item.status) }}">
+                                <span class="chip__body">{{ item.status }}</span>
+                            </span>
+                        </td>
+                        <td>{{ formatDuration(item.audioDuration) }}</td>
+                        <td>{{ formatTime(item.transcriptionTime) }}</td>
+                        <td>{{ formatTimestamp(item.startedAt) }}</td>
+                        <td>
+                            <button
+                                class="button button--ghost button--small"
+                                title="Copy transcript"
+                                (click)="copyTranscript(item)"
+                                [disabled]="item.status !== 'completed'"
+                                aria-label="Copy transcript"
+                            >
+                                <span class="material-icons" aria-hidden="true">content_copy</span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
-    </mat-card-content>
-</mat-card>
+    </div>
+</div>

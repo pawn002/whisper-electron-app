@@ -14,154 +14,31 @@
   color: var(--color-text-subtle);
 }
 
-// Aligned with Candor alert--info pattern
-.info-section {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--color-bg-surface);
-  border: var(--border-width-thin) solid var(--color-border-strong);
-  border-radius: var(--radius-md);
+.info-alert {
   margin-bottom: var(--spacing-md);
-  font-family: var(--font-family-accessible);
-
-  .info-icon {
-    font-size: var(--font-size-lg);
-    width: 20px;
-    height: 20px;
-    color: var(--color-text-subtle);
-    flex-shrink: 0;
-    margin-top: 0.125rem;
-  }
-
-  .info-text {
-    flex: 1;
-    font-size: var(--font-size-sm);
-    color: var(--color-text-default);
-    line-height: var(--line-height-normal);
-    letter-spacing: 0.02em;
-
-    p {
-      margin: 0 0 var(--spacing-xs) 0;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-
-    strong {
-      font-weight: var(--font-weight-semibold);
-    }
-
-    a {
-      color: var(--color-link);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-
-      &:hover {
-        text-decoration: underline;
-        color: var(--color-link-hover);
-      }
-
-      &:focus-visible {
-        outline: var(--focus-ring-width) solid var(--color-focus);
-        outline-offset: var(--focus-ring-offset);
-      }
-
-      .external-link-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-        vertical-align: middle;
-      }
-    }
-  }
 }
 
 .table-container {
-  width: 100%;
   overflow-x: auto;
 }
 
-.models-table {
-  width: 100%;
-  min-width: 700px;
+.model-name {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 
-  .model-name {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-
-    mat-icon {
-      font-size: var(--font-size-lg);
-      width: 20px;
-      height: 20px;
-      color: var(--color-text-subtle);
-    }
-
-    .name-text {
-      font-weight: var(--font-weight-medium);
-      text-transform: capitalize;
-    }
+  .material-icons {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-subtle);
+    flex-shrink: 0;
   }
 
-  // Aligned with Candor badge component pattern
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-full);
-    font-family: var(--font-family-accessible);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
-    letter-spacing: 0.06em;
-    line-height: var(--line-height-tight);
-    white-space: nowrap;
-    padding: 0.2rem 0.65rem;
-
-    &.badge-success {
-      background-color: var(--color-status-success-bg);
-      color: var(--color-status-success-text);
-    }
-
-    &.badge-primary {
-      background-color: var(--azure-100);
-      color: var(--azure-600);
-    }
-
-    &.badge-warn {
-      background-color: var(--color-status-warning-bg);
-      color: var(--color-status-warning-text);
-    }
+  span:not(.material-icons) {
+    font-weight: var(--font-weight-medium);
+    text-transform: capitalize;
   }
+}
 
-  mat-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-
-    mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-  }
-
-  button {
-    mat-icon {
-      margin-right: 4px;
-    }
-
-    &:focus-visible {
-      outline: var(--focus-ring-width) solid var(--color-focus);
-      outline-offset: var(--focus-ring-offset);
-    }
-  }
-
-  .download-progress {
-    width: 120px;
-  }
+.download-progress {
+  width: 120px;
 }

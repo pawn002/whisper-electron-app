@@ -1,82 +1,70 @@
-.app-toolbar {
+// ─── App Header ──────────────────────────────────────────────────────────────
+.app-header {
   position: sticky;
   top: 0;
   z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0 var(--spacing-md);
+  height: 64px;
+  background-color: var(--navy-800);
+  color: var(--color-text-inverse);
+  font-family: var(--font-family-base);
+  box-shadow: var(--shadow-sm);
 
-  .title {
-    margin-left: var(--spacing-sm);
+  .material-icons {
+    font-size: 24px;
+    color: var(--color-text-inverse);
+  }
+
+  .app-title {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-medium);
+    margin-left: var(--spacing-xs);
   }
 }
 
+// ─── Main Container ───────────────────────────────────────────────────────────
 .app-container {
   height: calc(100vh - 64px - 32px);
-  padding: var(--spacing-sm);
   overflow: auto;
+}
 
-  // Align Material tabs with Candor's dark inverse surface pattern
-  ::ng-deep .mat-mdc-tab-group {
-    .mat-mdc-tab-header {
-      background-color: var(--navy-800);
-    }
+// ─── Tabs (dark inverse surface) ─────────────────────────────────────────────
+// These elements are in this component's template, no ::ng-deep needed
+.tabs__list {
+  background-color: var(--navy-800);
+  border-bottom-color: oklch(from var(--navy-800) calc(l + 0.12) c h);
+  padding: 0 var(--spacing-sm);
+}
 
-    // Inactive tab labels
-    .mat-mdc-tab:not(.mat-mdc-tab-disabled) {
-      .mdc-tab__text-label {
-        color: rgba(255, 255, 255, 0.7);
-        font-family: var(--font-family-base);
-        font-size: var(--font-size-base);
-      }
+.tabs__tab {
+  color: rgba(255, 255, 255, 0.65);
 
-      &:hover .mdc-tab__text-label {
-        color: rgba(255, 255, 255, 0.9);
-      }
+  &[aria-selected='true'] {
+    color: var(--color-text-inverse);
+    font-weight: var(--font-weight-semibold);
+    border-bottom-color: var(--navy-300);
+  }
 
-      &:focus-visible {
-        outline: var(--focus-ring-width) solid var(--color-focus);
-        outline-offset: var(--focus-ring-offset);
-        background-color: rgba(255, 255, 255, 0.08);
-      }
-    }
+  &:hover {
+    color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.06);
+  }
 
-    // Active tab — Candor primary tone visible on dark inverse surface
-    .mat-mdc-tab.mdc-tab--active {
-      .mdc-tab__text-label {
-        color: var(--color-text-inverse);
-        font-weight: var(--font-weight-semibold);
-      }
-
-      &:focus-visible {
-        outline: var(--focus-ring-width) solid var(--color-focus);
-        outline-offset: var(--focus-ring-offset);
-        background-color: rgba(255, 255, 255, 0.08);
-      }
-    }
-
-    // Active tab indicator — use navy-300 (Candor primary light tone on dark bg)
-    .mat-mdc-tab-header-pagination-chevron,
-    .mdc-tab-indicator__content--underline {
-      border-color: var(--navy-300);
-    }
-
-    .mdc-tab-indicator .mdc-tab-indicator__content {
-      border-color: var(--navy-300);
-    }
-
-    // Disabled tab
-    .mat-mdc-tab-disabled {
-      .mdc-tab__text-label {
-        color: rgba(255, 255, 255, 0.3);
-      }
-    }
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+    background-color: rgba(255, 255, 255, 0.06);
   }
 }
 
-.tab-content {
+.tabs__panels {
   padding: var(--spacing-md);
 }
 
+// ─── Status Bar ───────────────────────────────────────────────────────────────
 .status-bar {
   position: fixed;
   bottom: 0;
@@ -94,4 +82,23 @@
   color: var(--color-text-subtle);
   gap: var(--spacing-xs);
   z-index: 1000;
+}
+
+// ─── Toast Container ──────────────────────────────────────────────────────────
+.toast-container {
+  position: fixed;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  z-index: 2000;
+  min-width: 300px;
+  max-width: 500px;
+  pointer-events: none;
+
+  .toast {
+    pointer-events: all;
+  }
 }
