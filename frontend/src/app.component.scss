@@ -15,59 +15,53 @@
   padding: var(--spacing-sm);
   overflow: auto;
 
-  // Enhanced tab contrast for better visibility
+  // Align Material tabs with Candor's dark inverse surface pattern
   ::ng-deep .mat-mdc-tab-group {
     .mat-mdc-tab-header {
       background-color: var(--navy-800);
     }
 
-    // Inactive tab labels - lighter gray for better contrast
+    // Inactive tab labels
     .mat-mdc-tab:not(.mat-mdc-tab-disabled) {
       .mdc-tab__text-label {
         color: rgba(255, 255, 255, 0.7);
+        font-family: var(--font-family-base);
+        font-size: var(--font-size-base);
       }
 
       &:hover .mdc-tab__text-label {
         color: rgba(255, 255, 255, 0.9);
       }
 
-      // Focus state - high contrast outline
-      &:focus {
-        outline: var(--focus-ring-width) solid var(--color-action-secondary);
-        outline-offset: var(--focus-ring-offset);
-      }
-
       &:focus-visible {
-        outline: var(--focus-ring-width) solid var(--color-action-secondary);
+        outline: var(--focus-ring-width) solid var(--color-focus);
         outline-offset: var(--focus-ring-offset);
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.08);
       }
     }
 
-    // Active tab - bright white for maximum contrast
+    // Active tab — Candor primary tone visible on dark inverse surface
     .mat-mdc-tab.mdc-tab--active {
       .mdc-tab__text-label {
         color: var(--color-text-inverse);
-        font-weight: var(--font-weight-medium);
+        font-weight: var(--font-weight-semibold);
       }
 
-      // Focus state for active tab
-      &:focus,
       &:focus-visible {
-        outline: var(--focus-ring-width) solid var(--color-text-inverse);
+        outline: var(--focus-ring-width) solid var(--color-focus);
         outline-offset: var(--focus-ring-offset);
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.08);
       }
     }
 
-    // Active tab indicator - brighter color
+    // Active tab indicator — use navy-300 (Candor primary light tone on dark bg)
     .mat-mdc-tab-header-pagination-chevron,
     .mdc-tab-indicator__content--underline {
-      border-color: var(--color-action-secondary);
+      border-color: var(--navy-300);
     }
 
     .mdc-tab-indicator .mdc-tab-indicator__content {
-      border-color: var(--color-action-secondary);
+      border-color: var(--navy-300);
     }
 
     // Disabled tab
@@ -94,7 +88,9 @@
   display: flex;
   align-items: center;
   padding: 0 var(--spacing-sm);
+  font-family: var(--font-family-accessible);
   font-size: var(--font-size-xs);
+  letter-spacing: 0.02em;
   color: var(--color-text-subtle);
   gap: var(--spacing-xs);
   z-index: 1000;

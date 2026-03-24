@@ -6,28 +6,35 @@
 .upload-section {
   margin-bottom: var(--spacing-md);
 
-  // Enhanced focus state for buttons
   button {
-    &:focus,
     &:focus-visible {
-      outline: 3px solid var(--color-focus);
+      outline: var(--focus-ring-width) solid var(--color-focus);
       outline-offset: var(--focus-ring-offset);
     }
   }
 
+  // Aligned with Candor surface/card pattern
   .file-info {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
     margin-top: var(--spacing-sm);
-    padding: 12px;
+    padding: var(--spacing-sm);
     background-color: var(--color-bg-surface);
+    border: var(--border-width-thin) solid var(--color-border-default);
     border-radius: var(--radius-sm);
+
+    mat-icon {
+      color: var(--color-text-subtle);
+    }
 
     .file-size {
       margin-left: auto;
-      color: var(--color-text-subtle);
+      font-family: var(--font-family-accessible);
       font-size: var(--font-size-sm);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+      color: var(--color-text-subtle);
     }
   }
 }
@@ -44,20 +51,20 @@
     min-width: 200px;
   }
 
-  // Enhanced focus state for buttons
   button {
-    &:focus,
     &:focus-visible {
-      outline: 3px solid var(--color-focus);
+      outline: var(--focus-ring-width) solid var(--color-focus);
       outline-offset: var(--focus-ring-offset);
     }
   }
 }
 
+// Aligned with Candor progress bar container pattern
 .progress-section {
   margin: var(--spacing-md) 0;
-  padding: 20px;
+  padding: var(--spacing-md);
   background-color: var(--color-bg-surface);
+  border: var(--border-width-thin) solid var(--color-border-default);
   border-radius: var(--radius-md);
   text-align: center;
 
@@ -69,9 +76,11 @@
   }
 
   .progress-label {
+    font-family: var(--font-family-accessible);
     font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    letter-spacing: 0.02em;
     color: var(--color-text-default);
-    font-size: var(--font-size-base);
     margin: 0 0 var(--spacing-xs) 0;
   }
 }
@@ -81,6 +90,9 @@
 
   h3 {
     margin-bottom: var(--spacing-sm);
+    font-family: var(--font-family-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-default);
   }
 
   .full-width {
@@ -92,11 +104,9 @@
     gap: var(--spacing-xs);
     margin-top: var(--spacing-sm);
 
-    // Enhanced focus state for buttons
     button {
-      &:focus,
       &:focus-visible {
-        outline: 3px solid var(--color-focus);
+        outline: var(--focus-ring-width) solid var(--color-focus);
         outline-offset: var(--focus-ring-offset);
       }
     }

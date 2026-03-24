@@ -11,10 +11,8 @@
       top: 50%;
       transform: translateY(-50%);
 
-      // Enhanced focus state
-      &:focus,
       &:focus-visible {
-        outline: 3px solid var(--color-focus);
+        outline: var(--focus-ring-width) solid var(--color-focus);
         outline-offset: var(--focus-ring-offset);
       }
     }
@@ -29,7 +27,10 @@
   justify-content: center;
   padding: var(--spacing-xl) var(--spacing-md);
   text-align: center;
+  font-family: var(--font-family-accessible);
+  font-size: var(--font-size-sm);
   color: var(--color-text-subtle);
+  letter-spacing: 0.02em;
 
   mat-icon {
     font-size: 64px;
@@ -79,44 +80,28 @@
     }
   }
 
+  // Aligned with Candor badge--default pattern
   .model-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    background-color: var(--azure-50);
-    color: var(--azure-600);
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: var(--font-weight-medium);
-    text-transform: capitalize;
-  }
-
-  mat-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.65rem;
+    background-color: var(--color-bg-surface);
+    color: var(--color-text-subtle-on-surface);
+    border-radius: var(--radius-full);
+    font-family: var(--font-family-accessible);
     font-size: var(--font-size-xs);
-    min-height: 24px;
-    padding: 0 var(--spacing-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.06em;
+    line-height: var(--line-height-tight);
+    white-space: nowrap;
     text-transform: capitalize;
   }
 
   button {
-    // Enhanced focus state for buttons
-    &:focus,
     &:focus-visible {
-      outline: 3px solid var(--color-focus);
+      outline: var(--focus-ring-width) solid var(--color-focus);
       outline-offset: var(--focus-ring-offset);
     }
-  }
-
-  th {
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-default);
-  }
-
-  td,
-  th {
-    padding: 12px var(--spacing-sm);
-  }
-
-  tr:hover {
-    background-color: var(--color-bg-surface);
   }
 }
