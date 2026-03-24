@@ -4,21 +4,21 @@
   z-index: 1000;
 
   .title {
-    margin-left: 16px;
-    font-size: 20px;
-    font-weight: 500;
+    margin-left: var(--spacing-sm);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
   }
 }
 
 .app-container {
   height: calc(100vh - 64px - 32px);
-  padding: 16px;
+  padding: var(--spacing-sm);
   overflow: auto;
 
   // Enhanced tab contrast for better visibility
   ::ng-deep .mat-mdc-tab-group {
     .mat-mdc-tab-header {
-      background-color: #303030;
+      background-color: var(--navy-800);
     }
 
     // Inactive tab labels - lighter gray for better contrast
@@ -33,29 +33,29 @@
 
       // Focus state - high contrast outline
       &:focus {
-        outline: 2px solid #ff4081;
-        outline-offset: 2px;
+        outline: var(--focus-ring-width) solid var(--color-action-secondary);
+        outline-offset: var(--focus-ring-offset);
       }
 
       &:focus-visible {
-        outline: 2px solid #ff4081;
-        outline-offset: 2px;
-        background-color: rgba(255, 64, 129, 0.1);
+        outline: var(--focus-ring-width) solid var(--color-action-secondary);
+        outline-offset: var(--focus-ring-offset);
+        background-color: rgba(255, 255, 255, 0.1);
       }
     }
 
     // Active tab - bright white for maximum contrast
     .mat-mdc-tab.mdc-tab--active {
       .mdc-tab__text-label {
-        color: #ffffff;
-        font-weight: 500;
+        color: var(--color-text-inverse);
+        font-weight: var(--font-weight-medium);
       }
 
       // Focus state for active tab
       &:focus,
       &:focus-visible {
-        outline: 2px solid #ffffff;
-        outline-offset: 2px;
+        outline: var(--focus-ring-width) solid var(--color-text-inverse);
+        outline-offset: var(--focus-ring-offset);
         background-color: rgba(255, 255, 255, 0.1);
       }
     }
@@ -63,11 +63,11 @@
     // Active tab indicator - brighter color
     .mat-mdc-tab-header-pagination-chevron,
     .mdc-tab-indicator__content--underline {
-      border-color: #ff4081;
+      border-color: var(--color-action-secondary);
     }
 
     .mdc-tab-indicator .mdc-tab-indicator__content {
-      border-color: #ff4081;
+      border-color: var(--color-action-secondary);
     }
 
     // Disabled tab
@@ -80,7 +80,7 @@
 }
 
 .tab-content {
-  padding: 24px;
+  padding: var(--spacing-md);
 }
 
 .status-bar {
@@ -89,13 +89,13 @@
   left: 0;
   right: 0;
   height: 32px;
-  background-color: #f5f5f5;
-  border-top: 1px solid #e0e0e0;
+  background-color: var(--color-bg-surface);
+  border-top: var(--border-width-thin) solid var(--color-border-default);
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  font-size: 12px;
-  color: #666;
-  gap: 8px;
+  padding: 0 var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-subtle);
+  gap: var(--spacing-xs);
   z-index: 1000;
 }

@@ -1,4 +1,5 @@
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import '@candor-design/tokens/tokens/candor-tokens.css';
 
 html, body {
   height: 100%;
@@ -6,5 +7,5 @@ html, body {
 
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: var(--font-family-base), "Helvetica Neue", sans-serif;
 }

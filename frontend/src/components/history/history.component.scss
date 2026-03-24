@@ -14,8 +14,8 @@
       // Enhanced focus state
       &:focus,
       &:focus-visible {
-        outline: 3px solid #1976d2;
-        outline-offset: 2px;
+        outline: 3px solid var(--color-focus);
+        outline-offset: var(--focus-ring-offset);
       }
     }
   }
@@ -27,32 +27,32 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: var(--spacing-xl) var(--spacing-md);
   text-align: center;
-  color: #666;
+  color: var(--color-text-subtle);
 
   mat-icon {
     font-size: 64px;
     width: 64px;
     height: 64px;
-    margin-bottom: 16px;
-    color: #999;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text-disabled);
   }
 
   p {
-    margin: 8px 0;
+    margin: var(--spacing-xs) 0;
   }
 
   .hint {
-    font-size: 14px;
-    color: #999;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-disabled);
   }
 }
 
 .table-container {
   width: 100%;
   overflow-x: auto;
-  margin-top: 16px;
+  margin-top: var(--spacing-sm);
 }
 
 .history-table {
@@ -62,13 +62,13 @@
   .file-cell {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--spacing-xs);
 
     mat-icon {
-      font-size: 20px;
+      font-size: var(--font-size-lg);
       width: 20px;
       height: 20px;
-      color: #666;
+      color: var(--color-text-subtle);
     }
 
     span {
@@ -82,18 +82,18 @@
   .model-badge {
     display: inline-block;
     padding: 4px 10px;
-    background-color: #e3f2fd;
-    color: #1976d2;
-    border-radius: 4px;
+    background-color: var(--azure-50);
+    color: var(--azure-600);
+    border-radius: var(--radius-sm);
     font-size: 13px;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     text-transform: capitalize;
   }
 
   mat-chip {
-    font-size: 12px;
+    font-size: var(--font-size-xs);
     min-height: 24px;
-    padding: 0 8px;
+    padding: 0 var(--spacing-xs);
     text-transform: capitalize;
   }
 
@@ -101,22 +101,22 @@
     // Enhanced focus state for buttons
     &:focus,
     &:focus-visible {
-      outline: 3px solid #1976d2;
-      outline-offset: 2px;
+      outline: 3px solid var(--color-focus);
+      outline-offset: var(--focus-ring-offset);
     }
   }
 
   th {
-    font-weight: 600;
-    color: #333;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-default);
   }
 
   td,
   th {
-    padding: 12px 16px;
+    padding: 12px var(--spacing-sm);
   }
 
   tr:hover {
-    background-color: #f5f5f5;
+    background-color: var(--color-bg-surface);
   }
 }

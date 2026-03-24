@@ -7,34 +7,34 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 48px 24px;
+  padding: var(--spacing-xl) var(--spacing-md);
   text-align: center;
-  color: #666;
+  color: var(--color-text-subtle);
 }
 
 .info-section {
   display: flex;
-  gap: 16px;
-  padding: 16px;
-  background-color: #e3f2fd;
-  border-radius: 8px;
-  margin-bottom: 24px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background-color: var(--azure-50);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
 
   .info-icon {
-    font-size: 24px;
+    font-size: var(--font-size-lg);
     width: 24px;
     height: 24px;
-    color: #1976d2;
+    color: var(--azure-600);
     flex-shrink: 0;
   }
 
   .info-text {
     flex: 1;
-    font-size: 14px;
-    color: #1565c0;
+    font-size: var(--font-size-sm);
+    color: var(--azure-700);
 
     p {
-      margin: 0 0 8px 0;
+      margin: 0 0 var(--spacing-xs) 0;
 
       &:last-child {
         margin-bottom: 0;
@@ -42,11 +42,11 @@
     }
 
     strong {
-      font-weight: 600;
+      font-weight: var(--font-weight-semibold);
     }
 
     a {
-      color: #1976d2;
+      color: var(--color-link);
       text-decoration: none;
       display: inline-flex;
       align-items: center;
@@ -54,6 +54,7 @@
 
       &:hover {
         text-decoration: underline;
+        color: var(--color-link-hover);
       }
 
       .external-link-icon {
@@ -78,17 +79,17 @@
   .model-name {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--spacing-xs);
 
     mat-icon {
-      font-size: 20px;
+      font-size: var(--font-size-lg);
       width: 20px;
       height: 20px;
-      color: #666;
+      color: var(--color-text-subtle);
     }
 
     .name-text {
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
       text-transform: capitalize;
     }
   }
@@ -96,23 +97,23 @@
   .badge {
     display: inline-block;
     padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
 
     &.badge-success {
-      background-color: #c8e6c9;
-      color: #2e7d32;
+      background-color: var(--color-status-success-bg);
+      color: var(--color-status-success-text);
     }
 
     &.badge-primary {
-      background-color: #bbdefb;
-      color: #1976d2;
+      background-color: var(--azure-100);
+      color: var(--azure-600);
     }
 
     &.badge-warn {
-      background-color: #ffecb3;
-      color: #f57c00;
+      background-color: var(--color-status-warning-bg);
+      color: var(--color-status-warning-text);
     }
   }
 
@@ -137,8 +138,8 @@
     // Enhanced focus state for buttons
     &:focus,
     &:focus-visible {
-      outline: 3px solid #1976d2;
-      outline-offset: 2px;
+      outline: 3px solid var(--color-focus);
+      outline-offset: var(--focus-ring-offset);
     }
   }
 
@@ -147,21 +148,21 @@
 
     mat-progress-bar {
       height: 6px;
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
     }
   }
 
   th {
-    font-weight: 600;
-    color: #333;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-default);
   }
 
   td,
   th {
-    padding: 16px;
+    padding: var(--spacing-sm);
   }
 
   tr:hover {
-    background-color: #f5f5f5;
+    background-color: var(--color-bg-surface);
   }
 }
