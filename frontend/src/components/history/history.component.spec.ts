@@ -88,4 +88,48 @@ describe('HistoryComponent', () => {
       expect(component.getStatusVariant('unknown')).toBe('');
     });
   });
+
+  // ─── loadHistory error path ───────────────────────────────────────────────
+
+  it('sets history to [] and clears loading state when electron throws', async () => {
+    (electronStub.getTranscriptionHistory as jest.Mock).mockRejectedValue(new Error('IPC error'));
+
+    await component.loadHistory();
+
+    expect(component.history).toEqual([]);
+    expect(component.isLoading).toBe(false);
+  });
+
+  // ─── copyTranscript ───────────────────────────────────────────────────────
+
+  describe('copyTranscript()', () => {
+    beforeEach(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: jest.fn().mockResolvedValue(undefined) },
+        configurable: true,
+      });
+    });
+
+    it('does nothing when the item has no result', async () => {
+      await component.copyTranscript({ id: '1', status: 'completed', startedAt: '' });
+      expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
+    });
+
+    it('copies a string result directly and shows success toast', async () => {
+      await component.copyTranscript({ id: '1', status: 'completed', startedAt: '', result: 'plain text' });
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('plain text');
+      expect(toastStub.show).toHaveBeenCalledWith('Transcript copied to clipboard', 'success', 3000);
+    });
+
+    it('copies the text property from an object result', async () => {
+      await component.copyTranscript({ id: '1', status: 'completed', startedAt: '', result: { text: 'object text' } });
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('object text');
+    });
+
+    it('shows error toast when clipboard write fails', async () => {
+      (navigator.clipboard.writeText as jest.Mock).mockRejectedValue(new Error('denied'));
+      await component.copyTranscript({ id: '1', status: 'completed', startedAt: '', result: 'text' });
+      expect(toastStub.show).toHaveBeenCalledWith('Failed to copy transcript', 'error', 3000);
+    });
+  });
 });
