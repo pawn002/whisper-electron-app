@@ -237,4 +237,110 @@ describe('TranscriptionComponent', () => {
 
     expect(result).toContain('[01:01:01.000 --> 01:01:02.000] Late segment');
   });
+
+  // ─── IPC callbacks registered in ngOnInit ────────────────────────────────
+  //
+  // These callbacks are closures registered at startup via window.electronAPI
+  // and electronService.onTranscriptionProgress. To capture them we must mock
+  // the registration points BEFORE fixture.detectChanges() triggers ngOnInit,
+  // so we re-create the component in a nested beforeEach.
+
+  describe('IPC callbacks registered in ngOnInit', () => {
+    let completedCallback: (result: any) => void;
+    let errorCallback: (error: string) => void;
+    let progressCallback: (data: { progress: number; message?: string }) => void;
+
+    beforeEach(() => {
+      // Capture the callback passed to electronService.onTranscriptionProgress
+      electronStub.onTranscriptionProgress.mockImplementation((cb: any) => {
+        progressCallback = cb;
+      });
+
+      // Capture completion/error callbacks registered directly on window.electronAPI
+      (window as any).electronAPI = {
+        onTranscriptionCompleted: (cb: any) => { completedCallback = cb; },
+        onTranscriptionError: (cb: any) => { errorCallback = cb; },
+      };
+
+      // Re-create so ngOnInit fires with the mocks above in place
+      fixture = TestBed.createComponent(TranscriptionComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    });
+
+    afterEach(() => {
+      delete (window as any).electronAPI;
+    });
+
+    // onTranscriptionProgress ──────────────────────────────────────────────
+
+    describe('onTranscriptionProgress', () => {
+      it('updates transcriptionProgress', () => {
+        progressCallback({ progress: 42 });
+        expect(component.transcriptionProgress).toBe(42);
+      });
+
+      it('updates progressMessage', () => {
+        progressCallback({ progress: 50, message: 'Loading model...' });
+        expect(component.progressMessage).toBe('Loading model...');
+      });
+
+      it('defaults progressMessage to empty string when message is absent', () => {
+        progressCallback({ progress: 10 });
+        expect(component.progressMessage).toBe('');
+      });
+    });
+
+    // onTranscriptionCompleted ─────────────────────────────────────────────
+
+    describe('onTranscriptionCompleted', () => {
+      it('sets transcriptionResult from the payload', () => {
+        completedCallback({ text: 'hello world' });
+        expect(component.transcriptionResult).toEqual({ text: 'hello world' });
+      });
+
+      it('clears isTranscribing', () => {
+        component.isTranscribing = true;
+        completedCallback({ text: 'done' });
+        expect(component.isTranscribing).toBe(false);
+      });
+
+      it('sets transcriptionProgress to 100', () => {
+        component.transcriptionProgress = 50;
+        completedCallback({ text: 'done' });
+        expect(component.transcriptionProgress).toBe(100);
+      });
+
+      it('shows a success toast', () => {
+        completedCallback({ text: 'done' });
+        expect(toastStub.show).toHaveBeenCalledWith('Transcription completed!', 'success', 3000);
+      });
+    });
+
+    // onTranscriptionError ─────────────────────────────────────────────────
+
+    describe('onTranscriptionError', () => {
+      it('clears isTranscribing', () => {
+        component.isTranscribing = true;
+        errorCallback('Something failed');
+        expect(component.isTranscribing).toBe(false);
+      });
+
+      it('resets transcriptionProgress to 0', () => {
+        component.transcriptionProgress = 75;
+        errorCallback('Something failed');
+        expect(component.transcriptionProgress).toBe(0);
+      });
+
+      it('shows the error message in a toast', () => {
+        errorCallback('Whisper binary not found');
+        expect(toastStub.show).toHaveBeenCalledWith('Whisper binary not found', 'error', 5000);
+      });
+
+      it('falls back to a default message when the error string is falsy', () => {
+        errorCallback('');
+        expect(toastStub.show).toHaveBeenCalledWith('Transcription failed', 'error', 5000);
+      });
+    });
+  });
 });

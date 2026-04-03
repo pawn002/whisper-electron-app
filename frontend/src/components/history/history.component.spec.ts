@@ -132,4 +132,49 @@ describe('HistoryComponent', () => {
       expect(toastStub.show).toHaveBeenCalledWith('Failed to copy transcript', 'error', 3000);
     });
   });
+
+  // ─── auto-refresh callbacks registered in ngOnInit ───────────────────────
+  //
+  // HistoryComponent registers onTranscriptionCompleted and onTranscriptionError
+  // listeners to auto-refresh the list. We capture those callbacks by setting
+  // up mockImplementation before the component is created.
+
+  describe('auto-refresh callbacks registered in ngOnInit', () => {
+    let completedCallback: () => void;
+    let errorCallback: () => void;
+
+    beforeEach(async () => {
+      (electronStub.onTranscriptionCompleted as jest.Mock).mockImplementation((cb: any) => {
+        completedCallback = cb;
+      });
+      (electronStub.onTranscriptionError as jest.Mock).mockImplementation((cb: any) => {
+        errorCallback = cb;
+      });
+
+      fixture = TestBed.createComponent(HistoryComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+      await fixture.whenStable();
+    });
+
+    it('refreshes history when a transcription completes', async () => {
+      const newHistory = [{ id: '1', status: 'completed', startedAt: '' }];
+      (electronStub.getTranscriptionHistory as jest.Mock).mockResolvedValue(newHistory);
+
+      completedCallback();
+      await fixture.whenStable();
+
+      expect(component.history).toEqual(newHistory);
+    });
+
+    it('refreshes history when a transcription fails', async () => {
+      const newHistory = [{ id: '1', status: 'failed', startedAt: '' }];
+      (electronStub.getTranscriptionHistory as jest.Mock).mockResolvedValue(newHistory);
+
+      errorCallback();
+      await fixture.whenStable();
+
+      expect(component.history).toEqual(newHistory);
+    });
+  });
 });
