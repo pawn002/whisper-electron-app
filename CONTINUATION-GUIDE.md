@@ -1,216 +1,144 @@
-# Intel Optimization Testing - Continuation Guide
+# Continuation Guide
 
-**Date**: 2025-12-13
-**Branch**: `task-9-optimizations`
-**Status**: Infrastructure complete, baseline variant built and tested successfully
+**Last Updated**: 2026-04-06  
+**Branch**: `claude/integrate-design-tokens-UqVdV`  
+**Status**: Vulkan iGPU working. SYCL pending driver update (install in progress — may need reboot).
 
 ---
 
 ## 📋 Current Status
 
-### ✅ Completed
+### ✅ Completed This Session
 
-1. **Intel oneAPI Base Toolkit** - Installed (2.72 GB)
-   - Location: `C:\Program Files (x86)\Intel\oneAPI`
-   - Purpose: Required for SYCL GPU support (Intel Iris Xe Graphics)
-   - Status: ✅ Detected by system-info
+#### 1. Angular v19 → v21 Upgrade
+- Updated all `@angular/*` packages to `^21.0.0`
+- Updated TypeScript from `~5.5.0` → `~5.9.0` (Angular 21 requirement)
+- Fixed `moduleResolution: "node"` → `"bundler"` in `frontend/tsconfig.json`
+  - Required for Angular 21's subpath package exports (`@angular/common/http`, etc.)
+- Ran `ng update --migrate-only` schematics for v20 and v21
+- Templates migrated from `*ngIf`/`*ngFor` → Angular block control flow (`@if`, `@for`)
 
-2. **OpenVINO Toolkit** - Installed via pip
-   - Version: openvino-2024.6.0, openvino-dev-2024.6.0
-   - Location: Python user packages
-   - Note: Pip version installed, not full SDK (system-info doesn't detect it)
+#### 2. whisper.cpp v1.8.2 → v1.8.4
+- Updated version pin in `scripts/build-whisper.js`
+- Fixed binary name: `main.exe` → `whisper-cli.exe` (renamed in v1.7+)
+- Key upstream change in v1.8.3: PR #3492 — `whisper_backend_init_gpu()` now recognizes
+  `GGML_BACKEND_DEVICE_TYPE_IGPU`, enabling iGPU acceleration (Intel Iris Xe, AMD iGPUs, etc.)
 
-3. **Visual C++ Redistributables** - Installed
-   - Version: 14.50.35719.0
-   - Purpose: Runtime dependencies for CMake-built binaries
+#### 3. Default Thread Count: 4 → 8
+Changed in four places based on benchmark data (~100ms improvement):
+- `frontend/src/components/transcription/transcription.component.ts:162`
+- `electron/main.ts:270`
+- `electron/services/transcription.service.ts:62`
+- `electron/services/whisper.service.ts:328`
 
-4. **Testing Infrastructure** - Fully implemented
-   - System detection: `scripts/system-info.js`
-   - Multi-variant builder: `scripts/build-whisper-variants.js`
-   - Benchmark framework: `scripts/benchmark-variants.js`
-   - Configuration: `benchmarks/configs/benchmark-config.json`
-   - Documentation: `benchmarks/README.md`
+#### 4. SYCL Build Infrastructure Fixed
+The SYCL variant (Intel GPU via oneAPI) now builds successfully. Key fixes:
+- Use **Ninja generator** + `dpcpp-cl.exe` (MSVC-compatible DPC++ frontend)
+  - VS generator ignores `CMAKE_C/CXX_COMPILER` overrides → must use Ninja
+- Manually inject MSVC + Windows SDK env vars (setvars.bat fails in Node.js subprocess)
+- Use `execFileSync` with array args to avoid shell-splitting paths with spaces/parens
 
-5. **Baseline Variant** - Built and tested
-   - Build time: 39.6 seconds
-   - Binary: `whisper.cpp/build-baseline/bin/Release/whisper-cli.exe`
-   - Performance: **949ms for 11 seconds of audio** (11.6x real-time)
-   - Status: ✅ Working perfectly
+**SYCL runtime status**: Binary builds and runs but **crashes with access violation (0xC0000005)**
+on GPU initialization. Root cause: Intel Iris Xe driver `31.0.101.4032` (2022) is too old
+for oneAPI 2025.1's Level Zero runtime. **Driver update downloading** — need reboot to install.
 
-6. **Git Commit** - All changes saved
-   - Commit: `34b294f`
-   - Message: "feat: add Intel hardware optimization testing infrastructure"
+#### 5. Vulkan iGPU Backend — Working Now ✅
+Added `vulkan` variant to the build system:
+- `scripts/system-info.js`: detects Vulkan SDK via `VULKAN_SDK` env or PATH
+- `scripts/build-whisper-variants.js`: Ninja + cl.exe (VS generator breaks `vulkan-shaders-gen`)
+- `benchmarks/configs/benchmark-config.json`: added `vulkan` to variants list
 
-### ⚠️ Pending / Issues
-
-1. **SYCL Variant** (Intel GPU) - Build blocked by Intel oneAPI bug
-   - **Root Cause**: Confirmed bug in Intel oneAPI 2025.1.1 CMake configuration
-   - **Error Location**: `IntelSYCLConfig.cmake:388` - `SYCL_FEATURE_TEST_EXTRACT` function call
-   - **whisper.cpp Status**: ✅ Updated to latest (commit 2551e4ce) with SYCL improvements
-   - **Build Environment**: ✅ All prerequisites configured correctly
-     - Visual Studio 2022 Build Tools: ✅ Configured
-     - oneAPI 2025.1.1: ✅ Installed and environment sourced
-     - Intel compilers (icx/icpx): ✅ Detected and functional
-     - MKL 2025.1.0: ✅ Detected
-   - **Investigation Summary**:
-     - Attempted 8+ different build approaches (Ninja, MSVC, bypassing packages, manual flags)
-     - Confirmed issue is in Intel's CMake config, not whisper.cpp
-     - Bug affects line 388 of IntelSYCLConfig.cmake in oneAPI 2025.1.1
-     - Function call syntax appears correct, suggesting CMake version incompatibility
-   - **Verified Solutions**:
-     - ❌ Update whisper.cpp (tested - still incompatible with oneAPI 2025.1.1)
-     - ⚠️ Downgrade oneAPI to 2024.x (not tested - would require reinstall)
-     - ⚠️ Patch Intel CMake config manually (not recommended - system file modification)
-     - ✅ **RECOMMENDED**: Use baseline CPU metrics (successfully benchmarked)
-
-2. **OpenVINO Variant** - Not attempted
-   - Reason: Pip version doesn't include full SDK with CMake support
-   - Solution: May need full OpenVINO Toolkit installation (or skip this variant)
-
-3. **Full Benchmark** - Not run yet
-   - Reason: Only baseline variant available
-   - Solution: Build SYCL variant first, then run `npm run benchmark`
+**Vulkan SDK**: 1.4.335.0 at `C:\VulkanSDK\1.4.335.0` — detected automatically.
 
 ---
 
-## 📝 Session Updates (2025-12-13)
+## 📊 Current Benchmark Results
 
-### ✅ Improvements Made
+Hardware: Intel i7-1260P, 16 cores, Intel Iris Xe Graphics  
+Audio: 11 seconds (JFK speech excerpt, 78 words)
 
-1. **Enhanced Build Infrastructure**
-   - Modified `scripts/build-whisper-variants.js`:
-     - Added `captureEnvironmentFromBatchFile()` function for automatic env capture
-     - Updated `setupEnvironment()` with graceful fallback mechanism
-     - Changed SYCL CMake flag from `-DGGML_SYCL=ON` to `-DGGML_SYCL=1` (per whisper.cpp Dockerfile)
-   - Created `build-sycl.bat` helper script with:
-     - VS2022INSTALLDIR configuration
-     - Automatic oneAPI environment sourcing
-     - Ready for future SYCL builds when compatibility issue resolved
+### Vulkan vs Baseline
 
-2. **Visual Studio Configuration**
-   - Identified VS 2022 Build Tools installation
-   - Configured VS2022INSTALLDIR environment variable
-   - Verified Visual Studio command-line environment initialization
+| Model | Config | Baseline | Vulkan | Speedup |
+|-------|--------|----------|--------|---------|
+| tiny  | 1 thread  | 1786ms | 766ms  | **2.33x** |
+| tiny  | 4 threads | 897ms  | 708ms  | **1.27x** |
+| tiny  | 8 threads | 881ms  | 703ms  | **1.25x** |
+| base  | 1 thread  | 4098ms | 1023ms | **4.01x** |
+| base  | 4 threads | 1812ms | 1037ms | **1.75x** |
+| base  | 8 threads | 1712ms | 998ms  | **1.71x** |
 
-3. **SYCL Compatibility Investigation**
-   - Extensively tested multiple environment capture approaches
-   - Identified root cause: oneAPI 2025.1.1 incompatibility with whisper.cpp
-   - Documented error details and possible solutions
-   - Build infrastructure ready for when compatibility is resolved
+**Best overall**: Vulkan, tiny model, 8 threads — **703ms, 0.06x RT, 110.9 words/sec**
 
-### 🔬 Technical Insights
+The big gains are at low thread counts (iGPU handles computation that would otherwise
+serialize on a single CPU core). At 8 threads the CPU is already well-utilized; Vulkan
+still wins by ~1.7x on base model.
 
-- **Environment Sourcing Challenge**: Windows batch file environment capture is complex due to:
-  - Nested quoting issues with paths containing spaces and parentheses
-  - `setvars.bat` dependency on relative paths requiring execution from its directory
-  - PowerShell/CMD interop complexities
-- **Graceful Fallback**: Implemented fallback to manual instructions when automation fails
-- **oneAPI 2025.x**: Newest version may require whisper.cpp updates for SYCL support
-- **Binary DLL Dependencies**: Fixed benchmark script to use build directory paths instead of copied binaries
-
-### 📊 Baseline Performance Results
-
-Successfully ran baseline (CPU) benchmarks with **Intel i7-1260P (16 cores)**:
-
-**ggml-tiny.bin Model** (39 MB):
-- 1 thread: 2435ms (0.22x RT, 32.03 words/sec)
-- 4 threads: 1060ms (0.10x RT, 73.56 words/sec)
-- **8 threads: 972ms (0.09x RT, 80.27 words/sec)** ← Best performance
-
-**ggml-base.bin Model** (142 MB):
-- 1 thread: 5875ms (0.53x RT, 13.28 words/sec)
-- 4 threads: 2256ms (0.21x RT, 34.58 words/sec)
-- 8 threads: 1990ms (0.18x RT, 39.20 words/sec)
-
-**Key Findings**:
-- Tiny model processes **11.3x faster than real-time** with 8 threads
-- Base model processes **5.5x faster than real-time** with 8 threads
-- Thread scaling shows good performance up to 8 threads
-- Test audio: 11 seconds (78 words) of JFK speech
-
-**Reports Generated**:
-- JSON: `benchmarks/results/benchmark-2025-12-13T17-58-38-341Z.json`
-- CSV: `benchmarks/results/benchmark-2025-12-13T17-58-38-341Z.csv`
+### SYCL Results
+All runs failed with exit code `3221225477` (access violation on GPU init).
+Will retest after driver update.
 
 ---
 
-## 🚀 Next Steps
+## 🚀 After Reboot
 
-### Option 1: Build SYCL Variant (Recommended)
-
-**Open a NEW Command Prompt window** (important - needs fresh environment):
-
-```cmd
-# Step 1: Source oneAPI environment
-"C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
-
-# Step 2: Navigate to project
-cd C:\Users\pawn0\_dev\whisper-electron-app
-
-# Step 3: Build SYCL variant
-npm run build:whisper-sycl
-
-# Step 4: Run full benchmark comparing baseline vs SYCL
-npm run benchmark
-```
-
-**Expected Result**:
-- SYCL variant builds successfully (will take 1-3 minutes)
-- Benchmark runs both baseline (CPU) and SYCL (GPU) variants
-- Results saved to `benchmarks/results/` with CSV and JSON reports
-
-### Option 2: Skip SYCL, Run Baseline-Only Benchmark
-
+### Step 1: Verify driver updated
 ```bash
-# Just run benchmark with baseline variant
-npm run benchmark
+node scripts/system-info.js
 ```
+Check that the Intel GPU is still detected. The Vulkan variant should still work.
 
-**Note**: Benchmark will show "no speedup" since there's only one variant, but will still generate timing reports.
-
-### Option 3: Test Variants Manually
-
+### Step 2: Rebuild SYCL variant (clean)
 ```bash
-# Test baseline variant manually
-cd whisper.cpp/build-baseline/bin/Release
-./whisper-cli.exe -m ../../../../models/ggml-tiny.bin -f ../../../../benchmarks/audio-samples/test-sample.wav -t 4
-
-# If SYCL built successfully:
-cd whisper.cpp/build-sycl/bin/Release
-./whisper-cli.exe -m ../../../../models/ggml-tiny.bin -f ../../../../benchmarks/audio-samples/test-sample.wav -t 4
+node scripts/build-whisper-variants.js --variant=sycl --clean
 ```
+
+### Step 3: Run full benchmark
+```bash
+node scripts/benchmark-variants.js
+```
+
+This will compare baseline vs vulkan vs sycl (if SYCL works after driver update).
+
+### Step 4: Wire Vulkan into the app (optional next task)
+Currently the app uses `whisper.cpp/build-baseline/` binary. The Vulkan binary is in
+`whisper.cpp/build-vulkan/bin/whisper-cli.exe` with DLLs alongside it.
+
+To use it, `electron/services/whisper.service.ts` needs to:
+1. Detect the Vulkan variant is available
+2. Prefer it over baseline when running on a system with a supported GPU
+3. Bundle the DLLs with the binary in the packaged app
 
 ---
 
-## 📁 Project Structure
+## 📁 Build Artifacts
 
 ```
 whisper-electron-app/
-├── scripts/
-│   ├── system-info.js              # Hardware detection (run: npm run system-info)
-│   ├── build-whisper-variants.js   # Multi-variant builder
-│   └── benchmark-variants.js       # Performance benchmarking
+├── whisper.cpp/
+│   ├── build-baseline/bin/whisper-cli.exe   ✅ Working (CPU/AVX2)
+│   ├── build-sycl/bin/whisper-cli.exe       ❌ Crashes (old driver)
+│   └── build-vulkan/bin/
+│       ├── whisper-cli.exe                  ✅ Working (Vulkan iGPU)
+│       ├── ggml-vulkan.dll
+│       ├── ggml-cpu.dll
+│       ├── ggml.dll
+│       └── whisper.dll
 │
-├── benchmarks/
-│   ├── configs/
-│   │   └── benchmark-config.json   # Test configuration
-│   ├── audio-samples/
-│   │   └── test-sample.wav         # JFK speech (11 sec, 78 words)
-│   ├── results/                    # Benchmark outputs (JSON, CSV)
-│   └── README.md                   # Full documentation
+├── whisper-bins/
+│   ├── baseline/whisper-cli.exe             (copy of build-baseline binary)
+│   ├── sycl/whisper-cli.exe                 (copy of build-sycl binary)
+│   ├── vulkan/whisper-cli.exe               (copy of build-vulkan binary)
+│   └── build-report.json
 │
-├── whisper-bins/                   # Optimization variant binaries
-│   ├── baseline/
-│   │   └── whisper-cli.exe         # (not working - DLL issues)
-│   ├── sycl/                       # (empty - not built yet)
-│   └── build-report.json           # Build status
+├── models/
+│   ├── ggml-tiny.bin    (39 MB)
+│   └── ggml-base.bin    (74 MB)
 │
-└── whisper.cpp/
-    ├── build-baseline/             # Baseline build directory
-    │   └── bin/Release/
-    │       └── whisper-cli.exe     # ✅ WORKING BINARY
-    ├── build-sycl/                 # (will be created when SYCL builds)
-    └── main.exe                    # Original setup binary (deprecated)
+└── benchmarks/
+    ├── configs/benchmark-config.json
+    ├── audio-samples/test-sample.wav        (11 sec JFK speech)
+    └── results/                             (benchmark JSON/CSV reports)
 ```
 
 ---
@@ -218,225 +146,76 @@ whisper-electron-app/
 ## 🔧 Available Commands
 
 ```bash
-# System Information
-npm run system-info                  # Detect hardware and toolchains
+# Hardware detection
+node scripts/system-info.js
 
-# Build Variants
-npm run build:whisper-variants       # Build all available variants
-npm run build:whisper-baseline       # Build only baseline
-npm run build:whisper-avx512         # Build AVX-512 (not available - CPU doesn't support)
-npm run build:whisper-sycl           # Build SYCL (requires setvars.bat first!)
-npm run build:whisper-openvino       # Build OpenVINO (not available - need full SDK)
+# Build variants
+node scripts/build-whisper-variants.js                    # All buildable
+node scripts/build-whisper-variants.js --variant=vulkan   # Just Vulkan
+node scripts/build-whisper-variants.js --variant=sycl     # Just SYCL
+node scripts/build-whisper-variants.js --variant=baseline # Just baseline
+node scripts/build-whisper-variants.js --clean            # Clean before build
 
-# Benchmarking
-npm run benchmark                    # Run performance comparison
+# Benchmarks
+node scripts/benchmark-variants.js
 
-# Development
-git status                           # Check current changes
-git log --oneline -5                 # View recent commits
+# App development
+npm run dev              # Start app (frontend + electron)
+npm run build            # Build all
+
+# Release
+npm run version:patch    # Bump version
+npm run dist:win         # Package for Windows (requires admin terminal)
 ```
 
 ---
 
-## 🐛 Known Issues & Solutions
+## 🐛 Known Issues
 
-### Issue 1: SYCL Build Fails with "C++ compiler lacks SYCL support"
+### SYCL: Access violation on GPU init
+- **Cause**: Intel driver `31.0.101.4032` (2022) lacks Level Zero support for oneAPI 2025.1
+- **Fix**: Update to any Intel Iris Xe driver from 2023+ (31.0.101.5xxx range)
+- **Driver**: Intel Arc & Iris Xe Graphics — Windows — download from intel.com
+- **Status**: Download in progress at time of writing, needs reboot to install
 
-**Cause**: oneAPI environment not sourced in the current shell session
-
-**Solution**:
-```cmd
-# Must run in same CMD window:
-"C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
-npm run build:whisper-sycl
-```
-
-### Issue 2: Benchmark fails with exit code 3221225781
-
-**Cause**: Binary copied to `whisper-bins/` is missing DLL dependencies
-
-**Solution**: Run binaries from their build directory:
+### SYCL DLL dependencies
+After the driver update, if SYCL still fails to run:
 ```bash
-cd whisper.cpp/build-baseline/bin/Release
-./whisper-cli.exe -m ../../../../models/ggml-tiny.bin -f ../../../../benchmarks/audio-samples/test-sample.wav -t 4
+# Copy Intel runtime DLLs into the build bin directory
+# DLLs live at: C:\Program Files (x86)\Intel\oneAPI\compiler\latest\bin\
+# Needed: sycl8.dll, libmmd.dll, svml_dispmd.dll, dnnl.dll,
+#         mkl_sycl_blas.5.dll, irc_msg.dll, mkl_core.2.dll,
+#         mkl_tbb_thread.2.dll, tbb12.dll, ur_win_proxy_loader.dll
 ```
 
-Or update the benchmark script to use build directory paths.
-
-### Issue 3: OpenVINO variant not buildable
-
-**Cause**: Pip version doesn't include CMake integration
-
-**Solution**: Either:
-1. Install full OpenVINO Toolkit: https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/download.html
-2. Skip OpenVINO variant and focus on baseline vs SYCL comparison
+### OpenVINO: Not installed
+- Pip version of OpenVINO doesn't include CMake integration
+- Would need the full OpenVINO Toolkit SDK to build this variant
+- Low priority — Vulkan already provides substantial speedup without it
 
 ---
 
-## 📊 Expected Performance
+## 📝 Branch Summary
 
-Based on initial testing with **Intel i7-1260P + Iris Xe Graphics**:
+Branch `claude/integrate-design-tokens-UqVdV` contains (newest first):
 
-| Variant | Expected Speed | Notes |
-|---------|---------------|-------|
-| Baseline | ~11x real-time | ✅ Confirmed: 949ms for 11sec audio |
-| SYCL (GPU) | ~15-25x real-time | Estimated (GPU acceleration) |
-| AVX-512 | N/A | CPU doesn't support AVX-512 |
-| OpenVINO | ~12-18x real-time | If toolkit installed |
-
-**Test Configuration**:
-- Audio: 11 seconds (JFK speech excerpt)
-- Model: ggml-tiny.bin (39 MB)
-- Threads: 1, 4, 8 (benchmark tests all)
-- Runs: 3 iterations + 1 warmup per config
-
----
-
-## 📝 Benchmark Output
-
-After running `npm run benchmark`, you'll get:
-
-1. **Console Summary**: Side-by-side comparison with speedups
-2. **JSON Report**: `benchmarks/results/benchmark-{timestamp}.json`
-3. **CSV Report**: `benchmarks/results/benchmark-{timestamp}.csv`
-
-**Metrics Captured**:
-- Total transcription time
-- Real-time factor (< 1.0 = faster than real-time)
-- Words per second (throughput)
-- Latency to first token
-- Load/encode/decode times
-- Standard deviation across runs
+| Commit | Description |
+|--------|-------------|
+| `5296318` | perf: add Vulkan iGPU backend — 1.7–4x speedup on Intel Iris Xe |
+| `31dab39` | perf: bump default threads 4→8, fix SYCL/Vulkan build scripts |
+| `5ee14da` | chore: update whisper.cpp to v1.8.4 |
+| `98519bd` | chore: upgrade Angular from v19 to v21 |
+| `f83245b` | test: add IPC callback tests for ngOnInit event registrations |
+| `79992b7` | Expand test suite to 57 tests across 4 files |
+| `5d6bc19` | Add initial test suite (28 tests) |
+| `2d1c331` | Replace Angular Material with Candor design system |
+| `45ea758` | Integrate @candor-design/tokens design system |
 
 ---
 
-## 🎯 Success Criteria
+## 🎯 Remaining Work
 
-- [x] System detection working
-- [x] Baseline variant builds successfully
-- [x] Baseline variant transcribes audio correctly
-- [ ] SYCL variant builds successfully
-- [ ] Benchmark runs with both variants
-- [ ] Results show measurable GPU speedup
-
----
-
-## 💡 Tips for Continuation
-
-1. **Starting Fresh Session**: Just run `npm run system-info` to verify everything is still detected
-
-2. **Quick Test**: Before full benchmark, test manually:
-   ```bash
-   cd whisper.cpp/build-baseline/bin/Release
-   ./whisper-cli.exe -m ../../../../models/ggml-tiny.bin -f ../../../../benchmarks/audio-samples/test-sample.wav
-   ```
-
-3. **Modifying Benchmark Config**: Edit `benchmarks/configs/benchmark-config.json`:
-   - Change models to test: `["ggml-tiny.bin", "ggml-base.bin", "ggml-small.bin"]`
-   - Change thread counts: `[1, 2, 4, 8, 16]`
-   - Change number of runs: `benchmarkRuns: 5`
-
-4. **Comparing Results**: CSV files can be opened in Excel/Google Sheets for easy comparison
-
-5. **If SYCL Seems Slow**: Check that GPU drivers are up to date:
-   - Intel Graphics Control Panel → Driver & Support
-   - Or use Windows Update
-
----
-
-## 🔗 Important Links
-
-- **oneAPI Documentation**: https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html
-- **whisper.cpp GitHub**: https://github.com/ggerganov/whisper.cpp
-- **SYCL Build Guide**: https://github.com/ggerganov/whisper.cpp#intel-gpu-support-via-sycl
-- **Benchmark README**: `benchmarks/README.md` (comprehensive guide)
-
----
-
-## 📞 Commands to Resume
-
-```bash
-# Check current status
-git status
-git branch
-
-# Verify installations
-npm run system-info
-
-# Build SYCL (in new CMD with setvars.bat sourced)
-npm run build:whisper-sycl
-
-# Run full benchmark
-npm run benchmark
-
-# View results
-cat benchmarks/results/benchmark-*.csv | tail -20
-```
-
----
-
-## 🎬 Summary for AI Assistant
-
-**Context**: We implemented Intel hardware optimization testing for whisper.cpp. The baseline variant is built and tested successfully (11.6x real-time). The SYCL variant needs to be built in a shell session with oneAPI environment sourced. Once both variants are built, the benchmark framework will compare their performance.
-
-**Key Files**:
-- `scripts/system-info.js` - Hardware detection
-- `scripts/build-whisper-variants.js` - Builds optimization variants
-- `scripts/benchmark-variants.js` - Performance testing
-- `benchmarks/README.md` - User documentation
-
-**Next Action**: Build SYCL variant using oneAPI environment, then run benchmarks.
-
-**Binary Locations**:
-- Working baseline: `whisper.cpp/build-baseline/bin/Release/whisper-cli.exe`
-- SYCL (when built): `whisper.cpp/build-sycl/bin/Release/whisper-cli.exe`
-
----
-
----
-
-## ✅ Session Summary (2025-12-13)
-
-### Accomplished
-
-1. ✅ **Build Infrastructure Improvements**
-   - Enhanced `build-whisper-variants.js` with automatic environment capture
-   - Created `build-sycl.bat` helper script with VS configuration
-   - Fixed `benchmark-variants.js` to use build directory paths (resolved DLL issues)
-
-2. ✅ **System Configuration**
-   - Configured Visual Studio 2022 Build Tools integration
-   - Verified oneAPI 2025.1.1 installation and environment sourcing
-   - Intel compilers detected and configured
-
-3. ✅ **Benchmark Success**
-   - Successfully ran complete baseline CPU benchmarks
-   - Tested 2 models × 3 thread configurations = 6 benchmark scenarios
-   - Generated JSON and CSV reports with full metrics
-
-4. ✅ **Performance Baseline Established**
-   - **Best: 972ms for 11s audio (11.3x real-time)** with tiny model, 8 threads
-   - Documented thread scaling characteristics
-   - Created reproducible performance measurements
-
-### Known Limitations
-
-1. ❌ **SYCL GPU Variant**: Cannot build due to whisper.cpp/oneAPI 2025.1.1 incompatibility
-2. ⚠️ **OpenVINO Variant**: Pip version lacks CMake support (not pursued)
-
-### Files Modified
-
-- `scripts/build-whisper-variants.js` - Environment capture, VS config, SYCL flags
-- `scripts/benchmark-variants.js` - Fixed binary paths for DLL dependencies
-- `build-sycl.bat` - New helper script for future SYCL builds
-- `CONTINUATION-GUIDE.md` - Comprehensive session documentation
-
-### Next Actions
-
-- **Wait for whisper.cpp update** supporting oneAPI 2025.1.1
-- **OR downgrade oneAPI** to 2024.x if SYCL GPU testing is priority
-- **Baseline metrics available** for future GPU comparison
-
-*Last Updated: 2025-12-13*
-*Branch: task-9-optimizations*
-*Base Commit: 34b294f*
+- [ ] **SYCL**: Retest after Intel driver update + reboot
+- [ ] **App integration**: Wire Vulkan binary into `whisper.service.ts` as preferred backend
+- [ ] **Packaging**: Include Vulkan DLLs in electron-builder output for production
+- [ ] **PR**: Merge `claude/integrate-design-tokens-UqVdV` → `main` when ready
