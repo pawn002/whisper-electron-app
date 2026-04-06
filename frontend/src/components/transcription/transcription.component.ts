@@ -159,7 +159,7 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
         language:
           this.selectedLanguage === 'auto' ? undefined : this.selectedLanguage,
         timestamps: true,
-        threads: 4,
+        threads: 8,
       };
 
       const result = await this.electronService.transcribeAudio(

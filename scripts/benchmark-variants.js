@@ -103,17 +103,13 @@ class WhisperBenchmark {
 
     for (const variant of this.config.variants) {
       const binaryName = process.platform === 'win32' ? 'whisper-cli.exe' : 'whisper-cli';
-      // Check build directory first (has all DLL dependencies)
-      const buildBinaryPath = path.join(
-        this.projectRoot,
-        'whisper.cpp',
-        `build-${variant}`,
-        'bin',
-        'Release',
-        binaryName
-      );
-
-      if (fs.existsSync(buildBinaryPath)) {
+      const buildBase = path.join(this.projectRoot, 'whisper.cpp', `build-${variant}`);
+      // VS generator puts binaries in bin/Release/, Ninja puts them in bin/
+      const candidates = [
+        path.join(buildBase, 'bin', 'Release', binaryName),
+        path.join(buildBase, 'bin', binaryName),
+      ];
+      if (candidates.some(p => fs.existsSync(p))) {
         available.push(variant);
       }
     }
@@ -127,15 +123,12 @@ class WhisperBenchmark {
     console.log('─────────────────────────────────────────────────────────');
 
     const binaryName = process.platform === 'win32' ? 'whisper-cli.exe' : 'whisper-cli';
-    // Use build directory path (has all DLL dependencies)
-    const binaryPath = path.join(
-      this.projectRoot,
-      'whisper.cpp',
-      `build-${variant}`,
-      'bin',
-      'Release',
-      binaryName
-    );
+    // VS generator puts binaries in bin/Release/, Ninja puts them in bin/
+    const buildBase = path.join(this.projectRoot, 'whisper.cpp', `build-${variant}`);
+    const binaryPath = [
+      path.join(buildBase, 'bin', 'Release', binaryName),
+      path.join(buildBase, 'bin', binaryName),
+    ].find(p => fs.existsSync(p));
     const modelPath = path.join(this.projectRoot, 'models', model);
     const audioPath = path.join(this.projectRoot, this.config.audio.testFile);
 
@@ -222,6 +215,17 @@ class WhisperBenchmark {
           const openvinoBinPath = path.join(openvinoPath, 'runtime', 'bin', 'intel64', 'Release');
           const tbbBinPath = path.join(openvinoPath, 'runtime', '3rdparty', 'tbb', 'bin');
           env.PATH = `${openvinoBinPath};${tbbBinPath};${env.PATH}`;
+        }
+      }
+
+      // SYCL binary needs Intel oneAPI runtime DLLs (sycl*.dll, OpenCL.dll, etc.)
+      if (binaryPath.includes('sycl')) {
+        const oneAPIRoot = 'C:\\Program Files (x86)\\Intel\\oneAPI';
+        const intelBinDir = `${oneAPIRoot}\\compiler\\latest\\bin`;
+        const oclBinDir   = `${oneAPIRoot}\\ocloc\\latest\\bin`;
+        env.PATH = `${intelBinDir};${env.PATH}`;
+        if (fs.existsSync(oclBinDir)) {
+          env.PATH = `${oclBinDir};${env.PATH}`;
         }
       }
 

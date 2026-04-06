@@ -325,7 +325,7 @@ export class WhisperService {
       '-f',
       processedAudioPath,
       '-t',
-      (options.threads || 4).toString(),
+      (options.threads || 8).toString(),
       '-p',
       (options.processors || 1).toString(),
     ];
