@@ -1,84 +1,91 @@
 <div class="card card--elevated card--padding-md history-card">
-    <div class="card__header">
-        <div class="card-header-row">
-            <div>
-                <h2>Transcription History</h2>
-                <p class="card-subtitle">View your past transcriptions</p>
-            </div>
-            <button
-                class="button button--ghost button--small"
-                (click)="loadHistory()"
-                [disabled]="isLoading"
-                title="Refresh history"
-                aria-label="Refresh history"
-            >
-                <span class="material-icons" aria-hidden="true">refresh</span>
-            </button>
-        </div>
-    </div>
-
-    <div class="card__body">
-        <div *ngIf="isLoading" class="loading-container">
-            <p>Loading history...</p>
-        </div>
-
-        <div *ngIf="!isLoading && history.length === 0" class="empty-state">
-            <span class="material-icons" aria-hidden="true">history</span>
-            <p>No transcription history yet</p>
-            <p class="hint">Your completed transcriptions will appear here</p>
-        </div>
-
-        <div
-            class="table-host table-container"
-            *ngIf="!isLoading && history.length > 0"
+  <div class="card__header">
+    <div class="card-header-row">
+      <div>
+        <h2>Transcription History</h2>
+        <p class="card-subtitle">View your past transcriptions</p>
+      </div>
+      <button
+        class="button button--ghost button--small"
+        (click)="loadHistory()"
+        [disabled]="isLoading"
+        title="Refresh history"
+        aria-label="Refresh history"
         >
-            <table>
-                <thead>
-                    <tr>
-                        <th>File</th>
-                        <th>Model</th>
-                        <th>Status</th>
-                        <th>Audio Duration</th>
-                        <th>Processing Time</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let item of history">
-                        <td>
-                            <div class="file-cell">
-                                <span class="material-icons" aria-hidden="true">audiotrack</span>
-                                <span>{{ item.fileName || "Unknown" }}</span>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="badge badge--sm badge--default">
-                                {{ item.options?.model || "base" }}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="chip chip--{{ getStatusVariant(item.status) }}">
-                                <span class="chip__body">{{ item.status }}</span>
-                            </span>
-                        </td>
-                        <td>{{ formatDuration(item.audioDuration) }}</td>
-                        <td>{{ formatTime(item.transcriptionTime) }}</td>
-                        <td>{{ formatTimestamp(item.startedAt) }}</td>
-                        <td>
-                            <button
-                                class="button button--ghost button--small"
-                                title="Copy transcript"
-                                (click)="copyTranscript(item)"
-                                [disabled]="item.status !== 'completed'"
-                                aria-label="Copy transcript"
-                            >
-                                <span class="material-icons" aria-hidden="true">content_copy</span>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <span class="material-icons" aria-hidden="true">refresh</span>
+      </button>
     </div>
+  </div>
+
+  <div class="card__body">
+    @if (isLoading) {
+      <div class="loading-container">
+        <p>Loading history...</p>
+      </div>
+    }
+
+    @if (!isLoading && history.length === 0) {
+      <div class="empty-state">
+        <span class="material-icons" aria-hidden="true">history</span>
+        <p>No transcription history yet</p>
+        <p class="hint">Your completed transcriptions will appear here</p>
+      </div>
+    }
+
+    @if (!isLoading && history.length > 0) {
+      <div
+        class="table-host table-container"
+        >
+        <table>
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Model</th>
+              <th>Status</th>
+              <th>Audio Duration</th>
+              <th>Processing Time</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of history; track item) {
+              <tr>
+                <td>
+                  <div class="file-cell">
+                    <span class="material-icons" aria-hidden="true">audiotrack</span>
+                    <span>{{ item.fileName || "Unknown" }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge badge--sm badge--default">
+                    {{ item.options?.model || "base" }}
+                  </span>
+                </td>
+                <td>
+                  <span class="chip chip--{{ getStatusVariant(item.status) }}">
+                    <span class="chip__body">{{ item.status }}</span>
+                  </span>
+                </td>
+                <td>{{ formatDuration(item.audioDuration) }}</td>
+                <td>{{ formatTime(item.transcriptionTime) }}</td>
+                <td>{{ formatTimestamp(item.startedAt) }}</td>
+                <td>
+                  <button
+                    class="button button--ghost button--small"
+                    title="Copy transcript"
+                    (click)="copyTranscript(item)"
+                    [disabled]="item.status !== 'completed'"
+                    aria-label="Copy transcript"
+                    >
+                    <span class="material-icons" aria-hidden="true">content_copy</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
 </div>

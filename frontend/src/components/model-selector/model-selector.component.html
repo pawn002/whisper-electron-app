@@ -1,108 +1,126 @@
 <div class="card card--elevated card--padding-md models-card">
-    <div class="card__header">
-        <h2>Whisper Model Management</h2>
-        <p class="card-subtitle">Download and manage speech recognition models</p>
-    </div>
+  <div class="card__header">
+    <h2>Whisper Model Management</h2>
+    <p class="card-subtitle">Download and manage speech recognition models</p>
+  </div>
 
-    <div class="card__body">
-        <div *ngIf="isLoading" class="loading-container">
-            <p>Loading models...</p>
-        </div>
+  <div class="card__body">
+    @if (isLoading) {
+      <div class="loading-container">
+        <p>Loading models...</p>
+      </div>
+    }
 
-        <div class="alert alert--info info-alert" *ngIf="!isLoading">
-            <span class="material-icons alert__icon" aria-hidden="true">info</span>
-            <div class="alert__content">
-                <p class="alert__message">
-                    <strong>Tip:</strong> Smaller models are faster but less accurate.
-                    Larger models provide better accuracy but take longer to process.
-                    Models are downloaded from
-                    <a
-                        href="https://huggingface.co/ggerganov/whisper.cpp"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >Hugging Face</a>
-                    and stored locally for offline use.
-                </p>
-            </div>
+    @if (!isLoading) {
+      <div class="alert alert--info info-alert">
+        <span class="material-icons alert__icon" aria-hidden="true">info</span>
+        <div class="alert__content">
+          <p class="alert__message">
+            <strong>Tip:</strong> Smaller models are faster but less accurate.
+            Larger models provide better accuracy but take longer to process.
+            Models are downloaded from
+            <a
+              href="https://huggingface.co/ggerganov/whisper.cpp"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Hugging Face</a>
+            and stored locally for offline use.
+          </p>
         </div>
+      </div>
+    }
 
-        <div class="table-host table-container" *ngIf="!isLoading">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Model</th>
-                        <th>Size</th>
-                        <th>Speed</th>
-                        <th>Accuracy</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let model of models">
-                        <td>
-                            <div class="model-name">
-                                <span class="material-icons" aria-hidden="true">memory</span>
-                                <span>{{ model.name }}</span>
-                            </div>
-                        </td>
-                        <td>{{ model.size }}</td>
-                        <td>
-                            <span class="badge badge--sm badge--{{ getSpeedVariant(model.speed) }}">
-                                {{ model.speed }}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge badge--sm badge--{{ getAccuracyVariant(model.accuracy) }}">
-                                {{ model.accuracy }}
-                            </span>
-                        </td>
-                        <td>
-                            <span *ngIf="model.installed" class="chip chip--success">
-                                <span class="chip__body">
-                                    <span class="material-icons" aria-hidden="true">check_circle</span>
-                                    Installed
-                                </span>
-                            </span>
-                            <span *ngIf="!model.installed && !model.downloading" class="chip">
-                                <span class="chip__body">
-                                    <span class="material-icons" aria-hidden="true">cloud_download</span>
-                                    Not Installed
-                                </span>
-                            </span>
-                            <span *ngIf="model.downloading" class="chip chip--primary">
-                                <span class="chip__body">
-                                    <span class="material-icons" aria-hidden="true">downloading</span>
-                                    Downloading...
-                                </span>
-                            </span>
-                        </td>
-                        <td>
-                            <button
-                                *ngIf="!model.installed && !model.downloading"
-                                class="button button--primary button--small"
-                                (click)="downloadModel(model)"
-                            >
-                                <span class="material-icons" aria-hidden="true">cloud_download</span>
-                                Download
-                            </button>
-                            <button
-                                *ngIf="model.installed"
-                                class="button button--ghost button--small"
-                                disabled
-                            >
-                                <span class="material-icons" aria-hidden="true">check</span>
-                                Installed
-                            </button>
-                            <div *ngIf="model.downloading" class="download-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-bar__fill progress-bar__fill--indeterminate"></div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    @if (!isLoading) {
+      <div class="table-host table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Size</th>
+              <th>Speed</th>
+              <th>Accuracy</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (model of models; track model) {
+              <tr>
+                <td>
+                  <div class="model-name">
+                    <span class="material-icons" aria-hidden="true">memory</span>
+                    <span>{{ model.name }}</span>
+                  </div>
+                </td>
+                <td>{{ model.size }}</td>
+                <td>
+                  <span class="badge badge--sm badge--{{ getSpeedVariant(model.speed) }}">
+                    {{ model.speed }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge badge--sm badge--{{ getAccuracyVariant(model.accuracy) }}">
+                    {{ model.accuracy }}
+                  </span>
+                </td>
+                <td>
+                  @if (model.installed) {
+                    <span class="chip chip--success">
+                      <span class="chip__body">
+                        <span class="material-icons" aria-hidden="true">check_circle</span>
+                        Installed
+                      </span>
+                    </span>
+                  }
+                  @if (!model.installed && !model.downloading) {
+                    <span class="chip">
+                      <span class="chip__body">
+                        <span class="material-icons" aria-hidden="true">cloud_download</span>
+                        Not Installed
+                      </span>
+                    </span>
+                  }
+                  @if (model.downloading) {
+                    <span class="chip chip--primary">
+                      <span class="chip__body">
+                        <span class="material-icons" aria-hidden="true">downloading</span>
+                        Downloading...
+                      </span>
+                    </span>
+                  }
+                </td>
+                <td>
+                  @if (!model.installed && !model.downloading) {
+                    <button
+                      class="button button--primary button--small"
+                      (click)="downloadModel(model)"
+                      >
+                      <span class="material-icons" aria-hidden="true">cloud_download</span>
+                      Download
+                    </button>
+                  }
+                  @if (model.installed) {
+                    <button
+                      class="button button--ghost button--small"
+                      disabled
+                      >
+                      <span class="material-icons" aria-hidden="true">check</span>
+                      Installed
+                    </button>
+                  }
+                  @if (model.downloading) {
+                    <div class="download-progress">
+                      <div class="progress-bar">
+                        <div class="progress-bar__fill progress-bar__fill--indeterminate"></div>
+                      </div>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
 </div>

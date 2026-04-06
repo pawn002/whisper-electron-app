@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
-import { CommonModule } from "@angular/common";
+
 import { ElectronService } from "../../services/electron.service";
 import { ToastService } from "../../services/toast.service";
 
@@ -19,7 +19,7 @@ interface TranscriptionHistoryItem {
 @Component({
   selector: "app-history",
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: "./history.component.html",
   styleUrls: ["./history.component.scss"],
 })

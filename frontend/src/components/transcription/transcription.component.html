@@ -1,114 +1,124 @@
 <div class="card card--elevated card--padding-md transcription-card">
-    <div class="card__header">
-        <h2>Audio Transcription</h2>
-        <p class="card-subtitle">Upload or select an audio file to transcribe</p>
+  <div class="card__header">
+    <h2>Audio Transcription</h2>
+    <p class="card-subtitle">Upload or select an audio file to transcribe</p>
+  </div>
+
+  <div class="card__body">
+    <div class="upload-section">
+      <button
+        class="button button--primary button--medium"
+        (click)="selectAudioFile()"
+        >
+        <span class="material-icons" aria-hidden="true">folder_open</span>
+        Select Audio File
+      </button>
+
+      @if (selectedFilePath) {
+        <div class="file-info">
+          <span class="material-icons" aria-hidden="true">audiotrack</span>
+          <span>{{ getFileName() }}</span>
+          @if (selectedFileSize) {
+            <span class="file-size">{{
+              formatFileSize(selectedFileSize || 0)
+            }}</span>
+          }
+        </div>
+      }
     </div>
 
-    <div class="card__body">
-        <div class="upload-section">
-            <button
-                class="button button--primary button--medium"
-                (click)="selectAudioFile()"
+    @if (selectedFilePath) {
+      <div class="options-section">
+        <div class="input-wrapper">
+          <label class="input-label" for="model-select">Model</label>
+          <select
+            id="model-select"
+            class="input"
+            [(ngModel)]="selectedModel"
             >
-                <span class="material-icons" aria-hidden="true">folder_open</span>
-                Select Audio File
-            </button>
-
-            <div *ngIf="selectedFilePath" class="file-info">
-                <span class="material-icons" aria-hidden="true">audiotrack</span>
-                <span>{{ getFileName() }}</span>
-                <span class="file-size" *ngIf="selectedFileSize">{{
-                    formatFileSize(selectedFileSize || 0)
-                }}</span>
-            </div>
+            @for (model of availableModels; track model) {
+              <option
+                [value]="model.id"
+                >
+                {{ model.name }}
+              </option>
+            }
+          </select>
         </div>
-
-        <div class="options-section" *ngIf="selectedFilePath">
-            <div class="input-wrapper">
-                <label class="input-label" for="model-select">Model</label>
-                <select
-                    id="model-select"
-                    class="input"
-                    [(ngModel)]="selectedModel"
-                >
-                    <option
-                        *ngFor="let model of availableModels"
-                        [value]="model.id"
-                    >
-                        {{ model.name }}
-                    </option>
-                </select>
-            </div>
-
-            <div class="input-wrapper">
-                <label class="input-label" for="language-select">Language</label>
-                <select
-                    id="language-select"
-                    class="input"
-                    [(ngModel)]="selectedLanguage"
-                >
-                    <option *ngFor="let lang of languages" [value]="lang.code">
-                        {{ lang.name }}
-                    </option>
-                </select>
-            </div>
-
-            <button
-                class="button button--secondary button--medium"
-                (click)="startTranscription()"
-                [disabled]="isTranscribing"
+        <div class="input-wrapper">
+          <label class="input-label" for="language-select">Language</label>
+          <select
+            id="language-select"
+            class="input"
+            [(ngModel)]="selectedLanguage"
             >
-                <span class="material-icons" aria-hidden="true">play_arrow</span>
-                Start Transcription
-            </button>
+            @for (lang of languages; track lang) {
+              <option [value]="lang.code">
+                {{ lang.name }}
+              </option>
+            }
+          </select>
         </div>
+        <button
+          class="button button--secondary button--medium"
+          (click)="startTranscription()"
+          [disabled]="isTranscribing"
+          >
+          <span class="material-icons" aria-hidden="true">play_arrow</span>
+          Start Transcription
+        </button>
+      </div>
+    }
 
-        <div class="progress-section" *ngIf="isTranscribing">
-            <div class="spinner-container">
-                <svg
-                    class="spinner spinner--lg"
-                    viewBox="0 0 44 44"
-                    fill="none"
-                    aria-label="Transcribing audio"
-                    role="status"
-                >
-                    <circle class="spinner__track" cx="22" cy="22" r="18" stroke-width="4"/>
-                    <circle class="spinner__arc" cx="22" cy="22" r="18" stroke-width="4" fill="none" stroke-linecap="round"/>
-                </svg>
-            </div>
-            <p class="progress-label">Transcribing audio...</p>
+    @if (isTranscribing) {
+      <div class="progress-section">
+        <div class="spinner-container">
+          <svg
+            class="spinner spinner--lg"
+            viewBox="0 0 44 44"
+            fill="none"
+            aria-label="Transcribing audio"
+            role="status"
+            >
+            <circle class="spinner__track" cx="22" cy="22" r="18" stroke-width="4"/>
+            <circle class="spinner__arc" cx="22" cy="22" r="18" stroke-width="4" fill="none" stroke-linecap="round"/>
+          </svg>
         </div>
+        <p class="progress-label">Transcribing audio...</p>
+      </div>
+    }
 
-        <div class="result-section" *ngIf="transcriptionResult">
-            <h3>Transcription Result</h3>
-            <div class="input-wrapper">
-                <label class="input-label" for="transcript">Transcript</label>
-                <textarea
-                    id="transcript"
-                    class="input transcript-textarea"
-                    rows="10"
-                    [ngModel]="getTranscriptionText()"
-                    (ngModelChange)="setTranscriptionText($event)"
-                    placeholder="Transcription will appear here..."
-                ></textarea>
-            </div>
-
-            <div class="result-actions">
-                <button
-                    class="button button--ghost button--small"
-                    (click)="copyToClipboard()"
-                >
-                    <span class="material-icons" aria-hidden="true">content_copy</span>
-                    Copy
-                </button>
-                <button
-                    class="button button--ghost button--small"
-                    (click)="exportTranscript()"
-                >
-                    <span class="material-icons" aria-hidden="true">save</span>
-                    Export
-                </button>
-            </div>
+    @if (transcriptionResult) {
+      <div class="result-section">
+        <h3>Transcription Result</h3>
+        <div class="input-wrapper">
+          <label class="input-label" for="transcript">Transcript</label>
+          <textarea
+            id="transcript"
+            class="input transcript-textarea"
+            rows="10"
+            [ngModel]="getTranscriptionText()"
+            (ngModelChange)="setTranscriptionText($event)"
+            placeholder="Transcription will appear here..."
+          ></textarea>
         </div>
-    </div>
+        <div class="result-actions">
+          <button
+            class="button button--ghost button--small"
+            (click)="copyToClipboard()"
+            >
+            <span class="material-icons" aria-hidden="true">content_copy</span>
+            Copy
+          </button>
+          <button
+            class="button button--ghost button--small"
+            (click)="exportTranscript()"
+            >
+            <span class="material-icons" aria-hidden="true">save</span>
+            Export
+          </button>
+        </div>
+      </div>
+    }
+  </div>
 </div>

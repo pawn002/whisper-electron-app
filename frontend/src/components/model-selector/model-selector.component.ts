@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
+
 import { ElectronService } from "../../services/electron.service";
 import { ToastService } from "../../services/toast.service";
 
@@ -17,7 +17,7 @@ interface WhisperModel {
 @Component({
   selector: "app-model-selector",
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: "./model-selector.component.html",
   styleUrls: ["./model-selector.component.scss"],
 })

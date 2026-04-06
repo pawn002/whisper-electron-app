@@ -9,30 +9,30 @@
     "test": "jest"
   },
   "dependencies": {
-    "@angular/animations": "^19.2.16",
-    "@angular/cdk": "^19.2.16",
-    "@angular/common": "^19.2.16",
-    "@angular/compiler": "^19.2.16",
-    "@angular/core": "^19.2.16",
-    "@angular/forms": "^19.2.16",
-    "@angular/material": "^19.2.16",
-    "@angular/platform-browser": "^19.2.16",
-    "@angular/platform-browser-dynamic": "^19.2.16",
-    "@angular/router": "^19.2.16",
+    "@angular/animations": "^21.0.0",
+    "@angular/cdk": "^21.0.0",
+    "@angular/common": "^21.0.0",
+    "@angular/compiler": "^21.0.0",
+    "@angular/core": "^21.0.0",
+    "@angular/forms": "^21.0.0",
+    "@angular/material": "^21.0.0",
+    "@angular/platform-browser": "^21.0.0",
+    "@angular/platform-browser-dynamic": "^21.0.0",
+    "@angular/router": "^21.0.0",
     "@candor-design/tokens": "^1.0.1",
     "rxjs": "^7.8.1",
     "tslib": "^2.6.2",
     "zone.js": "^0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^19.2.14",
-    "@angular/cli": "^19.2.14",
-    "@angular/compiler-cli": "^19.2.16",
+    "@angular-devkit/build-angular": "^21.0.0",
+    "@angular/cli": "^21.0.0",
+    "@angular/compiler-cli": "^21.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.10.0",
-    "jest": "^29.7.0",
+    "jest": "^30.0.0",
     "jest-environment-jsdom": "^30.3.0",
     "jest-preset-angular": "^16.1.2",
-    "typescript": "~5.5.0"
+    "typescript": "~5.9.0"
   }
 }
