@@ -29,7 +29,7 @@ function parseArgs() {
 Usage: node build-whisper-variants.js [options]
 
 Options:
-  --variant=<name>    Build specific variant (baseline, avx512, sycl, openvino)
+  --variant=<name>    Build specific variant (baseline, avx512, sycl, vulkan, openvino)
   --clean             Clean build directories before building
   --verbose, -v       Show detailed build output
   --help, -h          Show this help message
@@ -81,6 +81,16 @@ function getVariantConfig(variantName) {
         '-DGGML_SYCL=1',
       ],
       requiresToolchain: 'oneAPI'
+    },
+    vulkan: {
+      name: 'vulkan',
+      description: 'Vulkan GPU acceleration (iGPU/dGPU, works with existing drivers)',
+      cmakeArgs: [
+        '-DWHISPER_BUILD_EXAMPLES=ON',
+        '-DCMAKE_BUILD_TYPE=Release',
+        '-DGGML_VULKAN=1'
+      ],
+      requiresToolchain: 'vulkanSDK'
     },
     openvino: {
       name: 'openvino',
@@ -247,6 +257,66 @@ function setupEnvironment(variantName, systemInfo, verbose) {
     }
   }
 
+  if (variantName === 'vulkan' && systemInfo.toolchains.vulkanSDK && systemInfo.toolchains.vulkanSDK.installed) {
+    const sdkPath = systemInfo.toolchains.vulkanSDK.path;
+    env.VULKAN_SDK = sdkPath;
+    // Ensure glslc is on PATH for shader compilation
+    const sdkBin = path.join(sdkPath, 'Bin');
+    if (fs.existsSync(sdkBin)) {
+      env.PATH = `${sdkBin};${env.PATH || process.env.PATH}`;
+    }
+    if (verbose) console.log(`  ✅ Vulkan SDK: ${sdkPath}`);
+
+    if (process.platform === 'win32') {
+      // Vulkan's vulkan-shaders-gen ExternalProject spawns a nested cmake configure
+      // which loses the MSVC environment under VS generator. We use Ninja + manual
+      // MSVC env to keep INCLUDE/LIB/PATH stable across all subprocess levels.
+      const vsBuildToolsDir = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools';
+      const msvcBase = path.join(vsBuildToolsDir, 'VC', 'Tools', 'MSVC');
+      if (fs.existsSync(msvcBase)) {
+        const msvcVer = fs.readdirSync(msvcBase).sort().reverse()[0];
+        if (msvcVer) {
+          const msvcDir = path.join(msvcBase, msvcVer);
+          env.INCLUDE = [
+            path.join(msvcDir, 'include'),
+            env.INCLUDE
+          ].filter(Boolean).join(';');
+          env.LIB = [
+            path.join(msvcDir, 'lib', 'x64'),
+            env.LIB
+          ].filter(Boolean).join(';');
+          env.PATH = `${path.join(msvcDir, 'bin', 'Hostx64', 'x64')};${env.PATH}`;
+          if (verbose) console.log(`     MSVC: ${msvcDir}`);
+        }
+      }
+      const wkBase = 'C:\\Program Files (x86)\\Windows Kits\\10';
+      const wkLibBase = path.join(wkBase, 'Lib');
+      if (fs.existsSync(wkLibBase)) {
+        const sdkVer = fs.readdirSync(wkLibBase)
+          .filter(v => v.startsWith('10.'))
+          .sort().reverse()[0];
+        if (sdkVer) {
+          env.INCLUDE = [
+            path.join(wkBase, 'Include', sdkVer, 'ucrt'),
+            path.join(wkBase, 'Include', sdkVer, 'um'),
+            path.join(wkBase, 'Include', sdkVer, 'shared'),
+            env.INCLUDE
+          ].filter(Boolean).join(';');
+          env.LIB = [
+            path.join(wkLibBase, sdkVer, 'ucrt', 'x64'),
+            path.join(wkLibBase, sdkVer, 'um', 'x64'),
+            env.LIB
+          ].filter(Boolean).join(';');
+          const sdkBinDir = path.join(wkBase, 'bin', sdkVer, 'x64');
+          if (fs.existsSync(sdkBinDir)) {
+            env.PATH = `${sdkBinDir};${env.PATH}`;
+          }
+          if (verbose) console.log(`     Windows SDK: ${sdkVer}`);
+        }
+      }
+    }
+  }
+
   if (variantName === 'openvino' && systemInfo.toolchains.openVINO.installed) {
     console.log('  Setting up OpenVINO environment...');
     const setupvars = systemInfo.toolchains.openVINO.setupvars;
@@ -339,6 +409,22 @@ async function buildVariant(variantName, systemInfo, options) {
         cmakeArgs.unshift('-G', 'Ninja');
         cmakeArgs.push(`-DCMAKE_C_COMPILER=${cCompiler}`);
         cmakeArgs.push(`-DCMAKE_CXX_COMPILER=${cxxCompiler}`);
+      }
+    }
+
+    // Vulkan's vulkan-shaders-gen ExternalProject fails with VS generator because
+    // nested cmake invocations lose MSVC PATH. Use Ninja + cl.exe instead.
+    if (variantName === 'vulkan' && process.platform === 'win32') {
+      const vsBuildToolsDir = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools';
+      const msvcBase = path.join(vsBuildToolsDir, 'VC', 'Tools', 'MSVC');
+      if (fs.existsSync(msvcBase)) {
+        const msvcVer = fs.readdirSync(msvcBase).sort().reverse()[0];
+        const clExe = path.join(msvcBase, msvcVer, 'bin', 'Hostx64', 'x64', 'cl.exe');
+        if (fs.existsSync(clExe)) {
+          cmakeArgs.unshift('-G', 'Ninja');
+          cmakeArgs.push(`-DCMAKE_C_COMPILER=${clExe}`);
+          cmakeArgs.push(`-DCMAKE_CXX_COMPILER=${clExe}`);
+        }
       }
     }
 
