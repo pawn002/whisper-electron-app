@@ -232,34 +232,8 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
     return '';
   }
 
-  getTranscriptionText(): string {
-    if (!this.transcriptionResult) {
-      return '';
-    }
-
-    // If result is a string, return as-is (backward compatibility)
-    if (typeof this.transcriptionResult === 'string') {
-      return this.transcriptionResult;
-    }
-
-    // If result has segments, format as timestamped text for display
-    if (this.transcriptionResult.segments && Array.isArray(this.transcriptionResult.segments)) {
-      return this.formatSegmentsAsTimestampedText(this.transcriptionResult.segments);
-    }
-
-    // Fallback to text property or JSON stringified
-    return (
-      this.transcriptionResult.text ||
-      JSON.stringify(this.transcriptionResult, null, 2)
-    );
-  }
-
-  private formatSegmentsAsTimestampedText(segments: any[]): string {
-    return segments.map(segment => {
-      const start = this.formatTimestamp(segment.start);
-      const end = this.formatTimestamp(segment.end);
-      return `[${start} --> ${end}] ${segment.text}`;
-    }).join('\n');
+  formatTimestampRange(start: number, end: number): string {
+    return `[${this.formatTimestamp(start)} → ${this.formatTimestamp(end)}]`;
   }
 
   private formatTimestamp(seconds: number): string {
@@ -272,17 +246,6 @@ export class TranscriptionComponent implements OnInit, OnDestroy {
     const ss = secs.toFixed(3).padStart(6, '0');
 
     return `${hh}:${mm}:${ss}`;
-  }
-
-  setTranscriptionText(value: string): void {
-    if (typeof this.transcriptionResult === 'string') {
-      this.transcriptionResult = value;
-    } else if (
-      this.transcriptionResult &&
-      typeof this.transcriptionResult === 'object'
-    ) {
-      this.transcriptionResult.text = value;
-    }
   }
 
   copyToClipboard(): void {

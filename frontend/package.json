@@ -21,6 +21,7 @@
     "@candor-design/tokens": "^1.0.1",
     "@fontsource-variable/roboto-flex": "^5.2.8",
     "@fontsource/material-icons": "^5.2.7",
+    "@fontsource/noto-serif": "^5.2.9",
     "@fontsource/roboto-mono": "^5.2.8",
     "rxjs": "^7.8.1",
     "tslib": "^2.6.2",

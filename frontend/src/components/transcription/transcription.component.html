@@ -91,16 +91,19 @@
     @if (transcriptionResult) {
       <div class="result-section">
         <h3>Transcription Result</h3>
-        <div class="input-wrapper">
-          <label class="input-label" for="transcript">Transcript</label>
-          <textarea
-            id="transcript"
-            class="input transcript-textarea"
-            rows="10"
-            [ngModel]="getTranscriptionText()"
-            (ngModelChange)="setTranscriptionText($event)"
-            placeholder="Transcription will appear here..."
-          ></textarea>
+        <div class="transcript-view">
+          @if (transcriptionResult?.segments?.length) {
+            @for (seg of transcriptionResult.segments; track $index) {
+              <p class="transcript-segment">
+                <span class="segment__time">{{ formatTimestampRange(seg.start, seg.end) }}</span>
+                <span class="segment__text">{{ seg.text }}</span>
+              </p>
+            }
+          } @else {
+            <p class="transcript-segment">
+              <span class="segment__text">{{ transcriptionResult?.text }}</span>
+            </p>
+          }
         </div>
         <div class="result-actions">
           <button
