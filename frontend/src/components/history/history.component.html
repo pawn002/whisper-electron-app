@@ -51,11 +51,11 @@
           <tbody>
             @for (item of history; track item) {
               <tr>
-                <td class="file-cell">{{ item.fileName || "Unknown" }}</td>
+                <td class="file-cell cell--mono">{{ item.fileName || "Unknown" }}</td>
                 <td>{{ item.options?.model || "base" }}</td>
                 <td><span class="status-text status-text--{{ getStatusVariant(item.status) }}">{{ item.status }}</span></td>
-                <td>{{ formatDuration(item.audioDuration) }}</td>
-                <td>{{ formatTime(item.transcriptionTime) }}</td>
+                <td class="cell--mono">{{ formatDuration(item.audioDuration) }}</td>
+                <td class="cell--mono">{{ formatTime(item.transcriptionTime) }}</td>
                 <td>{{ formatTimestamp(item.startedAt) }}</td>
                 <td>
                   <button

@@ -47,7 +47,7 @@
             @for (model of models; track model) {
               <tr>
                 <td>{{ model.name }}</td>
-                <td>{{ model.size }}</td>
+                <td class="cell--mono">{{ model.size }}</td>
                 <td>
                   <span class="badge badge--sm badge--{{ getSpeedVariant(model.speed) }}">
                     {{ model.speed }}
@@ -77,15 +77,6 @@
                       >
                       <i class="ph-fill ph-cloud-arrow-down" aria-hidden="true"></i>
                       Download
-                    </button>
-                  }
-                  @if (model.installed) {
-                    <button
-                      class="button button--ghost button--small"
-                      disabled
-                      >
-                      <i class="ph ph-check" aria-hidden="true"></i>
-                      Installed
                     </button>
                   }
                   @if (model.downloading) {

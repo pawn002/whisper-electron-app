@@ -390,10 +390,9 @@ select.input {
       padding: var(--spacing-xs) var(--spacing-sm);
       text-align: left;
       border-bottom: var(--border-width-thin) solid var(--color-border-strong);
-      font-family: var(--font-family-accessible);
+      font-family: var(--font-family-base);
       font-size: var(--font-size-sm);
       color: var(--color-text-default);
-      letter-spacing: 0.02em;
     }
 
     th { font-weight: var(--font-weight-bold); }
@@ -404,7 +403,11 @@ select.input {
       border-bottom: var(--border-width-medium) solid var(--color-border-strong);
     }
 
-    td { font-variant-numeric: tabular-nums; }
+    td.cell--mono {
+      font-family: var(--font-family-mono);
+      font-size: var(--font-size-xs);
+      font-variant-numeric: tabular-nums;
+    }
 
     tbody tr:nth-child(even) td,
     tbody tr:nth-child(even) th {

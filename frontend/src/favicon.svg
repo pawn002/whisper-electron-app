@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background: navy-800 -->
+  <rect width="512" height="512" rx="80" fill="oklch(0.27 0.06 245.34)"/>
+
+  <!-- Bar 1 — shortest -->
+  <rect x="102" y="304" width="56" height="96" rx="10" fill="white"/>
+
+  <!-- Bar 2 -->
+  <rect x="186" y="240" width="56" height="160" rx="10" fill="white"/>
+
+  <!-- Bar 3 -->
+  <rect x="270" y="168" width="56" height="232" rx="10" fill="white"/>
+
+  <!-- Bar 4 — tallest, top-right corner cut to a nib diagonal -->
+  <path d="M 354 96 L 410 196 L 410 388 Q 410 400 398 400 L 366 400 Q 354 400 354 388 Z" fill="white"/>
+</svg>
