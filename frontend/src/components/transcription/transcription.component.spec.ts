@@ -79,34 +79,19 @@ describe('TranscriptionComponent', () => {
     });
   });
 
-  // ─── getTranscriptionText ─────────────────────────────────────────────────
+  // ─── formatTimestampRange ────────────────────────────────────────────────
+  // Replaces the removed getTranscriptionText() — segments are now rendered
+  // in the template via formatTimestampRange(segment.start, segment.end).
 
-  describe('getTranscriptionText()', () => {
-    it('returns empty string when no result', () => {
-      component.transcriptionResult = null;
-      expect(component.getTranscriptionText()).toBe('');
+  describe('formatTimestampRange()', () => {
+    it('formats a sub-minute range', () => {
+      expect(component.formatTimestampRange(0, 1.5))
+        .toBe('[00:00:00.000 → 00:00:01.500]');
     });
 
-    it('returns string result directly (backward-compat branch)', () => {
-      component.transcriptionResult = 'plain text transcript';
-      expect(component.getTranscriptionText()).toBe('plain text transcript');
-    });
-
-    it('returns text property from object result', () => {
-      component.transcriptionResult = { text: 'object transcript' };
-      expect(component.getTranscriptionText()).toBe('object transcript');
-    });
-
-    it('formats segments as timestamped text', () => {
-      component.transcriptionResult = {
-        segments: [
-          { start: 0, end: 1.5, text: 'Hello' },
-          { start: 1.5, end: 3, text: 'world' },
-        ],
-      };
-      const result = component.getTranscriptionText();
-      expect(result).toContain('[00:00:00.000 --> 00:00:01.500] Hello');
-      expect(result).toContain('[00:00:01.500 --> 00:00:03.000] world');
+    it('formats a range spanning over an hour', () => {
+      expect(component.formatTimestampRange(3661, 3662))
+        .toBe('[01:01:01.000 → 01:01:02.000]');
     });
   });
 
@@ -136,21 +121,6 @@ describe('TranscriptionComponent', () => {
     expect(component.isTranscribing).toBe(false);
   });
 
-  // ─── setTranscriptionText ────────────────────────────────────────────────
-
-  describe('setTranscriptionText()', () => {
-    it('replaces the result directly when it is a string', () => {
-      component.transcriptionResult = 'original';
-      component.setTranscriptionText('updated');
-      expect(component.transcriptionResult).toBe('updated');
-    });
-
-    it('sets the text property when result is an object', () => {
-      component.transcriptionResult = { text: 'original', segments: [] };
-      component.setTranscriptionText('updated');
-      expect(component.transcriptionResult.text).toBe('updated');
-    });
-  });
 
   // ─── loadAvailableModels ──────────────────────────────────────────────────
 
@@ -226,17 +196,6 @@ describe('TranscriptionComponent', () => {
     });
   });
 
-  // ─── timestamp edge case ──────────────────────────────────────────────────
-
-  it('formats segment timestamps spanning over an hour', () => {
-    component.transcriptionResult = {
-      segments: [{ start: 3661, end: 3662, text: 'Late segment' }],
-    };
-
-    const result = component.getTranscriptionText();
-
-    expect(result).toContain('[01:01:01.000 --> 01:01:02.000] Late segment');
-  });
 
   // ─── IPC callbacks registered in ngOnInit ────────────────────────────────
   //
