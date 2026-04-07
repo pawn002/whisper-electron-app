@@ -4,7 +4,7 @@
   top: 0;
   z-index: 1000;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--spacing-xs);
   padding: 0 var(--spacing-md);
   height: 64px;
@@ -18,6 +18,8 @@
     border-radius: var(--radius-sm);
     flex-shrink: 0;
     margin-right: -0.75rem;
+    position: relative;
+    top: 1px;
   }
 
   .app-title {
