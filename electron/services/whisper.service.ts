@@ -437,9 +437,15 @@ export class WhisperService {
               const jsonRaw = await fs.readFile(jsonFilePath, 'utf8');
               await fs.unlink(jsonFilePath).catch(() => {});
               const jsonResult = JSON.parse(jsonRaw);
+              const rawSegments: any[] = jsonResult.transcription || jsonResult.segments || [];
+              const segments = rawSegments.map((s: any) => ({
+                start: s.offsets ? s.offsets.from / 1000 : s.start,
+                end:   s.offsets ? s.offsets.to   / 1000 : s.end,
+                text:  s.text,
+              }));
               resolve({
-                text: jsonResult.transcription?.map((s: any) => s.text).join('') || jsonResult.text || output,
-                segments: jsonResult.transcription || jsonResult.segments || [],
+                text: segments.map(s => s.text).join('') || output,
+                segments,
                 language: jsonResult.result?.language || jsonResult.language,
                 duration: jsonResult.duration,
               });
