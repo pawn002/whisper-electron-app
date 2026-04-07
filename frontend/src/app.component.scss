@@ -4,7 +4,7 @@
   top: 0;
   z-index: 1000;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--spacing-xs);
   padding: 0 var(--spacing-md);
   height: 64px;
@@ -13,6 +13,12 @@
   color: var(--gray-0);
   font-family: var(--font-family-base);
   box-shadow: var(--shadow-sm);
+
+  .app-logo {
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+    margin-right: -0.75rem;
+  }
 
   .app-title {
     font-size: var(--font-size-lg);
