@@ -71,12 +71,14 @@ Technical architecture documentation for the Whisper Electron App.
 ## Technology Stack
 
 ### Frontend
-- **[Angular 17](https://angular.io/)** - Web application framework
-- **[Angular Material](https://material.angular.io/)** - UI components
+- **[Angular 21](https://angular.dev/)** - Web application framework
+- **[Candor design system](https://github.com/pawn002/candor)** - CSS design tokens + component layer
+- **[Phosphor Icons](https://phosphoricons.com/)** - Icon set (light weight)
+- **[Fontsource](https://fontsource.org/)** - Bundled fonts (Roboto Flex, Roboto Mono, Noto Serif)
 - **RxJS** - Reactive programming for state management
 
 ### Desktop (Electron)
-- **[Electron 28](https://www.electronjs.org/)** - Cross-platform desktop framework
+- **[Electron 35](https://www.electronjs.org/)** - Cross-platform desktop framework
 - **IPC** - Secure main/renderer communication
 - **Context Isolation** - Security boundary
 - **Services** - Business logic in main process (TranscriptionService, WhisperService)
@@ -289,7 +291,15 @@ Whisper Transcription.exe
 app.asar               # Frontend + Electron code (compressed)
 resources/
   ├── whisper.cpp/
-  │   └── whisper-cli.exe
+  │   ├── build-vulkan/bin/          # Vulkan iGPU backend (preferred when present)
+  │   │   ├── whisper-cli.exe
+  │   │   ├── ggml-vulkan.dll
+  │   │   ├── ggml-cpu.dll
+  │   │   ├── ggml-base.dll
+  │   │   ├── ggml.dll
+  │   │   └── whisper.dll
+  │   └── build/bin/Release/         # CPU/AVX2 baseline fallback
+  │       └── whisper-cli.exe
   ├── models/          # Pre-bundled models (migrated to user data on first run)
   │   ├── ggml-tiny.bin
   │   └── ggml-base.bin
@@ -446,9 +456,18 @@ export class ElectronService {
     "package.json"
   ],
   "extraResources": [
-    { "from": "whisper.cpp/build/bin/Release/whisper-cli.exe", "to": "whisper.cpp/build/bin/Release/" },
-    { "from": "models/", "to": "models/" },
-    { "from": "ffmpeg/bin/", "to": "ffmpeg/bin/" }
+    {
+      "from": "whisper.cpp/build-vulkan/bin",
+      "to": "whisper.cpp/build-vulkan/bin",
+      "filter": ["whisper-cli.exe", "whisper.dll", "ggml.dll", "ggml-base.dll", "ggml-cpu.dll", "ggml-vulkan.dll"]
+    },
+    {
+      "from": "whisper.cpp/build-baseline/bin/Release",
+      "to": "whisper.cpp/build/bin/Release",
+      "filter": ["whisper-cli.exe", "whisper.dll", "ggml.dll", "ggml-base.dll", "ggml-cpu.dll"]
+    },
+    { "from": "models", "to": "models" },
+    { "from": "ffmpeg", "to": "ffmpeg" }
   ]
 }
 ```
@@ -506,9 +525,9 @@ export class ElectronService {
 - Clean up temporary files
 - Release resources after transcription
 
-**CPU:**
-- Whisper.cpp uses all available cores
-- No GPU acceleration yet (planned)
+**CPU/GPU:**
+- Default: 8 threads (benchmarked optimal for i7-1260P class hardware)
+- Vulkan iGPU backend: 1.7–4x speedup on Intel Iris Xe (auto-selected when available)
 - Background processing doesn't block UI
 
 **Disk:**
@@ -521,9 +540,9 @@ export class ElectronService {
 ### Planned Improvements
 
 1. **GPU Acceleration**
-   - CUDA support (NVIDIA)
-   - Metal support (Apple Silicon)
-   - Significant speed improvements
+   - ✅ Vulkan iGPU (Intel Iris Xe) — 1.7–4x speedup, shipped
+   - CUDA support (NVIDIA) — planned
+   - Metal support (Apple Silicon) — planned
 
 2. **Database Integration**
    - SQLite for history
@@ -579,9 +598,9 @@ The separate backend was initially chosen for separation of concerns, but in pra
 
 ### Why Angular?
 
-- Material Design components
 - Strong TypeScript support
 - Dependency injection
+- Block control flow (`@if`, `@for`) for clean templates
 - Mature ecosystem
 
 ### Why whisper.cpp Over Other Implementations?

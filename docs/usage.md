@@ -318,4 +318,4 @@ Currently, the app uses standard system shortcuts:
 
 ### GPU Acceleration
 
-**In Progress** - GPU support for faster transcription is being developed.
+**Available on Windows with Intel Iris Xe** — The app automatically uses the Vulkan iGPU backend when available, providing 1.7–4x faster transcription compared to CPU-only. No configuration required.

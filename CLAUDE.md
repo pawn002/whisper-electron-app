@@ -24,7 +24,7 @@ npm run build:electron      # tsc -p electron
 
 ### Testing
 ```bash
-cd frontend && npm test     # Angular tests
+cd frontend && npm test     # Jest — 70 tests across 4 spec files (no browser required)
 ```
 
 ### Packaging

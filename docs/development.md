@@ -71,12 +71,14 @@ Note: The application no longer requires a backend server. All business logic ru
 ### Technology Stack
 
 **Frontend:**
-- Angular 17
-- Angular Material (UI components)
+- Angular 21
+- Candor design system (CSS design tokens + component layer)
+- Phosphor Icons (light weight icon set)
+- Fontsource (bundled fonts: Roboto Flex, Roboto Mono, Noto Serif)
 - RxJS (reactive programming)
 
 **Electron:**
-- Electron 28
+- Electron 35
 - Context isolation enabled
 - IPC for secure communication
 - Services (TranscriptionService, WhisperService) in main process
@@ -198,7 +200,7 @@ frontend/src/
 - Component-based architecture
 - Services for business logic
 - RxJS Observables for async operations
-- Material Design components
+- Candor design system (tokens-based CSS, no `::ng-deep`)
 
 ### Electron
 
@@ -227,16 +229,18 @@ electron/
 
 ### Running Tests
 
-**Frontend Tests:**
+**Frontend Tests (Jest):**
 ```bash
 cd frontend
-npm test                    # Run tests once
-npm run test:watch         # Watch mode
-npm run test:coverage      # With coverage
+npm test                    # Run all 70 tests (Jest, no browser required)
 ```
 
+Tests cover: component formatters, IPC callback closures (`onTranscriptionCompleted`,
+`onTranscriptionError`, `onTranscriptionProgress`), model lifecycle, toast service,
+and history auto-refresh. See `frontend/src/**/*.spec.ts`.
+
 **Electron/Service Tests:**
-Currently, testing infrastructure for Electron services is minimal. Future improvements could include:
+Testing infrastructure for Electron services is minimal. Future improvements could include:
 - Unit tests for service methods
 - Integration tests for IPC handlers
 - E2E tests for transcription workflow
@@ -244,7 +248,7 @@ Currently, testing infrastructure for Electron services is minimal. Future impro
 ### Writing Tests
 
 **Framework Testing Guides:**
-- [Angular Testing Guide](https://angular.io/guide/testing)
+- [jest-preset-angular](https://thymikee.github.io/jest-preset-angular/) - Jest + Angular TestBed
 - [Electron Testing](https://www.electronjs.org/docs/latest/tutorial/automated-testing)
 
 **Project-Specific Testing Areas:**
@@ -346,8 +350,7 @@ All PRs require:
 - Avoid `any`
 
 **Framework Style Guides:**
-- [Angular Style Guide](https://angular.io/guide/styleguide)
-- [NestJS Best Practices](https://docs.nestjs.com/techniques/performance)
+- [Angular Style Guide](https://angular.dev/style-guide)
 - [Electron Security Best Practices](https://www.electronjs.org/docs/latest/tutorial/security)
 
 **Project-Specific Rules:**
@@ -420,11 +423,12 @@ npm run lint:fix      # Auto-fix issues
 
 ### Documentation
 
-- [Angular Docs](https://angular.io/docs)
+- [Angular Docs](https://angular.dev/docs)
 - [Electron Docs](https://www.electronjs.org/docs)
 - [Electron IPC Guide](https://www.electronjs.org/docs/latest/tutorial/ipc)
 - [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 - [FFmpeg Documentation](https://ffmpeg.org/documentation.html)
+- [Candor Design System](https://github.com/pawn002/candor)
 
 ### Community
 

@@ -322,14 +322,11 @@ All models in this app use **int8 quantization** (ggml format):
 
 ### GPU Acceleration
 
-**Status**: In development
+**Vulkan iGPU (Windows)**: The app automatically uses the Vulkan backend on supported Intel iGPUs (e.g. Iris Xe), delivering 1.7–4x speedups. No configuration required — the app selects the best available backend at startup.
 
-GPU support will significantly speed up transcription:
-- **NVIDIA GPUs**: CUDA support planned
-- **Apple Silicon**: Metal support planned
-- **AMD GPUs**: ROCm support under consideration
-
-See [project status](../README.md#-status) for updates.
+**Planned**:
+- CUDA support (NVIDIA)
+- Metal support (Apple Silicon)
 
 ### Custom Models
 

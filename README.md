@@ -19,7 +19,7 @@ A robust, production-ready Electron application that provides offline speech-to-
 - **Transcription History**: View past transcriptions with metadata (model used, duration, processing time)
 - **Model Management**: Download and manage Whisper models directly from the app
 - **Cross-Platform**: Works on Windows, macOS, and Linux
-- **Modern UI**: Material Design with Angular
+- **Modern UI**: Candor design system with Phosphor Icons and Fontsource typography
 - **Secure IPC**: Context-isolated Electron with secure IPC communication
 
 ## 🚀 Quick Start
@@ -77,7 +77,7 @@ See [Usage Guide](docs/usage.md) for detailed instructions.
 whisper-electron-app/
 ├── electron/          # Electron main process
 │   └── services/      # Business logic services (Whisper, Transcription)
-├── frontend/          # Angular frontend (Material Design)
+├── frontend/          # Angular frontend (Candor design system)
 ├── whisper.cpp/       # Whisper.cpp binaries
 ├── models/            # Whisper model files (.bin)
 ├── ffmpeg/            # Bundled FFmpeg for audio conversion
@@ -172,7 +172,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 - ✅ Multi-platform support (Windows, macOS, Linux)
 - ✅ Model management
 - ✅ Transcription history
-- 🚧 GPU acceleration (in progress)
+- ✅ GPU acceleration (Vulkan iGPU — 1.7–4x speedup on Intel Iris Xe)
 - 🚧 Batch processing (planned)
 - 🚧 Speaker diarization (planned)
 
