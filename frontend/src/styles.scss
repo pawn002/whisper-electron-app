@@ -1,12 +1,35 @@
+@import '@fontsource-variable/roboto-flex/index.css';
+@import '@fontsource/roboto-mono/index.css';
+@import '@fontsource/material-icons/index.css';
 @import '@candor-design/tokens/tokens/candor-tokens.css';
 
 // ─── Base ───────────────────────────────────────────────────────────────────
 html, body { height: 100%; }
 body {
   margin: 0;
+  // Fontsource registers 'Roboto Flex Variable'; override the Candor token to match
+  --font-sans: 'Roboto Flex Variable', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Roboto Mono', 'SF Mono', Monaco, Consolas, monospace;
   font-family: var(--font-family-base), system-ui, sans-serif;
   background-color: var(--color-bg-page);
   color: var(--color-text-default);
+}
+
+// ─── Material Icons ──────────────────────────────────────────────────────────
+// Fontsource only provides the @font-face; we define the utility class here.
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }
 
 // ─── Button ─────────────────────────────────────────────────────────────────
