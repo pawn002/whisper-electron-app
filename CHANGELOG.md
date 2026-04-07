@@ -5,35 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.2.0] - 2026-04-07
-
-### Added
-- **Vulkan iGPU backend** — 1.7–4x faster transcription on Intel Iris Xe (and compatible iGPUs); auto-selected at startup, falls back to CPU baseline if absent
-- **Candor design system** — replaced Angular Material with `@candor-design/tokens` CSS custom properties; hand-rolled component layer verified against Candor source (button, card, tabs, badge, chip, input, alert, toast, progress, navigation)
-- **Phosphor Icons** — replaced Material Icons with Phosphor light-weight icon set (`ph-*` classes)
-- **Fontsource** — bundled fonts replace Google Fonts CDN: Roboto Flex Variable (UI), Roboto Mono (timestamps), Noto Serif (transcript body)
-- **App identity** — SVG logo mark in header, waveform+nib app icon, inline SVG favicon
-- **Test suite** — 65 Jest tests across 4 spec files (zero before this release); covers IPC callback closures, model lifecycle, history auto-refresh, and all pure-function logic; no browser required
-- **whisper.cpp v1.8.4** — upstream update enabling iGPU backend recognition (`GGML_BACKEND_DEVICE_TYPE_IGPU`)
-
-### Changed
-- **Angular v19 → v21** — all `@angular/*` packages, TypeScript 5.5 → 5.9, `moduleResolution: bundler`; templates migrated to `@if`/`@for` block control flow
-- **Electron 28 → 35**
-- **Default threads 4 → 8** — benchmarked ~100 ms improvement on i7-1260P class hardware
-- **Packaging** — electron-builder now bundles both Vulkan (`build-vulkan/bin/`) and baseline (`build-baseline/bin/Release/`) backends with all required DLLs
-- **Testing framework** — replaced Karma/Angular test runner with Jest + jest-preset-angular (no Chrome/Chromium required)
-- **JSON output parsing** — whisper segment `offsets.from/to` (ms integers) correctly normalized to `{start, end}` in seconds for frontend consumption
-
-### Removed
-- `@angular/material` and all Material Design component dependencies
-- Google Fonts CDN import
-- SYCL (Intel oneAPI) backend — tested post-driver-update; performance unacceptable, ruled out
-
-### Fixed
-- Dark mode contrast in app header and active tab indicator
-- Whisper JSON segments normalized to `{start, end, text}` before frontend receives them
-- `setup-whisper.js` binary verification used old `main.exe` name (renamed `whisper-cli.exe` in v1.7+); path check now covers `build-vulkan/` and `build-baseline/` layouts
-
 ## [1.1.3] - 2026-01-02
 
 ### Added
