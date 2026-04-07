@@ -277,6 +277,8 @@ Approximate times for 1 hour of audio on different hardware:
 
 **Note**: Times vary based on audio complexity, language, and system load.
 
+**Vulkan iGPU (Windows — Intel Iris Xe)**: The app automatically selects the Vulkan backend when available, reducing the times above by **1.7–4x**. The largest gains are on single-threaded runs; at 8 threads the speedup is ~1.7x on the base model. Example measured times for 11 seconds of audio: baseline 1.7 s → Vulkan 1.0 s (base model, 8 threads).
+
 ### Memory Usage
 
 Typical RAM usage during transcription:

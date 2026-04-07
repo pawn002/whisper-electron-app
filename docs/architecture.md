@@ -368,7 +368,7 @@ ipcMain.handle('transcribe-audio', async (event, audioPath: string, options: any
       language: options.language,
       outputFormat: options.outputFormat || 'txt',
       timestamps: options.timestamps !== false,
-      threads: options.threads || 4,
+      threads: options.threads || 8,
       processors: options.processors || 1,
       translate: options.translate || false,
     });
