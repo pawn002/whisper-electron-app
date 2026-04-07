@@ -67,14 +67,26 @@
     ],
     "extraResources": [
       {
-        "from": "whisper.cpp",
-        "to": "whisper.cpp",
+        "from": "whisper.cpp/build-vulkan/bin",
+        "to": "whisper.cpp/build-vulkan/bin",
         "filter": [
-          "**/*",
-          "!**/nul",
-          "!**/con",
-          "!**/prn",
-          "!**/aux"
+          "whisper-cli.exe",
+          "whisper.dll",
+          "ggml.dll",
+          "ggml-base.dll",
+          "ggml-cpu.dll",
+          "ggml-vulkan.dll"
+        ]
+      },
+      {
+        "from": "whisper.cpp/build-baseline/bin/Release",
+        "to": "whisper.cpp/build/bin/Release",
+        "filter": [
+          "whisper-cli.exe",
+          "whisper.dll",
+          "ggml.dll",
+          "ggml-base.dll",
+          "ggml-cpu.dll"
         ]
       },
       {
