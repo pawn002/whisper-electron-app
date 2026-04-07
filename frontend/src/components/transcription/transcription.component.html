@@ -10,13 +10,13 @@
         class="button button--primary button--medium"
         (click)="selectAudioFile()"
         >
-        <span class="material-icons" aria-hidden="true">folder_open</span>
+        <i class="ph-light ph-folder-open" aria-hidden="true"></i>
         Select Audio File
       </button>
 
       @if (selectedFilePath) {
         <div class="file-info">
-          <span class="material-icons" aria-hidden="true">audiotrack</span>
+          <i class="ph-light ph-music-note" aria-hidden="true"></i>
           <span>{{ getFileName() }}</span>
           @if (selectedFileSize) {
             <span class="file-size">{{
@@ -64,7 +64,7 @@
           (click)="startTranscription()"
           [disabled]="isTranscribing"
           >
-          <span class="material-icons" aria-hidden="true">play_arrow</span>
+          <i class="ph-light ph-play" aria-hidden="true"></i>
           Start Transcription
         </button>
       </div>
@@ -110,14 +110,14 @@
             class="button button--ghost button--small"
             (click)="copyToClipboard()"
             >
-            <span class="material-icons" aria-hidden="true">content_copy</span>
+            <i class="ph-light ph-copy" aria-hidden="true"></i>
             Copy
           </button>
           <button
             class="button button--ghost button--small"
             (click)="exportTranscript()"
             >
-            <span class="material-icons" aria-hidden="true">save</span>
+            <i class="ph-light ph-floppy-disk" aria-hidden="true"></i>
             Export
           </button>
         </div>

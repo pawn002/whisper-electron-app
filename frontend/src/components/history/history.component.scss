@@ -23,12 +23,11 @@
   color: var(--color-text-subtle);
   letter-spacing: 0.02em;
 
-  .material-icons {
+  i {
     font-size: 64px;
-    width: 64px;
-    height: 64px;
+    line-height: 1;
     margin-bottom: var(--spacing-sm);
-    color: var(--color-text-disabled);
+    color: var(--color-text-subtle);
   }
 
   p {

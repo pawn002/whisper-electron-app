@@ -12,7 +12,7 @@
         title="Refresh history"
         aria-label="Refresh history"
         >
-        <span class="material-icons" aria-hidden="true">refresh</span>
+        <i class="ph-light ph-arrow-clockwise" aria-hidden="true"></i>
       </button>
     </div>
   </div>
@@ -26,7 +26,7 @@
 
     @if (!isLoading && history.length === 0) {
       <div class="empty-state">
-        <span class="material-icons" aria-hidden="true">history</span>
+        <i class="ph-light ph-clock-counter-clockwise" aria-hidden="true"></i>
         <p>No transcription history yet</p>
         <p class="hint">Your completed transcriptions will appear here</p>
       </div>
@@ -65,7 +65,7 @@
                     [disabled]="item.status !== 'completed'"
                     aria-label="Copy transcript"
                     >
-                    <span class="material-icons" aria-hidden="true">content_copy</span>
+                    <i class="ph-light ph-copy" aria-hidden="true"></i>
                   </button>
                 </td>
               </tr>

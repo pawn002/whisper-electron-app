@@ -13,7 +13,7 @@
 
     @if (!isLoading) {
       <div class="alert alert--info info-alert">
-        <span class="material-icons alert__icon" aria-hidden="true">info</span>
+        <i class="ph-light ph-info alert__icon" aria-hidden="true"></i>
         <div class="alert__content">
           <p class="alert__message">
             <strong>Tip:</strong> Smaller models are faster but less accurate.
@@ -75,7 +75,7 @@
                       class="button button--primary button--small"
                       (click)="downloadModel(model)"
                       >
-                      <span class="material-icons" aria-hidden="true">cloud_download</span>
+                      <i class="ph-light ph-cloud-arrow-down" aria-hidden="true"></i>
                       Download
                     </button>
                   }
@@ -84,7 +84,7 @@
                       class="button button--ghost button--small"
                       disabled
                       >
-                      <span class="material-icons" aria-hidden="true">check</span>
+                      <i class="ph-light ph-check" aria-hidden="true"></i>
                       Installed
                     </button>
                   }

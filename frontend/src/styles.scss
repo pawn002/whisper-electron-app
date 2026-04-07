@@ -1,7 +1,7 @@
 @import '@fontsource-variable/roboto-flex/index.css';
 @import '@fontsource/roboto-mono/index.css';
 @import '@fontsource/noto-serif/index.css';
-@import '@fontsource/material-icons/index.css';
+@import '@phosphor-icons/web/light';
 @import '@candor-design/tokens/tokens/candor-tokens.css';
 
 // ─── Base ───────────────────────────────────────────────────────────────────
@@ -16,21 +16,11 @@ body {
   color: var(--color-text-default);
 }
 
-// ─── Material Icons ──────────────────────────────────────────────────────────
-// Fontsource only provides the @font-face; we define the utility class here.
-.material-icons {
-  font-family: 'Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
+// ─── Phosphor Icons ──────────────────────────────────────────────────────────
+i.ph-light {
+  font-size: 1.2em;
   line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
+  vertical-align: middle;
 }
 
 // ─── Button ─────────────────────────────────────────────────────────────────
@@ -53,8 +43,6 @@ body {
     outline-offset: var(--focus-ring-offset);
   }
   &:disabled { cursor: not-allowed; opacity: 0.5; }
-
-  .material-icons { font-size: 1.25em; line-height: 1; }
 
   &--small {
     font-size: var(--font-size-sm);
@@ -339,11 +327,6 @@ select.input {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-
-    .material-icons {
-      font-size: 1em;
-      vertical-align: middle;
-    }
 
     &--button {
       appearance: none;
