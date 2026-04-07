@@ -7,16 +7,16 @@
   <div class="card__body">
     <div class="upload-section">
       <button
-        class="button button--primary button--medium"
+        class="button button--accent button--medium"
         (click)="selectAudioFile()"
         >
-        <i class="ph-light ph-folder-open" aria-hidden="true"></i>
+        <i class="ph-fill ph-folder-open" aria-hidden="true"></i>
         Select Audio File
       </button>
 
       @if (selectedFilePath) {
         <div class="file-info">
-          <i class="ph-light ph-music-note" aria-hidden="true"></i>
+          <i class="ph ph-music-note" aria-hidden="true"></i>
           <span>{{ getFileName() }}</span>
           @if (selectedFileSize) {
             <span class="file-size">{{
@@ -60,11 +60,11 @@
           </select>
         </div>
         <button
-          class="button button--secondary button--medium"
+          class="button button--accent button--medium"
           (click)="startTranscription()"
           [disabled]="isTranscribing"
           >
-          <i class="ph-light ph-play" aria-hidden="true"></i>
+          <i class="ph-fill ph-play" aria-hidden="true"></i>
           Start Transcription
         </button>
       </div>
@@ -110,14 +110,14 @@
             class="button button--ghost button--small"
             (click)="copyToClipboard()"
             >
-            <i class="ph-light ph-copy" aria-hidden="true"></i>
+            <i class="ph-fill ph-copy" aria-hidden="true"></i>
             Copy
           </button>
           <button
             class="button button--ghost button--small"
             (click)="exportTranscript()"
             >
-            <i class="ph-light ph-floppy-disk" aria-hidden="true"></i>
+            <i class="ph-fill ph-floppy-disk" aria-hidden="true"></i>
             Export
           </button>
         </div>
