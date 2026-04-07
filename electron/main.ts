@@ -267,7 +267,7 @@ ipcMain.handle(
         language: options.language,
         outputFormat: options.outputFormat || 'txt',
         timestamps: options.timestamps !== false,
-        threads: options.threads || 8,
+        threads: options.threads || 4,
         processors: options.processors || 1,
         translate: options.translate || false,
       });

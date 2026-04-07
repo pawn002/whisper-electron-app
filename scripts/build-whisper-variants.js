@@ -399,16 +399,15 @@ async function buildVariant(variantName, systemInfo, options) {
       const ext = process.platform === 'win32' ? '.exe' : '';
       const icx  = path.join(compilerBin, `icx${ext}`);
       const icpx = path.join(compilerBin, `icpx${ext}`);
-      if (fs.existsSync(icpx)) {
-        // dpcpp-cl.exe is the MSVC-compatible DPC++/SYCL frontend — cmake generates
-        // MSVC-style flags on Windows, so we need the -cl variant for CXX.
-        const dpcppCl = path.join(compilerBin, `dpcpp-cl${ext}`);
-        const icxCl   = path.join(compilerBin, `icx-cl${ext}`);
-        const cCompiler  = fs.existsSync(icxCl)   ? icxCl   : icx;
-        const cxxCompiler = fs.existsSync(dpcppCl) ? dpcppCl : icpx;
+      const icxCl = path.join(compilerBin, `icx-cl${ext}`);
+      const cCompiler = fs.existsSync(icxCl) ? icxCl : icx;
+      // dpcpp-cl was removed in oneAPI 2025.1+; use icx-cl -fsycl for SYCL builds.
+      const cxxCompiler = icxCl;
+      if (fs.existsSync(cxxCompiler)) {
         cmakeArgs.unshift('-G', 'Ninja');
         cmakeArgs.push(`-DCMAKE_C_COMPILER=${cCompiler}`);
         cmakeArgs.push(`-DCMAKE_CXX_COMPILER=${cxxCompiler}`);
+        cmakeArgs.push(`-DCMAKE_CXX_FLAGS=-fsycl`);
       }
     }
 

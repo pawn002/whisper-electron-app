@@ -16,10 +16,7 @@
   ],
   "variants": [
     "baseline",
-    "avx512",
-    "sycl",
-    "vulkan",
-    "openvino"
+    "vulkan"
   ],
   "options": {
     "threads": [1, 4, 8],

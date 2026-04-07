@@ -59,7 +59,7 @@ export class TranscriptionService {
       const whisperOptions: TranscriptionOptions = {
         model: job.options.model || 'base',
         language: job.options.language,
-        threads: job.options.threads || 8,
+        threads: job.options.threads || 4,
         processors: 1,
         outputFormat: 'json',
         timestamps: true,
