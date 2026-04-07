@@ -46,12 +46,7 @@
           <tbody>
             @for (model of models; track model) {
               <tr>
-                <td>
-                  <div class="model-name">
-                    <span class="material-icons" aria-hidden="true">memory</span>
-                    <span>{{ model.name }}</span>
-                  </div>
-                </td>
+                <td>{{ model.name }}</td>
                 <td>{{ model.size }}</td>
                 <td>
                   <span class="badge badge--sm badge--{{ getSpeedVariant(model.speed) }}">
@@ -65,28 +60,13 @@
                 </td>
                 <td>
                   @if (model.installed) {
-                    <span class="chip chip--success">
-                      <span class="chip__body">
-                        <span class="material-icons" aria-hidden="true">check_circle</span>
-                        Installed
-                      </span>
-                    </span>
+                    <span class="status-text status-text--installed">Installed</span>
                   }
                   @if (!model.installed && !model.downloading) {
-                    <span class="chip">
-                      <span class="chip__body">
-                        <span class="material-icons" aria-hidden="true">cloud_download</span>
-                        Not Installed
-                      </span>
-                    </span>
+                    <span class="status-text">Not Installed</span>
                   }
                   @if (model.downloading) {
-                    <span class="chip chip--primary">
-                      <span class="chip__body">
-                        <span class="material-icons" aria-hidden="true">downloading</span>
-                        Downloading...
-                      </span>
-                    </span>
+                    <span class="status-text status-text--downloading">Downloading...</span>
                   }
                 </td>
                 <td>

@@ -16,27 +16,22 @@
 
 .info-alert {
   margin-bottom: var(--spacing-md);
+
+  .alert__message {
+    font-family: var(--font-family-serif);
+  }
 }
 
 .table-container {
   overflow-x: auto;
 }
 
-.model-name {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
+.status-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-subtle);
 
-  .material-icons {
-    font-size: var(--font-size-lg);
-    color: var(--color-text-subtle);
-    flex-shrink: 0;
-  }
-
-  span:not(.material-icons) {
-    font-weight: var(--font-weight-medium);
-    text-transform: capitalize;
-  }
+  &--installed { color: var(--color-success); }
+  &--downloading { color: var(--color-text-subtle); }
 }
 
 .download-progress {
