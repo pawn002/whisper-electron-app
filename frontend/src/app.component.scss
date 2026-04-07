@@ -9,13 +9,14 @@
   padding: 0 var(--spacing-md);
   height: 64px;
   background-color: var(--navy-800);
-  color: var(--color-text-inverse);
+  // navy-800 is always dark — use a fixed white, not the theme-adaptive inverse token
+  color: var(--gray-0);
   font-family: var(--font-family-base);
   box-shadow: var(--shadow-sm);
 
   .material-icons {
     font-size: 24px;
-    color: var(--color-text-inverse);
+    color: var(--gray-0);
   }
 
   .app-title {
@@ -43,7 +44,7 @@
   color: rgba(255, 255, 255, 0.65);
 
   &[aria-selected='true'] {
-    color: var(--color-text-inverse);
+    color: var(--gray-0);
     font-weight: var(--font-weight-semibold);
     border-bottom-color: var(--navy-300);
   }
