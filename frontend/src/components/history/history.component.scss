@@ -33,11 +33,12 @@
 
   p {
     margin: var(--spacing-xs) 0;
+    font-family: var(--font-family-serif);
   }
 
   .hint {
     font-size: var(--font-size-sm);
-    color: var(--color-text-disabled);
+    color: var(--color-text-subtle);
   }
 }
 
@@ -48,20 +49,17 @@
 }
 
 .file-cell {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
 
-  .material-icons {
-    font-size: var(--font-size-lg);
-    color: var(--color-text-subtle);
-    flex-shrink: 0;
-  }
+.status-text {
+  font-size: var(--font-size-sm);
+  text-transform: capitalize;
+  color: var(--color-text-subtle);
 
-  span:not(.material-icons) {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 250px;
-  }
+  &--success { color: var(--color-success); }
+  &--error   { color: var(--color-error); }
 }

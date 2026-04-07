@@ -51,22 +51,9 @@
           <tbody>
             @for (item of history; track item) {
               <tr>
-                <td>
-                  <div class="file-cell">
-                    <span class="material-icons" aria-hidden="true">audiotrack</span>
-                    <span>{{ item.fileName || "Unknown" }}</span>
-                  </div>
-                </td>
-                <td>
-                  <span class="badge badge--sm badge--default">
-                    {{ item.options?.model || "base" }}
-                  </span>
-                </td>
-                <td>
-                  <span class="chip chip--{{ getStatusVariant(item.status) }}">
-                    <span class="chip__body">{{ item.status }}</span>
-                  </span>
-                </td>
+                <td class="file-cell">{{ item.fileName || "Unknown" }}</td>
+                <td>{{ item.options?.model || "base" }}</td>
+                <td><span class="status-text status-text--{{ getStatusVariant(item.status) }}">{{ item.status }}</span></td>
                 <td>{{ formatDuration(item.audioDuration) }}</td>
                 <td>{{ formatTime(item.transcriptionTime) }}</td>
                 <td>{{ formatTimestamp(item.startedAt) }}</td>
