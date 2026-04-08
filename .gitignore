@@ -21,3 +21,7 @@ benchmarks/results/
 openvino_2025.4.0/
 openvino_2025.4.0.zip
 frontend/coverage/
+
+# Playwright MCP screenshots and artifacts
+.playwright-mcp/
+*.png
