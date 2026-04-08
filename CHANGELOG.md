@@ -5,58 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.4] - 2026-04-08
-
-### Added
-- docs(claude): add release process rule — no version bumps on feature branches
-- fix: address low-priority audit items
-- feat: add SVG logo mark to app header with baseline alignment
-- feat: add waveform+nib app icon
-- style: refine Phosphor icon weights and add button--accent
-- feat: replace Material Icons with Phosphor light weight icons
-- feat: render transcript segments with humanist typography
-- perf: add Vulkan iGPU backend — 1.7–4x speedup on Intel Iris Xe
-- test: add IPC callback tests for ngOnInit event registrations
-- Add initial test suite (28 tests, 0 → 28 coverage)
-- Add Candor issue drafts for later action
-
-### Changed
-- revert: undo premature version bump and CHANGELOG entry
-- chore: bump version to 1.2.0, update CHANGELOG, fix spec for refactored component
-- docs: audit and update all documentation for current codebase state
-- docs: update CONTINUATION-GUIDE — mark all work complete, rule out SYCL
-- docs: update CONTINUATION-GUIDE with current session state
-- chore: update whisper.cpp to v1.8.4
-
-### Fixed
-- fix: correct app header logo vertical alignment
-- fix: restore dark mode contrast in app header and active tab
-- fix: normalize whisper JSON segments to {start, end, text} for frontend
-
-### Removed
-- chore: remove stale one-off docs from project root
-- style: table typography, cell--mono class, favicon, remove installed action
-- chore: replace Google Fonts CDN with Fontsource, remove @angular/material
-
-### Other
-- chore: ignore Playwright MCP screenshots and artifacts
-- Merge pull request #17 from pawn002/claude/integrate-design-tokens-UqVdV
-- 1.2.0
-- style: clean up History tab — plain cells, serif empty state, fix hint contrast
-- style: clean up Models tab — serif alert text, plain status/model cells
-- chore: tighten electron-builder packaging — only bundle needed binaries
-- perf: wire Vulkan backend into app, fix JSON output parsing, set default threads to 4
-- perf: bump default threads 4→8, fix SYCL/Vulkan build scripts
-- chore: upgrade Angular from v19 to v21
-- chore: fix corrupted .gitignore entry for coverage directory
-- chore: ignore jest coverage output directory
-- Expand test suite to 57 tests across 4 files
-- Align Candor implementation with actual component source
-- Replace Angular Material with Candor design system
-- Deepen Candor design system alignment from Storybook reference
-- Integrate @candor-design/tokens design system
-
-
 ## [1.1.3] - 2026-01-02
 
 ### Added
