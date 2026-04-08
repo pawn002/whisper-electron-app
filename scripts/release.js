@@ -28,6 +28,17 @@ function exec(command, options = {}) {
   }
 }
 
+// Check if running as Windows admin
+function isWindowsAdmin() {
+  if (process.platform !== 'win32') return true;
+  try {
+    execSync('net session', { stdio: 'pipe' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Helper for prompts
 function question(query) {
   return new Promise(resolve => rl.question(query, resolve));
@@ -308,19 +319,8 @@ async function main() {
 
   console.log('✅ Version updated in all package files');
 
-  // Step 5: Commit version bump
-  console.log('\n📋 Step 5: Committing version bump...');
-  exec('git add package.json frontend/package.json CHANGELOG.md');
-  exec(`git commit -m "chore: release v${newVersion}"`);
-  console.log('✅ Version bump committed');
-
-  // Step 6: Create git tag
-  console.log('\n📋 Step 6: Creating git tag...');
-  exec(`git tag -a v${newVersion} -m "Release v${newVersion}"`);
-  console.log(`✅ Tag v${newVersion} created`);
-
-  // Step 7: Build
-  console.log('\n📋 Step 7: Building application...');
+  // Step 5: Build
+  console.log('\n📋 Step 5: Building application...');
   const buildAnswer = await question('\nDo you want to build the application now? (Y/n): ');
 
   if (buildAnswer.toLowerCase() !== 'n') {
@@ -330,24 +330,42 @@ async function main() {
 
     const distAnswer = await question('\nDo you want to create distribution packages? (Y/n): ');
     if (distAnswer.toLowerCase() !== 'n') {
-      console.log('\n📦 Creating distribution packages...');
-      console.log('⏳ This may take a while...');
-      exec('npm run dist');
-      console.log('✅ Distribution packages created');
+      if (process.platform === 'win32' && !isWindowsAdmin()) {
+        console.log('\n⚠️  Distribution packaging requires administrator privileges on Windows.');
+        console.log('\n   Please open a new terminal as Administrator and run:');
+        console.log('   npm run dist:win');
+        await question('\nPress Enter once the build has completed successfully...');
+      } else {
+        console.log('\n📦 Creating distribution packages...');
+        console.log('⏳ This may take a while...');
+        exec('npm run dist');
+        console.log('✅ Distribution packages created');
 
-      // Show created files
-      const distDir = path.join(__dirname, '../release');
-      if (fs.existsSync(distDir)) {
-        console.log('\n📦 Distribution files:');
-        const files = fs.readdirSync(distDir);
-        files.forEach(file => {
-          const stats = fs.statSync(path.join(distDir, file));
-          const sizeMB = (stats.size / 1024 / 1024).toFixed(2);
-          console.log(`  - ${file} (${sizeMB} MB)`);
-        });
+        // Show created files
+        const distDir = path.join(__dirname, '../release');
+        if (fs.existsSync(distDir)) {
+          console.log('\n📦 Distribution files:');
+          const files = fs.readdirSync(distDir);
+          files.forEach(file => {
+            const stats = fs.statSync(path.join(distDir, file));
+            const sizeMB = (stats.size / 1024 / 1024).toFixed(2);
+            console.log(`  - ${file} (${sizeMB} MB)`);
+          });
+        }
       }
     }
   }
+
+  // Step 6: Commit version bump
+  console.log('\n📋 Step 6: Committing version bump...');
+  exec('git add package.json frontend/package.json CHANGELOG.md');
+  exec(`git commit -m "chore: release v${newVersion}"`);
+  console.log('✅ Version bump committed');
+
+  // Step 7: Create git tag
+  console.log('\n📋 Step 7: Creating git tag...');
+  exec(`git tag -a v${newVersion} -m "Release v${newVersion}"`);
+  console.log(`✅ Tag v${newVersion} created`);
 
   // Step 8: Push to remote
   console.log('\n📋 Step 8: Pushing to remote...');
