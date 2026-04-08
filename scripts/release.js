@@ -82,17 +82,15 @@ function checkGitStatus() {
   return true;
 }
 
-// Get git commits since last tag
-function getCommitsSinceLastTag() {
-  try {
-    const lastTag = exec('git describe --tags --abbrev=0', { silent: true, ignoreError: true }).trim();
-    if (lastTag) {
-      return exec(`git log ${lastTag}..HEAD --oneline`, { silent: true }).trim();
-    }
-    return exec('git log --oneline', { silent: true }).trim();
-  } catch {
-    return exec('git log --oneline', { silent: true }).trim();
+// Get git commits since the current release version tag
+function getCommitsSinceLastTag(currentVersion) {
+  const currentTag = `v${currentVersion}`;
+  const tagExists = exec(`git tag -l ${currentTag}`, { silent: true }).trim();
+  if (tagExists) {
+    return exec(`git log ${currentTag}..HEAD --oneline`, { silent: true }).trim();
   }
+  // Tag doesn't exist — return all commits
+  return exec('git log --oneline', { silent: true }).trim();
 }
 
 // Generate CHANGELOG template
@@ -256,7 +254,7 @@ async function main() {
 
   // Step 3: CHANGELOG
   console.log('\n📋 Step 3: Updating CHANGELOG.md');
-  const commits = getCommitsSinceLastTag();
+  const commits = getCommitsSinceLastTag(currentVersion);
 
   if (commits) {
     console.log('\n📝 Recent commits:');
@@ -364,6 +362,11 @@ async function main() {
 
   // Step 7: Create git tag
   console.log('\n📋 Step 7: Creating git tag...');
+  const existingTag = exec(`git tag -l v${newVersion}`, { silent: true }).trim();
+  if (existingTag) {
+    console.log(`⚠️  Tag v${newVersion} already exists (likely from a previous failed run) — deleting and recreating.`);
+    exec(`git tag -d v${newVersion}`, { silent: true });
+  }
   exec(`git tag -a v${newVersion} -m "Release v${newVersion}"`);
   console.log(`✅ Tag v${newVersion} created`);
 
@@ -374,6 +377,12 @@ async function main() {
   if (pushAnswer.toLowerCase() !== 'n') {
     console.log('\n⬆️  Pushing commits and tags...');
     exec('git push origin main');
+    // Delete stale remote tag if it exists, then push fresh
+    const remoteTagExists = exec(`git ls-remote --tags origin refs/tags/v${newVersion}`, { silent: true }).trim();
+    if (remoteTagExists) {
+      console.log(`⚠️  Removing stale remote tag v${newVersion}...`);
+      exec(`git push origin :refs/tags/v${newVersion}`, { silent: true });
+    }
     exec('git push origin --tags');
     console.log('✅ Pushed to remote');
   }
