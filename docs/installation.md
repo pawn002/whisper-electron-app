@@ -116,8 +116,8 @@ This command will:
 After setup completes, verify the installation:
 
 ```bash
-# Check if whisper.cpp was built
-ls whisper.cpp/whisper-cli*
+# Check if whisper.cpp baseline binary was built (Windows)
+dir whisper.cpp\build-baseline\bin\Release\whisper-cli.exe
 
 # Check if models were downloaded
 ls models/

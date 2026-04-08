@@ -1,148 +1,97 @@
-<mat-card class="models-card">
-    <mat-card-header>
-        <mat-card-title>Whisper Model Management</mat-card-title>
-        <mat-card-subtitle
-            >Download and manage speech recognition models</mat-card-subtitle
-        >
-    </mat-card-header>
+<div class="card card--elevated card--padding-md models-card">
+  <div class="card__header">
+    <h2>Whisper Model Management</h2>
+    <p class="card-subtitle">Download and manage speech recognition models</p>
+  </div>
 
-    <mat-card-content>
-        <div *ngIf="isLoading" class="loading-container">
-            <p>Loading models...</p>
+  <div class="card__body">
+    @if (isLoading) {
+      <div class="loading-container">
+        <p>Loading models...</p>
+      </div>
+    }
+
+    @if (!isLoading) {
+      <div class="alert alert--info info-alert">
+        <i class="ph ph-info alert__icon" aria-hidden="true"></i>
+        <div class="alert__content">
+          <p class="alert__message">
+            <strong>Tip:</strong> Smaller models are faster but less accurate.
+            Larger models provide better accuracy but take longer to process.
+            Models are downloaded from
+            <a
+              href="https://huggingface.co/ggerganov/whisper.cpp"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Hugging Face</a>
+            and stored locally for offline use.
+          </p>
         </div>
+      </div>
+    }
 
-        <div class="info-section" *ngIf="!isLoading">
-            <mat-icon class="info-icon">info</mat-icon>
-            <div class="info-text">
-                <p>
-                    <strong>Tip:</strong> Smaller models are faster but less
-                    accurate. Larger models provide better accuracy but take
-                    longer to process.
-                </p>
-                <p>
-                    Models are downloaded from
-                    <a
-                        href="https://huggingface.co/ggerganov/whisper.cpp"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        >Hugging Face<mat-icon
-                            aria-hidden="true"
-                            class="external-link-icon"
-                            >open_in_new</mat-icon
-                        ></a
-                    >
-                    and stored locally for offline use.
-                </p>
-            </div>
-        </div>
-
-        <div class="table-container" *ngIf="!isLoading">
-            <table mat-table [dataSource]="models" class="models-table">
-                <ng-container matColumnDef="name">
-                    <th mat-header-cell *matHeaderCellDef>Model</th>
-                    <td mat-cell *matCellDef="let model">
-                        <div class="model-name">
-                            <mat-icon>memory</mat-icon>
-                            <span class="name-text">{{ model.name }}</span>
-                        </div>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="size">
-                    <th mat-header-cell *matHeaderCellDef>Size</th>
-                    <td mat-cell *matCellDef="let model">{{ model.size }}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="speed">
-                    <th mat-header-cell *matHeaderCellDef>Speed</th>
-                    <td mat-cell *matCellDef="let model">
-                        <span
-                            class="badge"
-                            [class]="'badge-' + getSpeedColor(model.speed)"
-                        >
-                            {{ model.speed }}
-                        </span>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="accuracy">
-                    <th mat-header-cell *matHeaderCellDef>Accuracy</th>
-                    <td mat-cell *matCellDef="let model">
-                        <span
-                            class="badge"
-                            [class]="
-                                'badge-' + getAccuracyColor(model.accuracy)
-                            "
-                        >
-                            {{ model.accuracy }}
-                        </span>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef>Status</th>
-                    <td mat-cell *matCellDef="let model">
-                        <mat-chip *ngIf="model.installed" color="primary">
-                            <mat-icon>check_circle</mat-icon>
-                            Installed
-                        </mat-chip>
-                        <mat-chip
-                            *ngIf="!model.installed && !model.downloading"
-                        >
-                            <mat-icon>cloud_download</mat-icon>
-                            Not Installed
-                        </mat-chip>
-                        <mat-chip *ngIf="model.downloading" color="accent">
-                            <mat-icon>downloading</mat-icon>
-                            Downloading...
-                        </mat-chip>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let model">
-                        <button
-                            mat-raised-button
-                            color="primary"
-                            (click)="downloadModel(model)"
-                            [disabled]="model.installed || model.downloading"
-                            [tabindex]="
-                                model.installed || model.downloading ? -1 : 0
-                            "
-                            *ngIf="!model.installed"
-                        >
-                            <mat-icon>cloud_download</mat-icon>
-                            Download
-                        </button>
-                        <button
-                            mat-button
-                            color="primary"
-                            disabled
-                            tabindex="-1"
-                            *ngIf="model.installed"
-                        >
-                            <mat-icon>check</mat-icon>
-                            Installed
-                        </button>
-                        <div
-                            *ngIf="model.downloading"
-                            class="download-progress"
-                        >
-                            <mat-progress-bar
-                                mode="indeterminate"
-                                color="accent"
-                            ></mat-progress-bar>
-                        </div>
-                    </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr
-                    mat-row
-                    *matRowDef="let row; columns: displayedColumns"
-                ></tr>
-            </table>
-        </div>
-    </mat-card-content>
-</mat-card>
+    @if (!isLoading) {
+      <div class="table-host table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Size</th>
+              <th>Speed</th>
+              <th>Accuracy</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (model of models; track model) {
+              <tr>
+                <td>{{ model.name }}</td>
+                <td class="cell--mono">{{ model.size }}</td>
+                <td>
+                  <span class="badge badge--sm badge--{{ getSpeedVariant(model.speed) }}">
+                    {{ model.speed }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge badge--sm badge--{{ getAccuracyVariant(model.accuracy) }}">
+                    {{ model.accuracy }}
+                  </span>
+                </td>
+                <td>
+                  @if (model.installed) {
+                    <span class="status-text status-text--installed">Installed</span>
+                  }
+                  @if (!model.installed && !model.downloading) {
+                    <span class="status-text">Not Installed</span>
+                  }
+                  @if (model.downloading) {
+                    <span class="status-text status-text--downloading">Downloading...</span>
+                  }
+                </td>
+                <td>
+                  @if (!model.installed && !model.downloading) {
+                    <button
+                      class="button button--accent button--small"
+                      (click)="downloadModel(model)"
+                      >
+                      <i class="ph-fill ph-cloud-arrow-down" aria-hidden="true"></i>
+                      Download
+                    </button>
+                  }
+                  @if (model.downloading) {
+                    <div class="download-progress">
+                      <div class="progress-bar">
+                        <div class="progress-bar__fill progress-bar__fill--indeterminate"></div>
+                      </div>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

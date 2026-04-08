@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { gatherSystemInfo } = require('./system-info.js');
 
@@ -28,7 +29,7 @@ function parseArgs() {
 Usage: node build-whisper-variants.js [options]
 
 Options:
-  --variant=<name>    Build specific variant (baseline, avx512, sycl, openvino)
+  --variant=<name>    Build specific variant (baseline, avx512, sycl, vulkan, openvino)
   --clean             Clean build directories before building
   --verbose, -v       Show detailed build output
   --help, -h          Show this help message
@@ -73,14 +74,23 @@ function getVariantConfig(variantName) {
     sycl: {
       name: 'sycl',
       description: 'Intel GPU acceleration via SYCL',
+      // Compiler paths are resolved at build time from the detected oneAPI install
       cmakeArgs: [
         '-DWHISPER_BUILD_EXAMPLES=ON',
         '-DCMAKE_BUILD_TYPE=Release',
         '-DGGML_SYCL=1',
-        '-DCMAKE_C_COMPILER=icx',
-        '-DCMAKE_CXX_COMPILER=icpx'
       ],
       requiresToolchain: 'oneAPI'
+    },
+    vulkan: {
+      name: 'vulkan',
+      description: 'Vulkan GPU acceleration (iGPU/dGPU, works with existing drivers)',
+      cmakeArgs: [
+        '-DWHISPER_BUILD_EXAMPLES=ON',
+        '-DCMAKE_BUILD_TYPE=Release',
+        '-DGGML_VULKAN=1'
+      ],
+      requiresToolchain: 'vulkanSDK'
     },
     openvino: {
       name: 'openvino',
@@ -131,32 +141,29 @@ async function ensureWhisperCpp(projectRoot, verbose) {
 
 // Capture environment variables from Windows batch file
 function captureEnvironmentFromBatchFile(batchFilePath) {
-  // Use PowerShell to run CMD batch file and capture environment
-  // Escape the path for PowerShell: backticks for quotes and parentheses
-  const escapedPath = batchFilePath.replace(/\(/g, '`(').replace(/\)/g, '`)');
-  const psCommand = `cmd /c "\\"${escapedPath}\\" && set"`;
-
+  // Write a temp batch file that calls the target and dumps env — avoids all
+  // PowerShell/escaping issues with paths containing parentheses or spaces.
+  const tmpBat = path.join(os.tmpdir(), 'whisper_setup_env.bat');
   try {
-    const output = execSync(`powershell -NoProfile -Command "${psCommand}"`, {
+    fs.writeFileSync(tmpBat, `@echo off\r\ncall "${batchFilePath}" > nul 2>&1\r\nset\r\n`);
+    const output = execSync(`cmd.exe /c "${tmpBat}"`, {
       encoding: 'utf8',
-      maxBuffer: 10 * 1024 * 1024, // 10MB buffer
-      timeout: 60000 // 60 second timeout
+      maxBuffer: 10 * 1024 * 1024,
+      timeout: 60000
     });
 
     const envVars = {};
-    const lines = output.split('\n');
-
-    for (const line of lines) {
+    for (const line of output.split('\n')) {
       const match = line.match(/^([^=]+)=(.*)$/);
       if (match) {
-        const [, key, value] = match;
-        envVars[key.trim()] = value.trimRight();
+        envVars[match[1].trim()] = match[2].trimRight();
       }
     }
-
     return envVars;
   } catch (error) {
     throw new Error(`Failed to capture environment from ${batchFilePath}: ${error.message}`);
+  } finally {
+    try { fs.unlinkSync(tmpBat); } catch {}
   }
 }
 
@@ -166,34 +173,147 @@ function setupEnvironment(variantName, systemInfo, verbose) {
 
   if (variantName === 'sycl' && systemInfo.toolchains.oneAPI.installed) {
     console.log('  Setting up oneAPI environment...');
-    const setvars = systemInfo.toolchains.oneAPI.setvars;
+    const oneAPIRoot = systemInfo.toolchains.oneAPI.path;
+    const compilerBinDir = systemInfo.toolchains.oneAPI.compilerPath;
+
+    // Manually inject the env vars cmake/SYCL needs. The setvars.bat approach fails
+    // in subprocess because it calls sub-scripts with relative paths. We set the
+    // minimum required vars directly instead.
+    env.ONEAPI_ROOT = oneAPIRoot;
+    env.CMPLR_ROOT = path.join(oneAPIRoot, 'compiler', 'latest');
+
+    // Add icpx/icx to PATH so cmake can find them
+    if (compilerBinDir && fs.existsSync(compilerBinDir)) {
+      env.PATH = `${compilerBinDir};${env.PATH || process.env.PATH}`;
+      console.log(`  ✅ oneAPI environment configured (icpx at ${compilerBinDir})`);
+    } else {
+      console.warn('  ⚠️  Could not find oneAPI compiler bin dir');
+    }
 
     if (process.platform === 'win32') {
-      console.log('  🔄 Sourcing oneAPI environment variables...');
+      // vcvarsall.bat and setvars.bat both fail when called from a Node.js subprocess
+      // because they invoke sub-scripts using relative paths that break outside their
+      // normal shell context. We manually reconstruct the minimum env they would set.
 
-      try {
-        const oneAPIEnv = captureEnvironmentFromBatchFile(setvars);
-        Object.assign(env, oneAPIEnv);
+      // 1. Intel compiler runtime libs (libircmt.lib etc.)
+      const intelLibDir = path.join(oneAPIRoot, 'compiler', 'latest', 'lib');
+      if (fs.existsSync(intelLibDir)) {
+        env.LIB = env.LIB ? `${intelLibDir};${env.LIB}` : intelLibDir;
+      }
 
-        console.log('  ✅ oneAPI environment configured successfully');
-
-        if (verbose) {
-          console.log(`     Captured ${Object.keys(oneAPIEnv).length} environment variables`);
-          console.log(`     Compiler: ${env.ICPX_COMPILER_DIR || 'detected'}`);
+      // 2. MSVC headers and libs (cl.exe, kernel32.lib, etc.)
+      const vsBuildToolsDir = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools';
+      const msvcBase = path.join(vsBuildToolsDir, 'VC', 'Tools', 'MSVC');
+      if (fs.existsSync(msvcBase)) {
+        const msvcVer = fs.readdirSync(msvcBase).sort().reverse()[0];
+        if (msvcVer) {
+          const msvcDir = path.join(msvcBase, msvcVer);
+          env.INCLUDE = [
+            path.join(msvcDir, 'include'),
+            env.INCLUDE
+          ].filter(Boolean).join(';');
+          env.LIB = [
+            path.join(msvcDir, 'lib', 'x64'),
+            env.LIB
+          ].filter(Boolean).join(';');
+          env.PATH = `${path.join(msvcDir, 'bin', 'Hostx64', 'x64')};${env.PATH}`;
+          if (verbose) console.log(`     MSVC: ${msvcDir}`);
         }
-      } catch (error) {
-        console.error('  ❌ Failed to source oneAPI environment');
-        console.error(`     ${error.message}`);
-        console.log('  ⚠️  Falling back to manual setup:');
-        console.log(`      Run: "${setvars}"`);
-        console.log(`      Then: npm run build:whisper-sycl\n`);
-        // Don't throw - let CMake fail with helpful error message
+      }
+
+      // 3. Windows SDK headers and libs (kernel32.lib, windows.h, etc.)
+      const wkBase = 'C:\\Program Files (x86)\\Windows Kits\\10';
+      const wkLibBase = path.join(wkBase, 'Lib');
+      if (fs.existsSync(wkLibBase)) {
+        const sdkVer = fs.readdirSync(wkLibBase).filter(v => v.startsWith('10.')).sort((a, b) => {
+          return a.split('.').map(Number).reduce((acc, n, i) => acc * 10000 + n, 0) -
+                 b.split('.').map(Number).reduce((acc, n, i) => acc * 10000 + n, 0);
+        }).reverse()[0];
+        if (sdkVer) {
+          env.INCLUDE = [
+            path.join(wkBase, 'Include', sdkVer, 'ucrt'),
+            path.join(wkBase, 'Include', sdkVer, 'um'),
+            path.join(wkBase, 'Include', sdkVer, 'shared'),
+            env.INCLUDE
+          ].filter(Boolean).join(';');
+          env.LIB = [
+            path.join(wkLibBase, sdkVer, 'ucrt', 'x64'),
+            path.join(wkLibBase, sdkVer, 'um', 'x64'),
+            env.LIB
+          ].filter(Boolean).join(';');
+          // Also add SDK bin dir for rc.exe (Resource Compiler)
+          const sdkBinDir = path.join(wkBase, 'bin', sdkVer, 'x64');
+          if (fs.existsSync(sdkBinDir)) {
+            env.PATH = `${sdkBinDir};${env.PATH}`;
+          }
+          if (verbose) console.log(`     Windows SDK: ${sdkVer}`);
+        }
       }
     }
 
-    // Add compiler paths to PATH (fallback for non-Windows or if capture failed)
-    if (systemInfo.toolchains.oneAPI.compilerPath) {
-      env.PATH = `${systemInfo.toolchains.oneAPI.compilerPath};${env.PATH}`;
+    if (verbose) {
+      console.log(`     ONEAPI_ROOT: ${env.ONEAPI_ROOT}`);
+      console.log(`     CMPLR_ROOT:  ${env.CMPLR_ROOT}`);
+    }
+  }
+
+  if (variantName === 'vulkan' && systemInfo.toolchains.vulkanSDK && systemInfo.toolchains.vulkanSDK.installed) {
+    const sdkPath = systemInfo.toolchains.vulkanSDK.path;
+    env.VULKAN_SDK = sdkPath;
+    // Ensure glslc is on PATH for shader compilation
+    const sdkBin = path.join(sdkPath, 'Bin');
+    if (fs.existsSync(sdkBin)) {
+      env.PATH = `${sdkBin};${env.PATH || process.env.PATH}`;
+    }
+    if (verbose) console.log(`  ✅ Vulkan SDK: ${sdkPath}`);
+
+    if (process.platform === 'win32') {
+      // Vulkan's vulkan-shaders-gen ExternalProject spawns a nested cmake configure
+      // which loses the MSVC environment under VS generator. We use Ninja + manual
+      // MSVC env to keep INCLUDE/LIB/PATH stable across all subprocess levels.
+      const vsBuildToolsDir = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools';
+      const msvcBase = path.join(vsBuildToolsDir, 'VC', 'Tools', 'MSVC');
+      if (fs.existsSync(msvcBase)) {
+        const msvcVer = fs.readdirSync(msvcBase).sort().reverse()[0];
+        if (msvcVer) {
+          const msvcDir = path.join(msvcBase, msvcVer);
+          env.INCLUDE = [
+            path.join(msvcDir, 'include'),
+            env.INCLUDE
+          ].filter(Boolean).join(';');
+          env.LIB = [
+            path.join(msvcDir, 'lib', 'x64'),
+            env.LIB
+          ].filter(Boolean).join(';');
+          env.PATH = `${path.join(msvcDir, 'bin', 'Hostx64', 'x64')};${env.PATH}`;
+          if (verbose) console.log(`     MSVC: ${msvcDir}`);
+        }
+      }
+      const wkBase = 'C:\\Program Files (x86)\\Windows Kits\\10';
+      const wkLibBase = path.join(wkBase, 'Lib');
+      if (fs.existsSync(wkLibBase)) {
+        const sdkVer = fs.readdirSync(wkLibBase)
+          .filter(v => v.startsWith('10.'))
+          .sort().reverse()[0];
+        if (sdkVer) {
+          env.INCLUDE = [
+            path.join(wkBase, 'Include', sdkVer, 'ucrt'),
+            path.join(wkBase, 'Include', sdkVer, 'um'),
+            path.join(wkBase, 'Include', sdkVer, 'shared'),
+            env.INCLUDE
+          ].filter(Boolean).join(';');
+          env.LIB = [
+            path.join(wkLibBase, sdkVer, 'ucrt', 'x64'),
+            path.join(wkLibBase, sdkVer, 'um', 'x64'),
+            env.LIB
+          ].filter(Boolean).join(';');
+          const sdkBinDir = path.join(wkBase, 'bin', sdkVer, 'x64');
+          if (fs.existsSync(sdkBinDir)) {
+            env.PATH = `${sdkBinDir};${env.PATH}`;
+          }
+          if (verbose) console.log(`     Windows SDK: ${sdkVer}`);
+        }
+      }
     }
   }
 
@@ -271,19 +391,55 @@ async function buildVariant(variantName, systemInfo, options) {
     // Configure with CMake
     let cmakeArgs = [...config.cmakeArgs];
 
+    // Add full compiler paths for SYCL variant.
+    // Visual Studio generators ignore CMAKE_C/CXX_COMPILER overrides, so we
+    // switch to the NMake Makefiles generator which respects them.
+    if (variantName === 'sycl' && systemInfo.toolchains.oneAPI.installed) {
+      const compilerBin = systemInfo.toolchains.oneAPI.compilerPath;
+      const ext = process.platform === 'win32' ? '.exe' : '';
+      const icx  = path.join(compilerBin, `icx${ext}`);
+      const icpx = path.join(compilerBin, `icpx${ext}`);
+      const icxCl = path.join(compilerBin, `icx-cl${ext}`);
+      const cCompiler = fs.existsSync(icxCl) ? icxCl : icx;
+      // dpcpp-cl was removed in oneAPI 2025.1+; use icx-cl -fsycl for SYCL builds.
+      const cxxCompiler = icxCl;
+      if (fs.existsSync(cxxCompiler)) {
+        cmakeArgs.unshift('-G', 'Ninja');
+        cmakeArgs.push(`-DCMAKE_C_COMPILER=${cCompiler}`);
+        cmakeArgs.push(`-DCMAKE_CXX_COMPILER=${cxxCompiler}`);
+        cmakeArgs.push(`-DCMAKE_CXX_FLAGS=-fsycl`);
+      }
+    }
+
+    // Vulkan's vulkan-shaders-gen ExternalProject fails with VS generator because
+    // nested cmake invocations lose MSVC PATH. Use Ninja + cl.exe instead.
+    if (variantName === 'vulkan' && process.platform === 'win32') {
+      const vsBuildToolsDir = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools';
+      const msvcBase = path.join(vsBuildToolsDir, 'VC', 'Tools', 'MSVC');
+      if (fs.existsSync(msvcBase)) {
+        const msvcVer = fs.readdirSync(msvcBase).sort().reverse()[0];
+        const clExe = path.join(msvcBase, msvcVer, 'bin', 'Hostx64', 'x64', 'cl.exe');
+        if (fs.existsSync(clExe)) {
+          cmakeArgs.unshift('-G', 'Ninja');
+          cmakeArgs.push(`-DCMAKE_C_COMPILER=${clExe}`);
+          cmakeArgs.push(`-DCMAKE_CXX_COMPILER=${clExe}`);
+        }
+      }
+    }
+
     // Add OpenVINO cmake path if building openvino variant
     if (variantName === 'openvino' && systemInfo.toolchains.openVINO.installed) {
       const openvinoCmakePath = path.join(systemInfo.toolchains.openVINO.path, 'runtime', 'cmake');
       cmakeArgs.push(`-DCMAKE_PREFIX_PATH=${openvinoCmakePath}`);
     }
 
-    const cmakeArgsStr = cmakeArgs.join(' ');
     console.log('🔧 Configuring with CMake...');
     if (options.verbose) {
-      console.log(`   Command: cmake ${cmakeArgsStr} ..`);
+      console.log(`   Args: ${cmakeArgs.join(' ')} ..`);
     }
 
-    execSync(`cmake ${cmakeArgsStr} ..`, {
+    // Use execFileSync with an array so paths with spaces/parens aren't shell-split
+    execFileSync('cmake', [...cmakeArgs, '..'], {
       cwd: buildDir,
       stdio: options.verbose ? 'inherit' : 'pipe',
       env: env
@@ -296,7 +452,7 @@ async function buildVariant(variantName, systemInfo, options) {
     console.log('   This may take several minutes...');
 
     const startTime = Date.now();
-    execSync('cmake --build . --config Release', {
+    execFileSync('cmake', ['--build', '.', '--config', 'Release'], {
       cwd: buildDir,
       stdio: options.verbose ? 'inherit' : 'pipe',
       env: env

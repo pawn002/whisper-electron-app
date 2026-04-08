@@ -6,7 +6,7 @@ const path = require('path');
 const https = require('https');
 
 const WHISPER_CPP_REPO = 'https://github.com/ggerganov/whisper.cpp.git';
-const WHISPER_VERSION = 'v1.5.4'; // Use a specific version for stability
+const WHISPER_VERSION = 'v1.8.4'; // Use a specific version for stability
 
 async function downloadFile(url, dest) {
   return new Promise((resolve, reject) => {
@@ -86,7 +86,7 @@ async function buildWhisper() {
       });
       
       // Copy the executable
-      const whisperExe = path.join(buildDir, 'bin', 'Release', 'main.exe');
+      const whisperExe = path.join(buildDir, 'bin', 'Release', 'whisper-cli.exe');
       const outputExe = path.join(outputDir, 'whisper.exe');
       fs.copyFileSync(whisperExe, outputExe);
       

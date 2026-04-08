@@ -1,13 +1,7 @@
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { MatCardModule } from "@angular/material/card";
-import { MatIconModule } from "@angular/material/icon";
-import { MatButtonModule } from "@angular/material/button";
-import { MatTableModule } from "@angular/material/table";
-import { MatProgressBarModule } from "@angular/material/progress-bar";
-import { MatChipsModule } from "@angular/material/chips";
-import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
+
 import { ElectronService } from "../../services/electron.service";
+import { ToastService } from "../../services/toast.service";
 
 interface WhisperModel {
   name: string;
@@ -23,16 +17,7 @@ interface WhisperModel {
 @Component({
   selector: "app-model-selector",
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTableModule,
-    MatProgressBarModule,
-    MatChipsModule,
-    MatSnackBarModule,
-  ],
+  imports: [],
   templateUrl: "./model-selector.component.html",
   styleUrls: ["./model-selector.component.scss"],
 })
@@ -80,19 +65,11 @@ export class ModelSelectorComponent implements OnInit {
     },
   ];
 
-  displayedColumns: string[] = [
-    "name",
-    "size",
-    "speed",
-    "accuracy",
-    "status",
-    "actions",
-  ];
   isLoading = true;
 
   constructor(
     private electronService: ElectronService,
-    private snackBar: MatSnackBar,
+    private toastService: ToastService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -113,7 +90,7 @@ export class ModelSelectorComponent implements OnInit {
       });
     } catch (error) {
       console.error("Failed to load models:", error);
-      this.snackBar.open("Failed to load models", "Close", { duration: 3000 });
+      this.toastService.show("Failed to load models", "error", 3000);
     } finally {
       this.isLoading = false;
     }
@@ -126,9 +103,7 @@ export class ModelSelectorComponent implements OnInit {
     model.downloadProgress = 0;
 
     try {
-      this.snackBar.open(`Downloading ${model.name} model...`, "Close", {
-        duration: 3000,
-      });
+      this.toastService.show(`Downloading ${model.name} model...`, "info", 3000);
 
       const result = await this.electronService.downloadModel(model.name);
 
@@ -136,10 +111,10 @@ export class ModelSelectorComponent implements OnInit {
         model.installed = true;
         model.downloading = false;
         model.downloadProgress = 100;
-        this.snackBar.open(
+        this.toastService.show(
           `${model.name} model downloaded successfully! You can now use it for transcription.`,
-          "Close",
-          { duration: 5000 },
+          "success",
+          5000,
         );
         await this.loadModels();
       } else {
@@ -149,41 +124,36 @@ export class ModelSelectorComponent implements OnInit {
       console.error("Download failed:", error);
       model.downloading = false;
       model.downloadProgress = 0;
-      this.snackBar.open(
+      this.toastService.show(
         `Failed to download ${model.name}: ${error.message}`,
-        "Close",
-        { duration: 5000 },
+        "error",
+        5000,
       );
     }
   }
 
-  getSpeedColor(speed: string): string {
+  getSpeedVariant(speed: string): string {
     switch (speed) {
       case "Fastest":
       case "Fast":
         return "success";
-      case "Medium":
-        return "primary";
       case "Slow":
       case "Slowest":
-        return "warn";
+        return "warning";
       default:
-        return "";
+        return "default";
     }
   }
 
-  getAccuracyColor(accuracy: string): string {
+  getAccuracyVariant(accuracy: string): string {
     switch (accuracy) {
       case "Best":
       case "Great":
         return "success";
-      case "Better":
-      case "Good":
-        return "primary";
       case "Lower":
-        return "warn";
+        return "warning";
       default:
-        return "";
+        return "default";
     }
   }
 }

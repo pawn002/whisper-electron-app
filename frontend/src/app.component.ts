@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { ElectronService } from "./services/electron.service";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { ToastService } from "./services/toast.service";
 
 @Component({
   selector: "app-root",
@@ -11,10 +11,11 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 export class AppComponent implements OnInit {
   title = "Whisper Transcription";
   systemInfo: any = null;
+  activeTab = 0;
 
   constructor(
     private electronService: ElectronService,
-    private snackBar: MatSnackBar
+    public toastService: ToastService,
   ) {}
 
   async ngOnInit() {
@@ -25,7 +26,6 @@ export class AppComponent implements OnInit {
       console.error("Failed to get system info:", error);
     }
 
-    // Set up menu action listeners
     this.electronService.onMenuAction("open-file", () => {
       this.openFile();
     });
@@ -38,17 +38,11 @@ export class AppComponent implements OnInit {
   async openFile() {
     const filePath = await this.electronService.selectAudioFile();
     if (filePath) {
-      this.snackBar.open(`Selected file: ${filePath}`, "Close", {
-        duration: 3000,
-      });
-      // Emit event to handle file selection
+      this.toastService.show(`Selected file: ${filePath}`, "info", 3000);
     }
   }
 
   async saveTranscript() {
-    // This will be implemented to save the current transcript
-    this.snackBar.open("Save transcript functionality", "Close", {
-      duration: 3000,
-    });
+    this.toastService.show("Save transcript functionality", "info", 3000);
   }
 }

@@ -129,6 +129,30 @@ async function checkOneAPI() {
   return { installed: false, path: null };
 }
 
+async function checkVulkanSDK() {
+  // Check VULKAN_SDK env var first (set by Vulkan SDK installer)
+  const vulkanSdk = process.env.VULKAN_SDK;
+  if (vulkanSdk && fs.existsSync(vulkanSdk)) {
+    const glslc = path.join(vulkanSdk, 'Bin', process.platform === 'win32' ? 'glslc.exe' : 'glslc');
+    if (fs.existsSync(glslc)) {
+      return { installed: true, path: vulkanSdk, glslc };
+    }
+  }
+
+  // Fall back to PATH lookup
+  try {
+    const glslcPath = execSync(
+      process.platform === 'win32' ? 'where glslc' : 'which glslc',
+      { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }
+    ).trim().split('\n')[0].trim();
+    if (glslcPath && fs.existsSync(glslcPath)) {
+      return { installed: true, path: path.dirname(path.dirname(glslcPath)), glslc: glslcPath };
+    }
+  } catch {}
+
+  return { installed: false, path: null, glslc: null };
+}
+
 async function checkOpenVINO() {
   const projectRoot = path.join(__dirname, '..');
   const possiblePaths = [
@@ -162,6 +186,7 @@ async function gatherSystemInfo() {
   const cpuFeatures = await detectCPUFeatures();
   const gpu = await detectIntelGPU();
   const oneAPI = await checkOneAPI();
+  const vulkanSDK = await checkVulkanSDK();
   const openVINO = await checkOpenVINO();
 
   const systemInfo = {
@@ -186,6 +211,7 @@ async function gatherSystemInfo() {
     gpu: gpu,
     toolchains: {
       oneAPI: oneAPI,
+      vulkanSDK: vulkanSDK,
       openVINO: openVINO
     },
     buildableVariants: []
@@ -227,6 +253,20 @@ async function gatherSystemInfo() {
       name: 'sycl',
       buildable: false,
       reason: reasons.join(', ')
+    });
+  }
+
+  if (vulkanSDK.installed) {
+    systemInfo.buildableVariants.push({
+      name: 'vulkan',
+      buildable: true,
+      reason: 'Vulkan SDK with glslc found'
+    });
+  } else {
+    systemInfo.buildableVariants.push({
+      name: 'vulkan',
+      buildable: false,
+      reason: 'Vulkan SDK not found (install from vulkan.lunarg.com)'
     });
   }
 
@@ -285,6 +325,14 @@ function displaySystemInfo(info) {
   } else {
     console.log(`  ❌ Intel oneAPI Base Toolkit`);
     console.log(`     Install: https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html`);
+  }
+
+  if (info.toolchains.vulkanSDK && info.toolchains.vulkanSDK.installed) {
+    console.log(`  ✅ Vulkan SDK`);
+    console.log(`     Path: ${info.toolchains.vulkanSDK.path}`);
+  } else {
+    console.log(`  ❌ Vulkan SDK`);
+    console.log(`     Install: https://vulkan.lunarg.com/sdk/home`);
   }
 
   if (info.toolchains.openVINO.installed) {

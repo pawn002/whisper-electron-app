@@ -1,101 +1,108 @@
-.app-toolbar {
+// ─── App Header ──────────────────────────────────────────────────────────────
+.app-header {
   position: sticky;
   top: 0;
   z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0 var(--spacing-md);
+  height: 64px;
+  background-color: var(--navy-800);
+  // navy-800 is always dark — use a fixed white, not the theme-adaptive inverse token
+  color: var(--gray-0);
+  font-family: var(--font-family-base);
+  box-shadow: var(--shadow-sm);
 
-  .title {
-    margin-left: 16px;
-    font-size: 20px;
-    font-weight: 500;
+  .app-logo {
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+    margin-right: -0.75rem;
+    position: relative;
+    top: 1px;
+  }
+
+  .app-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    margin-left: var(--spacing-xs);
   }
 }
 
+// ─── Main Container ───────────────────────────────────────────────────────────
 .app-container {
   height: calc(100vh - 64px - 32px);
-  padding: 16px;
   overflow: auto;
+}
 
-  // Enhanced tab contrast for better visibility
-  ::ng-deep .mat-mdc-tab-group {
-    .mat-mdc-tab-header {
-      background-color: #303030;
-    }
+// ─── Tabs (dark inverse surface) ─────────────────────────────────────────────
+// These elements are in this component's template, no ::ng-deep needed
+.tabs__list {
+  background-color: var(--navy-800);
+  border-bottom-color: oklch(from var(--navy-800) calc(l + 0.12) c h);
+  padding: 0 var(--spacing-sm);
+}
 
-    // Inactive tab labels - lighter gray for better contrast
-    .mat-mdc-tab:not(.mat-mdc-tab-disabled) {
-      .mdc-tab__text-label {
-        color: rgba(255, 255, 255, 0.7);
-      }
+.tabs__tab {
+  color: rgba(255, 255, 255, 0.65);
 
-      &:hover .mdc-tab__text-label {
-        color: rgba(255, 255, 255, 0.9);
-      }
+  &[aria-selected='true'] {
+    color: var(--gray-0);
+    font-weight: var(--font-weight-semibold);
+    border-bottom-color: var(--navy-300);
+  }
 
-      // Focus state - high contrast outline
-      &:focus {
-        outline: 2px solid #ff4081;
-        outline-offset: 2px;
-      }
+  &:hover {
+    color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.06);
+  }
 
-      &:focus-visible {
-        outline: 2px solid #ff4081;
-        outline-offset: 2px;
-        background-color: rgba(255, 64, 129, 0.1);
-      }
-    }
-
-    // Active tab - bright white for maximum contrast
-    .mat-mdc-tab.mdc-tab--active {
-      .mdc-tab__text-label {
-        color: #ffffff;
-        font-weight: 500;
-      }
-
-      // Focus state for active tab
-      &:focus,
-      &:focus-visible {
-        outline: 2px solid #ffffff;
-        outline-offset: 2px;
-        background-color: rgba(255, 255, 255, 0.1);
-      }
-    }
-
-    // Active tab indicator - brighter color
-    .mat-mdc-tab-header-pagination-chevron,
-    .mdc-tab-indicator__content--underline {
-      border-color: #ff4081;
-    }
-
-    .mdc-tab-indicator .mdc-tab-indicator__content {
-      border-color: #ff4081;
-    }
-
-    // Disabled tab
-    .mat-mdc-tab-disabled {
-      .mdc-tab__text-label {
-        color: rgba(255, 255, 255, 0.3);
-      }
-    }
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+    background-color: rgba(255, 255, 255, 0.06);
   }
 }
 
-.tab-content {
-  padding: 24px;
+.tabs__panels {
+  padding: var(--spacing-md);
 }
 
+// ─── Status Bar ───────────────────────────────────────────────────────────────
 .status-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   height: 32px;
-  background-color: #f5f5f5;
-  border-top: 1px solid #e0e0e0;
+  background-color: var(--color-bg-surface);
+  border-top: var(--border-width-thin) solid var(--color-border-default);
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  font-size: 12px;
-  color: #666;
-  gap: 8px;
+  padding: 0 var(--spacing-sm);
+  font-family: var(--font-family-accessible);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.02em;
+  color: var(--color-text-subtle);
+  gap: var(--spacing-xs);
   z-index: 1000;
+}
+
+// ─── Toast Container ──────────────────────────────────────────────────────────
+.toast-container {
+  position: fixed;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  z-index: 2000;
+  min-width: 300px;
+  max-width: 500px;
+  pointer-events: none;
+
+  .toast {
+    pointer-events: all;
+  }
 }

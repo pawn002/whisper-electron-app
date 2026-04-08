@@ -12,6 +12,7 @@ type ValidModelName = (typeof VALID_MODEL_NAMES)[number];
 
 export class WhisperService {
   private whisperPath: string;
+  private whisperBinDir: string;
   private modelsPath: string;
   private ffmpegPath: string;
   private initialized: boolean = false;
@@ -39,19 +40,28 @@ export class WhisperService {
     console.log('[WhisperService] Environment:', isDev ? 'development' : 'production');
     console.log('[WhisperService] Base path:', basePath);
 
-    // Platform-specific binary paths (in resources/app)
+    // Platform-specific binary paths — prefer Vulkan variant when available
     if (process.platform === 'win32') {
-      this.whisperPath = path.join(
-        basePath,
-        'whisper.cpp',
-        'build',
-        'bin',
-        'Release',
-        'whisper-cli.exe'
-      );
+      const vulkanBinDir = path.join(basePath, 'whisper.cpp', 'build-vulkan', 'bin');
+      const vulkanBin = path.join(vulkanBinDir, 'whisper-cli.exe');
+      const baselineBinDir = path.join(basePath, 'whisper.cpp', 'build', 'bin', 'Release');
+      const baselineBin = path.join(baselineBinDir, 'whisper-cli.exe');
+
+      const vulkanExists = require('fs').existsSync(vulkanBin);
+      if (vulkanExists) {
+        this.whisperPath = vulkanBin;
+        this.whisperBinDir = vulkanBinDir;
+        console.log('[WhisperService] Vulkan backend selected');
+      } else {
+        this.whisperPath = baselineBin;
+        this.whisperBinDir = baselineBinDir;
+        console.log('[WhisperService] Baseline (CPU) backend selected');
+      }
+
       this.ffmpegPath = path.join(basePath, 'ffmpeg', 'bin', 'ffmpeg.exe');
     } else {
       this.whisperPath = path.join(basePath, 'whisper.cpp', 'main');
+      this.whisperBinDir = path.dirname(this.whisperPath);
       this.ffmpegPath = path.join(basePath, 'ffmpeg', 'bin', 'ffmpeg');
     }
 
@@ -101,7 +111,6 @@ export class WhisperService {
 
   private async ensureDirectories(): Promise<void> {
     await fs.mkdir(this.modelsPath, { recursive: true });
-    await fs.mkdir(path.dirname(this.whisperPath), { recursive: true });
   }
 
   private async migrateModelsIfNeeded(): Promise<void> {
@@ -358,7 +367,9 @@ export class WhisperService {
       let whisperProcess;
 
       try {
-        whisperProcess = spawn(this.whisperPath, args);
+        whisperProcess = spawn(this.whisperPath, args, {
+          env: { ...process.env, PATH: `${this.whisperBinDir}${path.delimiter}${process.env.PATH}` },
+        });
       } catch (spawnError: any) {
         console.error('[WhisperService] Failed to spawn whisper process:', spawnError);
         reject(new Error(`Failed to start whisper: ${spawnError.message}`));
@@ -420,16 +431,26 @@ export class WhisperService {
         if (code === 0) {
           // Parse the output based on format
           if (options.outputFormat === 'json') {
+            // whisper-cli writes JSON to <audiofile>.json on disk, not stdout
+            const jsonFilePath = processedAudioPath + '.json';
             try {
-              const jsonResult = JSON.parse(output);
+              const jsonRaw = await fs.readFile(jsonFilePath, 'utf8');
+              await fs.unlink(jsonFilePath).catch(() => {});
+              const jsonResult = JSON.parse(jsonRaw);
+              const rawSegments: any[] = jsonResult.transcription || jsonResult.segments || [];
+              const segments = rawSegments.map((s: any) => ({
+                start: s.offsets ? s.offsets.from / 1000 : s.start,
+                end:   s.offsets ? s.offsets.to   / 1000 : s.end,
+                text:  s.text,
+              }));
               resolve({
-                text: jsonResult.text || '',
-                segments: jsonResult.segments || [],
-                language: jsonResult.language,
+                text: segments.map(s => s.text).join('') || output,
+                segments,
+                language: jsonResult.result?.language || jsonResult.language,
                 duration: jsonResult.duration,
               });
             } catch (e) {
-              console.error('[WhisperService] Failed to parse JSON output:', e);
+              console.error('[WhisperService] Failed to read/parse JSON output file:', e);
               resolve({ text: output });
             }
           } else {

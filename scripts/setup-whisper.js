@@ -165,32 +165,30 @@ async function setupWhisper() {
     process.exit(1);
   }
 
-  // Verify binary exists
-  const binaryName = platform === "win32" ? "main.exe" : "main";
-  let binaryPath = path.join(whisperDir, binaryName);
+  // Verify binary exists — check known build output locations
+  // whisper-cli.exe (renamed from main.exe in v1.7+); Vulkan variant preferred
+  const candidatePaths =
+    platform === "win32"
+      ? [
+          path.join(whisperDir, "build-vulkan", "bin", "whisper-cli.exe"),
+          path.join(whisperDir, "build-baseline", "bin", "Release", "whisper-cli.exe"),
+          path.join(whisperDir, "build", "bin", "Release", "whisper-cli.exe"),
+        ]
+      : [
+          path.join(whisperDir, "build", "bin", "whisper-cli"),
+          path.join(whisperDir, "whisper-cli"),
+          path.join(whisperDir, "main"),
+        ];
 
-  // Check CMake build output location on Windows
-  if (platform === "win32" && !fs.existsSync(binaryPath)) {
-    const cmakeBinaryPath = path.join(
-      whisperDir,
-      "build",
-      "bin",
-      "Release",
-      binaryName,
-    );
-    if (fs.existsSync(cmakeBinaryPath)) {
-      binaryPath = cmakeBinaryPath;
-      // Copy to root directory for easier access
-      fs.copyFileSync(cmakeBinaryPath, path.join(whisperDir, binaryName));
-    }
-  }
+  const foundBinary = candidatePaths.find((p) => fs.existsSync(p));
 
-  if (!fs.existsSync(binaryPath)) {
-    console.error(`❌ Binary not found at ${binaryPath}`);
+  if (!foundBinary) {
+    console.error("❌ Binary not found. Checked:");
+    candidatePaths.forEach((p) => console.error(`   ${p}`));
     process.exit(1);
   }
 
-  console.log(`✅ Binary found at: ${binaryPath}`);
+  console.log(`✅ Binary found at: ${foundBinary}`);
 
   // Download models
   console.log("\n📥 Downloading Whisper models...");
@@ -240,6 +238,19 @@ async function setupWhisper() {
   }
 
   console.log("\n✨ Setup complete!");
+
+  // Report which whisper backends are available
+  if (platform === "win32") {
+    const vulkanBin = path.join(whisperDir, "build-vulkan", "bin", "whisper-cli.exe");
+    const baselineBin = path.join(whisperDir, "build-baseline", "bin", "Release", "whisper-cli.exe");
+    console.log("\n📊 Whisper backends detected:");
+    console.log(`   Vulkan iGPU  : ${fs.existsSync(vulkanBin)   ? "✅ " + vulkanBin   : "❌ not built (run: npm run build:whisper-variants)"}`);
+    console.log(`   Baseline CPU : ${fs.existsSync(baselineBin) ? "✅ " + baselineBin : "❌ not built (run: npm run build:whisper-baseline)"}`);
+    if (fs.existsSync(vulkanBin)) {
+      console.log("   → App will prefer Vulkan (1.7–4x faster on Intel Iris Xe)");
+    }
+  }
+
   console.log("\nNext steps:");
   console.log("1. Start the app: npm run dev");
 }

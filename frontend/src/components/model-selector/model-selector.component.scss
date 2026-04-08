@@ -7,161 +7,33 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 48px 24px;
+  padding: var(--spacing-xl) var(--spacing-md);
   text-align: center;
-  color: #666;
+  font-family: var(--font-family-accessible);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-subtle);
 }
 
-.info-section {
-  display: flex;
-  gap: 16px;
-  padding: 16px;
-  background-color: #e3f2fd;
-  border-radius: 8px;
-  margin-bottom: 24px;
+.info-alert {
+  margin-bottom: var(--spacing-md);
 
-  .info-icon {
-    font-size: 24px;
-    width: 24px;
-    height: 24px;
-    color: #1976d2;
-    flex-shrink: 0;
-  }
-
-  .info-text {
-    flex: 1;
-    font-size: 14px;
-    color: #1565c0;
-
-    p {
-      margin: 0 0 8px 0;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-
-    strong {
-      font-weight: 600;
-    }
-
-    a {
-      color: #1976d2;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-
-      &:hover {
-        text-decoration: underline;
-      }
-
-      .external-link-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-        vertical-align: middle;
-      }
-    }
+  .alert__message {
+    font-family: var(--font-family-serif);
   }
 }
 
 .table-container {
-  width: 100%;
   overflow-x: auto;
 }
 
-.models-table {
-  width: 100%;
-  min-width: 700px;
+.status-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-subtle);
 
-  .model-name {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  &--installed { color: var(--color-success); }
+  &--downloading { color: var(--color-text-subtle); }
+}
 
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      color: #666;
-    }
-
-    .name-text {
-      font-weight: 500;
-      text-transform: capitalize;
-    }
-  }
-
-  .badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-
-    &.badge-success {
-      background-color: #c8e6c9;
-      color: #2e7d32;
-    }
-
-    &.badge-primary {
-      background-color: #bbdefb;
-      color: #1976d2;
-    }
-
-    &.badge-warn {
-      background-color: #ffecb3;
-      color: #f57c00;
-    }
-  }
-
-  mat-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 13px;
-
-    mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-  }
-
-  button {
-    mat-icon {
-      margin-right: 4px;
-    }
-
-    // Enhanced focus state for buttons
-    &:focus,
-    &:focus-visible {
-      outline: 3px solid #1976d2;
-      outline-offset: 2px;
-    }
-  }
-
-  .download-progress {
-    width: 120px;
-
-    mat-progress-bar {
-      height: 6px;
-      border-radius: 3px;
-    }
-  }
-
-  th {
-    font-weight: 600;
-    color: #333;
-  }
-
-  td,
-  th {
-    padding: 16px;
-  }
-
-  tr:hover {
-    background-color: #f5f5f5;
-  }
+.download-progress {
+  width: 120px;
 }

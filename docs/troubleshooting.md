@@ -172,14 +172,16 @@ npm run setup
 
 **Solutions**:
 
-1. **Verify binary exists**:
+1. **Verify binaries exist** (Windows):
    ```bash
-   # Windows
-   dir whisper.cpp\whisper-cli.exe
-   
-   # macOS/Linux
-   ls -la whisper.cpp/whisper-cli
+   # Vulkan backend (preferred)
+   dir whisper.cpp\build-vulkan\bin\whisper-cli.exe
+
+   # Baseline CPU fallback
+   dir whisper.cpp\build-baseline\bin\Release\whisper-cli.exe
    ```
+
+   The app uses the Vulkan binary if present, otherwise falls back to baseline.
 
 2. **Rebuild whisper.cpp**:
    ```bash
@@ -188,7 +190,7 @@ npm run setup
 
 3. **Check permissions** (macOS/Linux):
    ```bash
-   chmod +x whisper.cpp/whisper-cli
+   chmod +x whisper.cpp/build-baseline/bin/whisper-cli
    ```
 
 ### Model Not Found Error
@@ -431,6 +433,6 @@ cd ..
 
 3. **Check permissions** (macOS/Linux):
    ```bash
-   chmod +x whisper.cpp/whisper-cli
+   chmod +x whisper.cpp/build-baseline/bin/whisper-cli
    chmod +x ffmpeg/bin/ffmpeg
    ```

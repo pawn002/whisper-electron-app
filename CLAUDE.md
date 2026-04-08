@@ -24,7 +24,7 @@ npm run build:electron      # tsc -p electron
 
 ### Testing
 ```bash
-cd frontend && npm test     # Angular tests
+cd frontend && npm test     # Jest — 70 tests across 4 spec files (no browser required)
 ```
 
 ### Packaging
@@ -51,6 +51,11 @@ npm run version:patch       # Bump patch version
 npm run version:minor       # Bump minor version
 npm run version:major       # Bump major version
 ```
+
+> **⚠️ Never bump the version or write CHANGELOG entries on a feature branch.**
+> Version bumps and CHANGELOG updates are handled by `npm run release:interactive`
+> **after** the PR is merged to main. Doing it on the branch creates noise in the
+> diff and risks conflicts if the release cadence changes.
 
 ## Architecture
 

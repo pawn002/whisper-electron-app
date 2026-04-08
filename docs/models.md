@@ -277,6 +277,8 @@ Approximate times for 1 hour of audio on different hardware:
 
 **Note**: Times vary based on audio complexity, language, and system load.
 
+**Vulkan iGPU (Windows — Intel Iris Xe)**: The app automatically selects the Vulkan backend when available, reducing the times above by **1.7–4x**. The largest gains are on single-threaded runs; at 8 threads the speedup is ~1.7x on the base model. Example measured times for 11 seconds of audio: baseline 1.7 s → Vulkan 1.0 s (base model, 8 threads).
+
 ### Memory Usage
 
 Typical RAM usage during transcription:
@@ -322,14 +324,11 @@ All models in this app use **int8 quantization** (ggml format):
 
 ### GPU Acceleration
 
-**Status**: In development
+**Vulkan iGPU (Windows)**: The app automatically uses the Vulkan backend on supported Intel iGPUs (e.g. Iris Xe), delivering 1.7–4x speedups. No configuration required — the app selects the best available backend at startup.
 
-GPU support will significantly speed up transcription:
-- **NVIDIA GPUs**: CUDA support planned
-- **Apple Silicon**: Metal support planned
-- **AMD GPUs**: ROCm support under consideration
-
-See [project status](../README.md#-status) for updates.
+**Planned**:
+- CUDA support (NVIDIA)
+- Metal support (Apple Silicon)
 
 ### Custom Models
 

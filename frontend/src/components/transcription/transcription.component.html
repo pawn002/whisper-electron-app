@@ -1,100 +1,127 @@
-<mat-card class="transcription-card">
-    <mat-card-header>
-        <mat-card-title>Audio Transcription</mat-card-title>
-        <mat-card-subtitle
-            >Upload or select an audio file to transcribe</mat-card-subtitle
+<div class="card card--elevated card--padding-md transcription-card">
+  <div class="card__header">
+    <h2>Audio Transcription</h2>
+    <p class="card-subtitle">Upload or select an audio file to transcribe</p>
+  </div>
+
+  <div class="card__body">
+    <div class="upload-section">
+      <button
+        class="button button--accent button--medium"
+        (click)="selectAudioFile()"
         >
-    </mat-card-header>
+        <i class="ph-fill ph-folder-open" aria-hidden="true"></i>
+        Select Audio File
+      </button>
 
-    <mat-card-content>
-        <div class="upload-section">
-            <button
-                mat-raised-button
-                color="primary"
-                (click)="selectAudioFile()"
+      @if (selectedFilePath) {
+        <div class="file-info">
+          <i class="ph ph-music-note" aria-hidden="true"></i>
+          <span>{{ getFileName() }}</span>
+          @if (selectedFileSize) {
+            <span class="file-size">{{
+              formatFileSize(selectedFileSize || 0)
+            }}</span>
+          }
+        </div>
+      }
+    </div>
+
+    @if (selectedFilePath) {
+      <div class="options-section">
+        <div class="input-wrapper">
+          <label class="input-label" for="model-select">Model</label>
+          <select
+            id="model-select"
+            class="input"
+            [(ngModel)]="selectedModel"
             >
-                <mat-icon>folder_open</mat-icon>
-                Select Audio File
-            </button>
-
-            <div *ngIf="selectedFilePath" class="file-info">
-                <mat-icon>audiotrack</mat-icon>
-                <span>{{ getFileName() }}</span>
-                <span
-                    class="file-size"
-                    *ngIf="selectedFileSize"
-                    >{{
-                        formatFileSize(selectedFileSize || 0)
-                    }}</span
+            @for (model of availableModels; track model) {
+              <option
+                [value]="model.id"
                 >
-            </div>
+                {{ model.name }}
+              </option>
+            }
+          </select>
         </div>
-
-        <div class="options-section" *ngIf="selectedFilePath">
-            <mat-form-field appearance="outline">
-                <mat-label>Model</mat-label>
-                <mat-select [(value)]="selectedModel">
-                    <mat-option
-                        *ngFor="let model of availableModels"
-                        [value]="model.id"
-                    >
-                        {{ model.name }}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-                <mat-label>Language</mat-label>
-                <mat-select [(value)]="selectedLanguage">
-                    <mat-option value="auto">Auto Detect</mat-option>
-                    <mat-option value="en">English</mat-option>
-                    <mat-option value="es">Spanish</mat-option>
-                    <mat-option value="fr">French</mat-option>
-                    <mat-option value="de">German</mat-option>
-                </mat-select>
-            </mat-form-field>
-
-            <button
-                mat-raised-button
-                color="accent"
-                (click)="startTranscription()"
-                [disabled]="isTranscribing"
+        <div class="input-wrapper">
+          <label class="input-label" for="language-select">Language</label>
+          <select
+            id="language-select"
+            class="input"
+            [(ngModel)]="selectedLanguage"
             >
-                <mat-icon>play_arrow</mat-icon>
-                Start Transcription
-            </button>
+            @for (lang of languages; track lang) {
+              <option [value]="lang.code">
+                {{ lang.name }}
+              </option>
+            }
+          </select>
         </div>
+        <button
+          class="button button--accent button--medium"
+          (click)="startTranscription()"
+          [disabled]="isTranscribing"
+          >
+          <i class="ph-fill ph-play" aria-hidden="true"></i>
+          Start Transcription
+        </button>
+      </div>
+    }
 
-        <div class="progress-section" *ngIf="isTranscribing">
-            <div class="spinner-container">
-                <mat-spinner diameter="60" color="accent"></mat-spinner>
-            </div>
-            <p class="progress-label">Transcribing audio...</p>
+    @if (isTranscribing) {
+      <div class="progress-section">
+        <div class="spinner-container">
+          <svg
+            class="spinner spinner--lg"
+            viewBox="0 0 44 44"
+            fill="none"
+            aria-label="Transcribing audio"
+            role="status"
+            >
+            <circle class="spinner__track" cx="22" cy="22" r="18" stroke-width="4"/>
+            <circle class="spinner__arc" cx="22" cy="22" r="18" stroke-width="4" fill="none" stroke-linecap="round"/>
+          </svg>
         </div>
+        <p class="progress-label">Transcribing audio...</p>
+      </div>
+    }
 
-        <div class="result-section" *ngIf="transcriptionResult">
-            <h3>Transcription Result</h3>
-            <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Transcript</mat-label>
-                <textarea
-                    matInput
-                    rows="10"
-                    [ngModel]="getTranscriptionText()"
-                    (ngModelChange)="setTranscriptionText($event)"
-                    placeholder="Transcription will appear here..."
-                ></textarea>
-            </mat-form-field>
-
-            <div class="result-actions">
-                <button mat-button (click)="copyToClipboard()">
-                    <mat-icon>content_copy</mat-icon>
-                    Copy
-                </button>
-                <button mat-button (click)="exportTranscript()">
-                    <mat-icon>save</mat-icon>
-                    Export
-                </button>
-            </div>
+    @if (transcriptionResult) {
+      <div class="result-section">
+        <h3>Transcription Result</h3>
+        <div class="transcript-view">
+          @if (transcriptionResult?.segments?.length) {
+            @for (seg of transcriptionResult.segments; track $index) {
+              <p class="transcript-segment">
+                <span class="segment__time">{{ formatTimestampRange(seg.start, seg.end) }}</span>
+                <span class="segment__text">{{ seg.text }}</span>
+              </p>
+            }
+          } @else {
+            <p class="transcript-segment">
+              <span class="segment__text">{{ transcriptionResult?.text }}</span>
+            </p>
+          }
         </div>
-    </mat-card-content>
-</mat-card>
+        <div class="result-actions">
+          <button
+            class="button button--ghost button--small"
+            (click)="copyToClipboard()"
+            >
+            <i class="ph-fill ph-copy" aria-hidden="true"></i>
+            Copy
+          </button>
+          <button
+            class="button button--ghost button--small"
+            (click)="exportTranscript()"
+            >
+            <i class="ph-fill ph-floppy-disk" aria-hidden="true"></i>
+            Export
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

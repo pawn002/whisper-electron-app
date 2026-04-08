@@ -20,3 +20,4 @@ whisper-bins/
 benchmarks/results/
 openvino_2025.4.0/
 openvino_2025.4.0.zip
+frontend/coverage/
