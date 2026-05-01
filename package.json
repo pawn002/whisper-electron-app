@@ -113,7 +113,11 @@
       ]
     },
     "win": {
-      "target": "dir"
+      "target": ["nsis", "zip"]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false
     },
     "linux": {
       "target": [

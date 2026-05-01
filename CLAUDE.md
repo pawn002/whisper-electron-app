@@ -28,13 +28,12 @@ cd frontend && npm test     # Jest — 70 tests across 4 spec files (no browser 
 ```
 
 ### Packaging
-> **⚠️ Windows**: All `dist` commands require administrator privileges. Run terminal as admin.
 
 ```bash
-npm run dist                # Build and package for current platform (admin on Windows)
-npm run dist:win            # Windows (requires admin)
-npm run dist:mac            # macOS
-npm run dist:linux          # Linux
+npm run dist                # Build and package for current platform
+npm run dist:win            # Windows — produces Setup.exe (NSIS, per-user) + .zip
+npm run dist:mac            # macOS — produces .dmg + .zip
+npm run dist:linux          # Linux — produces .AppImage + .deb
 ```
 
 ### Setup & Installation
