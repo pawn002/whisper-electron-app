@@ -30,7 +30,7 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-subtle);
 
-  &--installed { color: var(--color-success); }
+  &--installed { color: var(--color-status-success); }
   &--downloading { color: var(--color-text-subtle); }
 }
 

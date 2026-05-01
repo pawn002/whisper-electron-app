@@ -10,7 +10,7 @@
     "build:electron": "tsc -p electron",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:electron\"",
     "dev:frontend": "cd frontend && npm run start",
-    "dev:electron": "wait-on tcp:4200 && npx electron . --dev",
+    "dev:electron": "npm run build:electron && wait-on tcp:4200 && npx electron . --dev",
     "setup": "npm install && npm run install:all && node scripts/setup-whisper.js",
     "install:all": "cd frontend && npm install",
     "build:whisper": "node scripts/build-whisper.js",
@@ -113,7 +113,11 @@
       ]
     },
     "win": {
-      "target": "dir"
+      "target": ["nsis", "zip"]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false
     },
     "linux": {
       "target": [
