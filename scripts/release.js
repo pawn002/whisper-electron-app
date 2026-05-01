@@ -26,6 +26,17 @@ function exec(command, options = {}) {
   }
 }
 
+// Check if running as Windows admin
+function isWindowsAdmin() {
+  if (process.platform !== 'win32') return true;
+  try {
+    execSync('net session', { stdio: 'pipe' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Helper for prompts
 function question(query) {
   return new Promise(resolve => rl.question(query, resolve));
@@ -275,6 +286,15 @@ async function main() {
 
       const distAnswer = await question('\nDo you want to create distribution packages? (Y/n): ');
       if (distAnswer.toLowerCase() !== 'n') {
+        if (process.platform === 'win32' && !isWindowsAdmin()) {
+          console.log('\n⚠️  electron-builder may require administrator privileges on Windows.');
+          console.log('   If packaging fails, re-run this script from an elevated terminal.');
+          const continueAnyway = await question('\nContinue anyway? (Y/n): ');
+          if (continueAnyway.toLowerCase() === 'n') {
+            console.log('\n📝 Run from an admin terminal when ready: npm run dist:win');
+            throw new Error('Distribution skipped — rerun as administrator.');
+          }
+        }
         console.log('\n📦 Creating distribution packages...');
         console.log('⏳ This may take a while...');
         exec('npm run dist');
