@@ -136,7 +136,6 @@ function createWindow() {
 
   if (isDev) {
     mainWindow.loadURL('http://localhost:4200');
-    mainWindow.webContents.openDevTools();
   } else {
     const indexPath = path.join(__dirname, '../../frontend/dist/index.html');
     mainWindow.loadFile(indexPath);
