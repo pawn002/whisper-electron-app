@@ -110,6 +110,7 @@ function convertToVTT(text: string): string {
 }
 
 function createWindow() {
+  const isMac = process.platform === 'darwin';
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -120,7 +121,15 @@ function createWindow() {
       sandbox: true,
     },
     title: 'Whisper Transcription',
-    backgroundColor: '#303030',
+    backgroundColor: '#072942',
+    titleBarStyle: isMac ? 'hiddenInset' : 'hidden',
+    ...(isMac ? {} : {
+      titleBarOverlay: {
+        color: '#072942',
+        symbolColor: '#ffffff',
+        height: 64,
+      },
+    }),
   });
 
   // Initialize services immediately
