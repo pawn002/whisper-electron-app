@@ -7,15 +7,12 @@
   align-items: center;
   gap: var(--spacing-xs);
   padding: 0 var(--spacing-md);
-  // On macOS hiddenInset, reserve space for the traffic-light buttons (~72px)
-  padding-left: max(var(--spacing-md), env(titlebar-area-x, var(--spacing-md)));
   height: 64px;
   background-color: var(--navy-800);
   // navy-800 is always dark — use a fixed white, not the theme-adaptive inverse token
   color: var(--gray-0);
   font-family: var(--font-family-base);
   box-shadow: var(--shadow-sm);
-  -webkit-app-region: drag;
 
   .app-logo {
     border-radius: var(--radius-sm);
