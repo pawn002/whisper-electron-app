@@ -59,6 +59,6 @@
   text-transform: capitalize;
   color: var(--color-text-subtle);
 
-  &--success { color: var(--color-success); }
-  &--error   { color: var(--color-error); }
+  &--success { color: var(--color-status-success); }
+  &--error   { color: var(--color-status-error); }
 }

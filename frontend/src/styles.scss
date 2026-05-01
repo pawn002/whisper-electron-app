@@ -88,12 +88,6 @@ i.ph-fill {
     &:hover:not(:disabled) { background-color: var(--color-bg-surface); }
     &:active:not(:disabled) { background-color: oklch(from var(--color-bg-surface) calc(l - 0.06) c h); }
   }
-  &--accent {
-    background-color: var(--color-action-secondary);
-    color: var(--color-text-on-action);
-    &:hover:not(:disabled) { background-color: var(--color-action-secondary-hover); }
-    &:active:not(:disabled) { background-color: var(--color-action-secondary-active); }
-  }
   &--destructive {
     background-color: var(--color-action-destructive);
     color: var(--color-action-destructive-text);
