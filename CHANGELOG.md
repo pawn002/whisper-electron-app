@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2026-05-02
+
+### Added
+- Switch Windows dist target to nsis + zip, drop admin requirement
+- Remove default Electron toolbar, use native overlay controls
+- Upgrade Candor to v3.0.0 and align CTAs to navy primary
+
+### Fixed
+- Pre-release polish (#19)
+- Correct toast dismiss icon weight to ph-fill
+- Restore Windows admin check before distribution build
+- Make release script atomic — rollback on failure before commit
+- Stop auto-opening DevTools on dev launch
+- Remove application menu template that was overriding setApplicationMenu(null)
+- Compile electron TypeScript before launching in dev mode
+- Remove default app menu, restore standard title bar
+
 ## [1.1.4] - 2026-04-08
 
 ### Added
