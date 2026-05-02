@@ -1,181 +1,65 @@
-# Whisper Electron App - Offline Speech-to-Text
+# Whisper Transcription
 
-A robust, production-ready Electron application that provides offline speech-to-text transcription using OpenAI's Whisper model via whisper.cpp. Built with Angular for the frontend and native Electron services for business logic.
+Offline speech-to-text Electron app using OpenAI's Whisper via whisper.cpp. Angular frontend, Electron main process — no backend server, no internet required after setup.
 
-## 📚 Documentation
+## Quick Start
 
-**New users**: See the [docs/](docs/) folder for comprehensive guides:
-- **[Installation Guide](docs/installation.md)** - Complete setup instructions for all platforms
-- **[Usage Guide](docs/usage.md)** - Detailed walkthrough of all features
-- **[Model Guide](docs/models.md)** - Whisper model comparison and recommendations
-- **[Troubleshooting](docs/troubleshooting.md)** - Solutions to common issues
-
-## 🌟 Features
-
-- **100% Offline Operation**: No internet connection required after initial setup
-- **Multiple Model Support**: Choose from tiny, base, small, medium, and large models
-- **Multi-format Support**: MP3, WAV, OGG, M4A, FLAC, AAC, WEBM audio formats (automatic conversion via bundled ffmpeg)
-- **Export Options**: Save transcripts as TXT, SRT, VTT, or JSON
-- **Transcription History**: View past transcriptions with metadata (model used, duration, processing time)
-- **Model Management**: Download and manage Whisper models directly from the app
-- **Cross-Platform**: Works on Windows, macOS, and Linux
-- **Modern UI**: Candor design system with Phosphor Icons and Fontsource typography
-- **Secure IPC**: Context-isolated Electron with secure IPC communication
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- **Node.js** v18.0.0 or higher
-- **npm** v8.0.0 or higher
-- **Git**
-- **Build Tools**: Visual Studio 2019+ (Windows), Xcode Command Line Tools (macOS), or build-essential (Linux)
-
-See [Installation Guide](docs/installation.md) for detailed requirements.
-
-### Installation
+**Prerequisites:** Node.js v20+, npm v10+, Git, and platform build tools (Visual Studio Build Tools on Windows, Xcode CLI on macOS, build-essential on Linux). See [Installation Guide](docs/installation.md) for details.
 
 ```bash
-# Clone the repository
 git clone https://github.com/pawn002/whisper-electron-app.git
 cd whisper-electron-app
-
-# Run setup (installs dependencies, builds Whisper.cpp, downloads models)
-npm run setup
+npm run setup   # installs deps, builds whisper.cpp, downloads FFmpeg + base models
+npm run dev     # starts frontend (localhost:4200) + Electron
 ```
 
-### Development
+## Scripts
 
-```bash
-# Start frontend and electron in development mode
-npm run dev
-```
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev mode (frontend + Electron) |
+| `npm run build` | Compile TypeScript + Angular |
+| `npm run dist:win` | Build Windows installer — **run as administrator** |
+| `npm run dist:mac` | Build macOS DMG |
+| `npm run dist:linux` | Build Linux AppImage / deb |
+| `npm run clean` | Remove intermediate build artifacts (`dist/`, `frontend/dist/`) |
+| `npm run clean:release` | Remove installer output (`release/`) |
+| `npm run release:interactive` | Guided release wizard (version bump, changelog, tag) |
+| `npm test` | Run frontend Jest test suite |
 
-### Production Build
-
-> **⚠️ Windows Users**: Building distribution packages (`npm run dist`, `npm run dist:win`, etc.) requires **administrator privileges**. Run your terminal as administrator before executing these commands.
-
-```bash
-# Build and package the app
-npm run dist            # Run with admin privileges on Windows
-```
-
-## 🎯 Usage
-
-1. **Launch** the application
-2. **Select** an audio file (MP3, WAV, OGG, M4A, FLAC, AAC, WEBM)
-3. **Choose** a Whisper model (tiny, base, small, medium, large)
-4. **Configure** language settings (auto-detect or specific language)
-5. **Start** transcription and wait for completion
-6. **Export** results as TXT, JSON, SRT, or VTT
-
-See [Usage Guide](docs/usage.md) for detailed instructions.
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 whisper-electron-app/
-├── electron/          # Electron main process
-│   └── services/      # Business logic services (Whisper, Transcription)
-├── frontend/          # Angular frontend (Candor design system)
-├── whisper.cpp/       # Whisper.cpp binaries
-├── models/            # Whisper model files (.bin)
-├── ffmpeg/            # Bundled FFmpeg for audio conversion
-├── docs/              # Documentation
-└── scripts/           # Build and setup scripts
+├── electron/        # Main process — IPC handlers, Whisper + transcription services
+├── frontend/        # Angular renderer — UI components, Candor design system
+├── build/           # Build assets (app icon)
+├── scripts/         # Setup and release scripts
+└── docs/            # Documentation
+
+# Created by npm run setup (gitignored):
+├── whisper.cpp/     # Whisper.cpp binary
+├── models/          # Downloaded Whisper model files
+└── ffmpeg/          # Bundled FFmpeg
 ```
 
-## 🔧 Whisper Models
+## Documentation
 
-| Model  | Size    | Speed   | Accuracy | Best For |
-|--------|---------|---------|----------|----------|
-| tiny   | 39 MB   | Fastest | Lower    | Quick drafts, testing |
-| base   | 74 MB   | Fast    | Good     | General use (recommended) |
-| small  | 244 MB  | Medium  | Better   | Professional work |
-| medium | 769 MB  | Slow    | Great    | High accuracy needs |
-| large  | 1550 MB | Slowest | Best     | Maximum quality |
+| Guide | Contents |
+|---|---|
+| [Installation](docs/installation.md) | Full setup instructions for all platforms |
+| [Usage](docs/usage.md) | Transcription workflow, model management, export formats |
+| [Models](docs/models.md) | Model comparison, recommendations, performance benchmarks |
+| [Development](docs/development.md) | Dev environment, architecture, testing, contributing |
+| [Architecture](docs/architecture.md) | IPC design, service layer, security model |
+| [Troubleshooting](docs/troubleshooting.md) | Common issues and fixes |
 
-See [Model Guide](docs/models.md) for detailed comparison and recommendations.
+## Contributing
 
-## 🐛 Troubleshooting
+1. Fork and create a feature branch
+2. Follow the commit and PR conventions in [docs/development.md](docs/development.md)
+3. Run `npm test` before opening a PR
 
-**Common Issues:**
+## License
 
-- **Setup fails**: Ensure Git, Node.js, and build tools are installed
-- **Model not found**: Download models from the Models tab in the app
-- **Slow transcription**: Use smaller models (tiny/base) or upgrade hardware
-
-See [Troubleshooting Guide](docs/troubleshooting.md) for detailed solutions.
-
-## 🔖 Release Management
-
-This project follows [Semantic Versioning](https://semver.org/).
-
-### Quick Release
-
-```bash
-npm run release:interactive
-```
-
-This interactive script guides you through the entire release process:
-- Version selection (patch/minor/major)
-- CHANGELOG generation
-- Git commit and tag
-- Build and distribution
-- GitHub release creation
-
-### Manual Release
-
-> **⚠️ Windows Users**: Distribution commands require **administrator privileges**.
-
-```bash
-# Update version
-npm run version:patch    # Bug fixes (1.0.0 → 1.0.1)
-npm run version:minor    # New features (1.0.0 → 1.1.0)
-npm run version:major    # Breaking changes (1.0.0 → 2.0.0)
-
-# Build and distribute (requires admin on Windows)
-npm run build
-npm run dist
-
-# Push to remote
-npm run release
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Commit your changes (`git commit -m 'Add amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
-
-## 📄 License
-
-MIT License - See [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [whisper.cpp](https://github.com/ggerganov/whisper.cpp) - C++ implementation of Whisper
-- [OpenAI Whisper](https://github.com/openai/whisper) - Original Whisper model
-- Angular and Electron communities
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/pawn002/whisper-electron-app/issues)
-- **Documentation**: [docs/](docs/) folder
-
-## 🚦 Status
-
-- ✅ Core transcription functionality
-- ✅ Multi-platform support (Windows, macOS, Linux)
-- ✅ Model management
-- ✅ Transcription history
-- ✅ GPU acceleration (Vulkan iGPU — 1.7–4x speedup on Intel Iris Xe)
-- 🚧 Batch processing (planned)
-- 🚧 Speaker diarization (planned)
-
----
-
-Built with ❤️ for offline, privacy-focused speech transcription
+MIT — see [LICENSE](LICENSE)
