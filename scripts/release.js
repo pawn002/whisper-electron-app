@@ -180,13 +180,13 @@ function checkGhCli() {
   return execCommand('gh --version', { silent: true, ignoreError: true }).success;
 }
 
-function findArtifacts() {
+function findArtifacts(version) {
   const distDir = path.join(process.cwd(), 'release');
   if (!fs.existsSync(distDir)) return [];
 
   const exts = ['.exe', '.zip', '.dmg', '.AppImage', '.deb'];
   return fs.readdirSync(distDir)
-    .filter((f) => exts.some((ext) => f.endsWith(ext)))
+    .filter((f) => exts.some((ext) => f.endsWith(ext)) && f.includes(version))
     .map((f) => ({ path: path.join(distDir, f), name: f }));
 }
 
@@ -352,9 +352,9 @@ async function step5_build(version) {
       return false;
     }
 
-    const artifacts = findArtifacts();
+    const artifacts = findArtifacts(version);
     if (artifacts.length === 0) {
-      console.log('\n⚠️  No build artifacts found in release/');
+      console.log(`\n⚠️  No build artifacts matching version ${version} found in release/`);
       const continueAnyway = (await question('Continue anyway? [y/N]: ')).trim().toLowerCase();
       if (continueAnyway !== 'y') {
         throw new Error('Build artifacts not found. Complete the build and run the script again.');
@@ -485,7 +485,7 @@ async function step9_release(version) {
 
     const uploadArtifacts = (await question('\nUpload distribution files? [Y/n]: ')).trim().toLowerCase();
     if (uploadArtifacts !== 'n') {
-      const artifacts = findArtifacts();
+      const artifacts = findArtifacts(version);
       if (artifacts.length === 0) {
         console.log('\n⚠️  No build artifacts found in release/');
       } else {
