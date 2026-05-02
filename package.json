@@ -21,6 +21,8 @@
     "build:whisper-sycl": "node scripts/build-whisper-variants.js --variant=sycl",
     "build:whisper-openvino": "node scripts/build-whisper-variants.js --variant=openvino",
     "benchmark": "node scripts/benchmark-variants.js",
+    "clean": "node -e \"['dist','frontend/dist','frontend/.angular'].forEach(d=>{try{require('fs').rmSync(d,{recursive:true,force:true})}catch(e){}})\"",
+    "clean:release": "node -e \"require('fs').rmSync('release',{recursive:true,force:true})\"",
     "dist": "npm run build && electron-builder",
     "dist:mac": "npm run build && electron-builder --mac",
     "dist:win": "npm run build && electron-builder --win",
@@ -38,8 +40,12 @@
     "speech-to-text",
     "angular"
   ],
-  "author": "Your Name",
+  "author": "John R.",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "devDependencies": {
     "@types/node": "^20.10.0",
     "@types/uuid": "^10.0.0",
